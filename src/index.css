@@ -1,0 +1,302 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* Cores da empresa - AZUL ESCURO como principal */
+    --primary: 221 46% 21%; /* #1d244a - Azul escuro principal */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 28 58% 60%; /* #d19563 - Dourado/bronze secundário */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 221 46% 21%; /* Azul escuro como accent */
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 46% 21%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 221 46% 21%;
+
+    /* Cores da empresa específicas */
+    --company-blue: #1d244a; /* Azul escuro principal */
+    --company-gold: #d19563; /* Dourado/bronze */
+    --company-white: #ffffff;
+    --company-black: #000000;
+    
+    /* Modern UI Variables com azul escuro como principal */
+    --glass-bg: rgba(255, 255, 255, 0.15);
+    --glass-border: rgba(29, 36, 74, 0.25);
+    --glass-backdrop: blur(20px);
+    --gradient-primary: linear-gradient(135deg, #1d244a 0%, #2a3459 100%);
+    --gradient-secondary: linear-gradient(135deg, #d19563 0%, #1d244a 100%);
+    --gradient-accent: linear-gradient(135deg, #1d244a 20%, #3a4568 80%);
+    --shadow-glass: 0 8px 32px rgba(29, 36, 74, 0.2);
+    --shadow-elevated: 0 20px 40px rgba(29, 36, 74, 0.15);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 221 46% 21%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 28 58% 60%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 221 46% 21%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 221 46% 21%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 221 46% 21%;
+
+    /* Dark Mode Glass Variables */
+    --glass-bg: rgba(0, 0, 0, 0.2);
+    --glass-border: rgba(29, 36, 74, 0.3);
+    --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background: linear-gradient(135deg, #1d244a 0%, #2a3459 100%);
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Glassmorphism Components */
+@layer components {
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop);
+    -webkit-backdrop-filter: var(--glass-backdrop);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-elevated);
+  }
+
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  /* Cores da empresa aplicadas */
+  .bg-company-blue {
+    background-color: var(--company-blue);
+  }
+
+  .bg-company-gold {
+    background-color: var(--company-gold);
+  }
+
+  .text-company-blue {
+    color: var(--company-blue);
+  }
+
+  .text-company-gold {
+    color: var(--company-gold);
+  }
+
+  .border-company-blue {
+    border-color: var(--company-blue);
+  }
+
+  .border-company-gold {
+    border-color: var(--company-gold);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Safe Areas for Mobile */
+@supports (padding: max(0px)) {
+  .safe-area-inset-top {
+    padding-top: max(1rem, env(safe-area-inset-top));
+  }
+  
+  .safe-area-inset-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Modern Form Styles */
+.form-group {
+  @apply space-y-2;
+}
+
+.form-label {
+  @apply text-sm font-medium text-gray-700 dark:text-gray-300;
+}
+
+.form-input {
+  @apply w-full px-4 py-3 text-base bg-white/15 backdrop-blur-sm border border-white/25 rounded-xl focus:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-300;
+}
+
+.form-input:focus {
+  @apply shadow-lg;
+}
+
+/* Touch Optimized */
+@media (hover: none) and (pointer: coarse) {
+  .touch-optimized {
+    @apply min-h-[48px] min-w-[48px];
+  }
+  
+  .interactive-card:hover {
+    @apply scale-100;
+  }
+  
+  .interactive-card:active {
+    @apply scale-95;
+  }
+}
+
+.bg-soccer-pattern {
+  background-color: #f0fdf4;
+  background-image: radial-gradient(#22c55e 0.5px, transparent 0.5px), radial-gradient(#22c55e 0.5px, #f0fdf4 0.5px);
+  background-size: 20px 20px;
+  background-position: 0 0, 10px 10px;
+}
+
+/* Animation Classes */
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.button-modern {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.button-modern:hover {
+  transform: translateY(-1px);
+}
+
+.shadow-glass {
+  box-shadow: var(--shadow-glass);
+}
+
+.shadow-elevated {
+  box-shadow: var(--shadow-elevated);
+}
