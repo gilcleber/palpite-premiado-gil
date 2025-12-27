@@ -22,17 +22,17 @@ const App = () => (
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.BASE_URL}>
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              
+
               {/* Admin routes with protected access */}
               <Route element={<AdminProtectedRoute />}>
                 <Route path="/admin" element={<Admin />} />
               </Route>
-              
+
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
