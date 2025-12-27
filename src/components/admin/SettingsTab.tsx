@@ -52,12 +52,15 @@ const SettingsTab = () => {
 
             if (insertError) throw insertError;
 
+            // Cast to any to access new columns not yet in types
+            const typedNewData = newData as any;
+
             setSettings({
-              id: newData.id,
-              prize_title: newData.prize_title,
-              prize_description: newData.prize_description,
-              prize_image_url: newData.prize_image_url,
-              draw_date: newData.draw_date,
+              id: typedNewData.id,
+              prize_title: typedNewData.prize_title,
+              prize_description: typedNewData.prize_description,
+              prize_image_url: typedNewData.prize_image_url,
+              draw_date: typedNewData.draw_date,
               team_a: "Time A",
               team_b: "Time B",
               team_a_logo_url: null,
@@ -67,16 +70,19 @@ const SettingsTab = () => {
             throw error;
           }
         } else {
+          // Cast to any to access new columns not yet in types
+          const typedData = data as any;
+
           setSettings({
-            id: data.id,
-            prize_title: data.prize_title,
-            prize_description: data.prize_description,
-            prize_image_url: data.prize_image_url,
-            draw_date: data.draw_date,
-            team_a: "Time A", // Note: If specific columns for names existed, we'd use them.
+            id: typedData.id,
+            prize_title: typedData.prize_title,
+            prize_description: typedData.prize_description,
+            prize_image_url: typedData.prize_image_url,
+            draw_date: typedData.draw_date,
+            team_a: "Time A",
             team_b: "Time B",
-            team_a_logo_url: data.team_a_logo_url,
-            team_b_logo_url: data.team_b_logo_url
+            team_a_logo_url: typedData.team_a_logo_url,
+            team_b_logo_url: typedData.team_b_logo_url
           });
         }
       } catch (error) {
@@ -107,17 +113,19 @@ const SettingsTab = () => {
     try {
       setSaving(true);
 
+      const updateData: any = {
+        prize_title: settings.prize_title,
+        prize_description: settings.prize_description,
+        prize_image_url: settings.prize_image_url,
+        draw_date: settings.draw_date,
+        team_a_logo_url: settings.team_a_logo_url,
+        team_b_logo_url: settings.team_b_logo_url,
+        updated_at: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from("app_settings")
-        .update({
-          prize_title: settings.prize_title,
-          prize_description: settings.prize_description,
-          prize_image_url: settings.prize_image_url,
-          draw_date: settings.draw_date,
-          team_a_logo_url: settings.team_a_logo_url,
-          team_b_logo_url: settings.team_b_logo_url,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("id", settings.id);
 
       if (error) throw error;

@@ -56,12 +56,13 @@ const BettingForm = () => {
           .single();
 
         if (!error && data) {
-          if (data.draw_date) {
-            setGameDate(data.draw_date);
+          const typedData = data as any;
+          if (typedData.draw_date) {
+            setGameDate(typedData.draw_date);
           }
           setLogos({
-            team1: data.team_a_logo_url,
-            team2: data.team_b_logo_url,
+            team1: typedData.team_a_logo_url,
+            team2: typedData.team_b_logo_url,
           });
         }
       } catch (err) {
@@ -195,7 +196,8 @@ const BettingForm = () => {
       // 2. Insert new bet
       const { a, b } = parseScore(formData.score);
 
-      const { error: insertError } = await supabase.from("palpites").insert({
+      // Cast payload to any to include 'email' which is not in the generated types yet
+      const insertPayload: any = {
         nome_completo: formData.fullName,
         email: formData.email,
         cidade: formData.city,
@@ -208,7 +210,9 @@ const BettingForm = () => {
         placar_time_b: b,
         escolha: formData.selectedOption || "",
         game_date: effectiveDate
-      });
+      };
+
+      const { error: insertError } = await supabase.from("palpites").insert(insertPayload);
 
       if (insertError) {
         console.error("Error inserting bet", insertError);
