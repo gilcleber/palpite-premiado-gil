@@ -101,7 +101,7 @@ const BettingForm = () => {
     });
   };
 
-  const handleScoreSelect = (score: string) => {
+  const handleScoreSelect = (score: string | null) => {
     setFormData({ ...formData, score });
   };
 
@@ -283,7 +283,7 @@ const BettingForm = () => {
         <button
           disabled={loading}
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-[#d19563] hover:bg-[#b07b4e] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
         >
           {loading ? "Enviando..." : "Confirmar Palpite"}
         </button>
