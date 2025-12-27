@@ -267,18 +267,70 @@ const SettingsTab = () => {
           />
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="draw_date" className="text-sm font-medium text-[#1d244a]">
-            Data do Sorteio
-          </label>
-          <Input
-            id="draw_date"
-            name="draw_date"
-            type="datetime-local"
-            value={settings?.draw_date ? new Date(settings.draw_date).toISOString().slice(0, 16) : ""}
-            onChange={handleChange}
-            className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label htmlFor="draw_date_day" className="text-sm font-medium text-[#1d244a]">
+              Data do Sorteio
+            </label>
+            <Input
+              id="draw_date_day"
+              type="date"
+              value={settings?.draw_date ? new Date(settings.draw_date).toLocaleDateString('pt-BR').split('/').reverse().join('-') : ""} // Basic fallback, preferable to parse properly
+              onChange={(e) => {
+                if (!settings) return;
+                const dateVal = e.target.value; // YYYY-MM-DD
+                if (!dateVal) {
+                  setSettings({ ...settings, draw_date: null });
+                  return;
+                }
+
+                // Get current time or default to 19:00
+                const currentDt = settings.draw_date ? new Date(settings.draw_date) : new Date();
+                const timeVal = settings.draw_date
+                  ? `${String(currentDt.getHours()).padStart(2, '0')}:${String(currentDt.getMinutes()).padStart(2, '0')}`
+                  : "19:00";
+
+                // Create new date object combining dateVal and timeVal (Local Time)
+                // Note: new Date("YYYY-MM-DDTHH:mm") creates date in Local Time
+                const newLocalIso = `${dateVal}T${timeVal}`;
+                const newDateObj = new Date(newLocalIso);
+
+                setSettings({ ...settings, draw_date: newDateObj.toISOString() });
+              }}
+              className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="draw_date_time" className="text-sm font-medium text-[#1d244a]">
+              Horário
+            </label>
+            <Input
+              id="draw_date_time"
+              type="time"
+              value={settings?.draw_date ? (() => {
+                const d = new Date(settings.draw_date);
+                return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+              })() : ""}
+              onChange={(e) => {
+                if (!settings) return;
+                const timeVal = e.target.value; // HH:mm
+                if (!timeVal) return;
+
+                const currentDt = settings.draw_date ? new Date(settings.draw_date) : new Date();
+                // If no date set yet, use today
+                const datePart = settings.draw_date
+                  ? new Date(settings.draw_date).toLocaleDateString('pt-BR').split('/').reverse().join('-')
+                  : new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-');
+
+                const newLocalIso = `${datePart}T${timeVal}`;
+                const newDateObj = new Date(newLocalIso);
+
+                setSettings({ ...settings, draw_date: newDateObj.toISOString() });
+              }}
+              className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
+            />
+          </div>
         </div>
 
         <Button

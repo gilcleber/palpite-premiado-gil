@@ -26,14 +26,14 @@ const PrizeAnnouncement = () => {
           .single();
 
         if (error) throw error;
-        
+
         // Add default team names since they don't exist in the database
         const updatedData = {
           ...data,
           team1_name: "Ponte Preta", // Default value
           team2_name: "Guarani" // Default value
         };
-        
+
         setSettings(updatedData);
       } catch (error) {
         console.error("Error fetching prize settings:", error);
@@ -67,8 +67,8 @@ const PrizeAnnouncement = () => {
         <div className="flex flex-col md:flex-row items-center gap-4">
           {settings.prize_image_url ? (
             <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-              <img 
-                src={settings.prize_image_url} 
+              <img
+                src={settings.prize_image_url}
                 alt={settings.prize_title}
                 className="w-full h-full object-cover"
               />
@@ -78,7 +78,7 @@ const PrizeAnnouncement = () => {
               <Gift className="h-12 w-12 text-[#1d244a]" />
             </div>
           )}
-          
+
           <div className="flex-1 text-center md:text-left">
             <h2 className="text-xl font-bold text-[#1d244a] mb-2">
               {settings.prize_title || "Prêmio Especial"}
@@ -88,7 +88,13 @@ const PrizeAnnouncement = () => {
             </p>
             <div className="flex items-center justify-center md:justify-start text-sm text-gray-600">
               <Calendar className="h-4 w-4 mr-1" />
-              <span>Sorteio: {settings.draw_date ? new Date(settings.draw_date).toLocaleDateString('pt-BR') : "Data a ser definida"}</span>
+              <span>Sorteio: {settings.draw_date ? new Date(settings.draw_date).toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              }) : "Data a ser definida"}</span>
             </div>
           </div>
         </div>
