@@ -15,6 +15,7 @@ type Palpite = {
     time_a: string;
     time_b: string;
     telefone: string;
+    cpf: string;
 };
 
 const LiveDraw = () => {
@@ -250,7 +251,7 @@ const LiveDraw = () => {
                         {/* Admin Only - Copy Full Data */}
                         <Button
                             onClick={() => {
-                                const fullInfo = `Vencedor: ${winner.nome_completo}\nTel: ${winner.telefone}\nInsta: ${winner.instagram_handle}`;
+                                const fullInfo = `Vencedor: ${winner.nome_completo}\nCPF: ${winner.cpf}\nCidade: ${winner.cidade}\nTel: ${winner.telefone}\nInsta: ${winner.instagram_handle}`;
                                 navigator.clipboard.writeText(fullInfo);
                                 toast.success("Dados do vencedor copiados!");
                             }}
