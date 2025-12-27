@@ -42,6 +42,11 @@ const BettingForm = () => {
   const [loading, setLoading] = useState(false);
   const [gameDate, setGameDate] = useState<string>("");
 
+  const [logos, setLogos] = useState<{ team1: string | null; team2: string | null }>({
+    team1: null,
+    team2: null,
+  });
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
@@ -54,7 +59,10 @@ const BettingForm = () => {
           if (data.draw_date) {
             setGameDate(data.draw_date);
           }
-          // Could also update team names here if they were in the DB
+          setLogos({
+            team1: data.team_a_logo_url,
+            team2: data.team_b_logo_url,
+          });
         }
       } catch (err) {
         console.error("Error fetching settings:", err);
@@ -138,9 +146,6 @@ const BettingForm = () => {
     }
 
     if (formData.selectedOption === "draw" && !formData.score) {
-      // Automatically set score if draw but not chosen? No, user must pick score.
-      // The condition above covers it if selectedOption != draw. 
-      // For draw, we also need score.
       toast.error("Por favor, selecione um placar para o empate");
       return false;
     }
@@ -165,18 +170,11 @@ const BettingForm = () => {
     setLoading(true);
 
     try {
-      // 1. Check if user already played for this game date
-      // If gameDate is not set from settings, we use current date as fallback or warn?
-      // Let's assume gameDate is important. If null, maybe allow?
-      // Better to require a game date to enforce uniqueness per game.
       const effectiveDate = gameDate || new Date().toISOString().split('T')[0];
 
       const { data: existingBet, error: checkError } = await supabase
         .from("palpites")
         .select("id")
-        .eq("cpf", formData.cpf.replace(/\D/g, "")) // Store clean CPF? Or formatted?
-        // The input formats it. Let's send it as is for now, but consistency is key.
-        // Let's assume we store what is in the form.
         .eq("cpf", formData.cpf)
         .eq("game_date", effectiveDate)
         .maybeSingle();
@@ -199,17 +197,7 @@ const BettingForm = () => {
 
       const { error: insertError } = await supabase.from("palpites").insert({
         nome_completo: formData.fullName,
-        email: formData.email, // Note: DB might not have email column in snippets seen, check types!
-        // Looking at types.ts seen earlier, 'palpites' has: nome_completo, cpf, telefone, cidade, time_a, time_b, placar_time_a, placar_time_b, escolha, game_date.
-        // It DOES NOT have email.
-        // But wait, the previous code had email field.
-        // I should double check types.ts.
-        // Yes, types.ts for 'palpites' did NOT show email.
-        // I will skip email for now or risk error.
-        // Wait, previously no Supabase insert was done (it was Google Forms).
-        // So the table definition I saw in types.ts is what exists.
-        // I should ask user to add email column too if they want it.
-        // For now, I will NOT send email to avoid error.
+        email: formData.email,
         cidade: formData.city,
         cpf: formData.cpf,
         telefone: formData.phone,
@@ -275,6 +263,8 @@ const BettingForm = () => {
         handleTeamNameChange={handleTeamNameChange}
         toggleEdit={toggleEdit}
         handleOptionSelect={handleOptionSelect}
+        teamALogo={logos.team1}
+        teamBLogo={logos.team2}
       />
 
       {formData.selectedOption && (
@@ -295,7 +285,7 @@ const BettingForm = () => {
         </button>
       </div>
 
-      <p className="text-center text-xs text-gray-500 mt-4">
+      <p className="text-center text-xs text-blue-100 mt-4 opacity-80">
         Seus dados serão usados apenas para o sorteio e não serão compartilhados.
         Apenas um palpite por jogo.
       </p>

@@ -16,6 +16,8 @@ interface AppSettings {
   draw_date: string | null;
   team_a: string;
   team_b: string;
+  team_a_logo_url: string | null;
+  team_b_logo_url: string | null;
 }
 
 const SettingsTab = () => {
@@ -34,49 +36,47 @@ const SettingsTab = () => {
 
         if (error) {
           console.error("Settings error:", error);
-          // Se não existir configuração, criar uma padrão
           if (error.code === 'PGRST116') {
-            console.log("No settings found, creating default...");
             const defaultSettings = {
               prize_title: "Prêmio do Sorteio",
               prize_description: "Descrição do prêmio aqui",
               prize_image_url: null,
               draw_date: null
             };
-            
+
             const { data: newData, error: insertError } = await supabase
               .from("app_settings")
               .insert([defaultSettings])
               .select("*")
               .single();
-              
-            if (insertError) {
-              console.error("Error creating default settings:", insertError);
-              throw insertError;
-            }
-            
+
+            if (insertError) throw insertError;
+
             setSettings({
               id: newData.id,
               prize_title: newData.prize_title,
               prize_description: newData.prize_description,
               prize_image_url: newData.prize_image_url,
               draw_date: newData.draw_date,
-              team_a: "Time A", // Valor padrão local
-              team_b: "Time B"  // Valor padrão local
+              team_a: "Time A",
+              team_b: "Time B",
+              team_a_logo_url: null,
+              team_b_logo_url: null
             });
           } else {
             throw error;
           }
         } else {
-          console.log("Settings loaded:", data);
           setSettings({
             id: data.id,
             prize_title: data.prize_title,
             prize_description: data.prize_description,
             prize_image_url: data.prize_image_url,
             draw_date: data.draw_date,
-            team_a: "Time A", // Valor padrão local
-            team_b: "Time B"  // Valor padrão local
+            team_a: "Time A", // Note: If specific columns for names existed, we'd use them.
+            team_b: "Time B",
+            team_a_logo_url: data.team_a_logo_url,
+            team_b_logo_url: data.team_b_logo_url
           });
         }
       } catch (error) {
@@ -96,7 +96,6 @@ const SettingsTab = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    console.log("Field changed:", name, value);
     if (settings) {
       setSettings({ ...settings, [name]: value });
     }
@@ -104,12 +103,10 @@ const SettingsTab = () => {
 
   const handleSave = async () => {
     if (!settings) return;
-    
+
     try {
       setSaving(true);
-      console.log("Saving settings:", settings);
-      
-      // Salvamos apenas os campos que existem na tabela
+
       const { error } = await supabase
         .from("app_settings")
         .update({
@@ -117,16 +114,14 @@ const SettingsTab = () => {
           prize_description: settings.prize_description,
           prize_image_url: settings.prize_image_url,
           draw_date: settings.draw_date,
+          team_a_logo_url: settings.team_a_logo_url,
+          team_b_logo_url: settings.team_b_logo_url,
           updated_at: new Date().toISOString(),
         })
         .eq("id", settings.id);
 
-      if (error) {
-        console.error("Save error:", error);
-        throw error;
-      }
-      
-      console.log("Settings saved successfully");
+      if (error) throw error;
+
       toast({
         title: "Sucesso",
         description: "Configurações atualizadas com sucesso",
@@ -134,8 +129,8 @@ const SettingsTab = () => {
     } catch (error) {
       console.error("Error saving settings:", error);
       toast({
-        title: "Erro", 
-        description: "Não foi possível salvar as configurações. Verifique a conexão com o Supabase.",
+        title: "Erro",
+        description: "Falha ao salvar. Verifique se você rodou a migração SQL.",
         variant: "destructive",
       });
     } finally {
@@ -157,39 +152,69 @@ const SettingsTab = () => {
         <CardTitle className="text-white">Configurações do Sistema</CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
+
+        {/* Teams Configuration */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label htmlFor="team_a" className="text-sm font-medium text-[#1d244a]">
-              Time A
-            </label>
-            <Input
-              id="team_a"
-              name="team_a"
-              value={settings?.team_a || ""}
-              onChange={handleChange}
-              placeholder="Nome do Time A"
-              className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-            />
-            <p className="text-xs text-gray-500">
-              Nota: Os nomes dos times são armazenados localmente e precisam ser configurados no banco de dados.
-            </p>
+          <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+            <h4 className="font-semibold text-[#1d244a]">Time A (Mandante)</h4>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nome do Time</label>
+              <Input
+                name="team_a"
+                value={settings?.team_a || ""}
+                onChange={handleChange}
+                placeholder="Ex: Ponte Preta"
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">URL do Logo (PNG/JPG)</label>
+              <Input
+                name="team_a_logo_url"
+                value={settings?.team_a_logo_url || ""}
+                onChange={handleChange}
+                placeholder="https://..."
+                className="bg-white"
+              />
+            </div>
+            {settings?.team_a_logo_url && (
+              <div className="mt-2 flex justify-center">
+                <img src={settings.team_a_logo_url} alt="Logo Preview" className="h-16 w-16 object-contain" />
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <label htmlFor="team_b" className="text-sm font-medium text-[#1d244a]">
-              Time B
-            </label>
-            <Input
-              id="team_b"
-              name="team_b"
-              value={settings?.team_b || ""}
-              onChange={handleChange}
-              placeholder="Nome do Time B"
-              className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-            />
-            <p className="text-xs text-gray-500">
-              Nota: Os nomes dos times são armazenados localmente e precisam ser configurados no banco de dados.
-            </p>
+          <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+            <h4 className="font-semibold text-[#1d244a]">Time B (Visitante)</h4>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Nome do Time</label>
+              <Input
+                name="team_b"
+                value={settings?.team_b || ""}
+                onChange={handleChange}
+                placeholder="Ex: Guarani"
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">URL do Logo (PNG/JPG)</label>
+              <Input
+                name="team_b_logo_url"
+                value={settings?.team_b_logo_url || ""}
+                onChange={handleChange}
+                placeholder="https://..."
+                className="bg-white"
+              />
+            </div>
+            {settings?.team_b_logo_url && (
+              <div className="mt-2 flex justify-center">
+                <img src={settings.team_b_logo_url} alt="Logo Preview" className="h-16 w-16 object-contain" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -247,10 +272,10 @@ const SettingsTab = () => {
             className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
           />
         </div>
-        
-        <Button 
-          onClick={handleSave} 
-          disabled={saving} 
+
+        <Button
+          onClick={handleSave}
+          disabled={saving}
           className="w-full mt-6 bg-[#1d244a] hover:bg-[#2a3459] text-white border-0"
         >
           {saving ? (

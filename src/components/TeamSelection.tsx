@@ -1,7 +1,7 @@
-
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { FormData } from "./BettingForm";
+import { Shield } from "lucide-react";
 
 interface TeamSelectionProps {
   formData: FormData;
@@ -12,32 +12,56 @@ interface TeamSelectionProps {
   handleTeamNameChange: (team: "team1" | "team2", value: string) => void;
   toggleEdit: (team: "team1" | "team2") => void;
   handleOptionSelect: (option: "team1" | "draw" | "team2") => void;
+  teamALogo?: string | null;
+  teamBLogo?: string | null;
 }
 
 const TeamSelection = ({
   formData,
-  handleOptionSelect
+  handleOptionSelect,
+  teamALogo,
+  teamBLogo
 }: TeamSelectionProps) => {
   return (
     <div className="space-y-6 animate-slide-up">
-      <h3 className="text-xl font-semibold text-center text-blue-800 mb-6">
+      <h3 className="text-xl font-semibold text-center text-blue-100 mb-6 drop-shadow-md">
         Escolha sua opção para o jogo
       </h3>
 
-      {/* Teams Display - Simples e claro */}
-      <div className="flex items-center justify-center space-x-4 mb-8">
-        <div className="bg-white/95 backdrop-blur-sm px-6 py-4 rounded-xl border-2 border-blue-200 shadow-lg">
-          <span className="text-lg font-bold text-blue-800">
+      {/* Teams Display - Logos e Nomes */}
+      <div className="flex items-center justify-center space-x-2 sm:space-x-8 mb-8">
+
+        {/* Team A */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg p-2">
+            {teamALogo ? (
+              <img src={teamALogo} alt={formData.team1Name} className="w-full h-full object-contain drop-shadow transition-transform hover:scale-110" />
+            ) : (
+              <Shield className="w-10 h-10 text-white/50" />
+            )}
+          </div>
+          <span className="text-white font-bold text-sm sm:text-base tracking-wide text-center max-w-[100px] leading-tight">
             {formData.team1Name}
           </span>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3 rounded-lg shadow-lg">
-          <span className="text-xl font-bold text-white">VS</span>
+        {/* VS Badge */}
+        <div className="flex flex-col items-center">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-company-gold rounded-full flex items-center justify-center shadow-lg transform rotate-3 border-2 border-white/20">
+            <span className="text-white font-black text-sm sm:text-lg italic">VS</span>
+          </div>
         </div>
 
-        <div className="bg-white/95 backdrop-blur-sm px-6 py-4 rounded-xl border-2 border-blue-200 shadow-lg">
-          <span className="text-lg font-bold text-blue-800">
+        {/* Team B */}
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border-2 border-white/20 shadow-lg p-2">
+            {teamBLogo ? (
+              <img src={teamBLogo} alt={formData.team2Name} className="w-full h-full object-contain drop-shadow transition-transform hover:scale-110" />
+            ) : (
+              <Shield className="w-10 h-10 text-white/50" />
+            )}
+          </div>
+          <span className="text-white font-bold text-sm sm:text-base tracking-wide text-center max-w-[100px] leading-tight">
             {formData.team2Name}
           </span>
         </div>
