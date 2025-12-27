@@ -64,7 +64,7 @@ const ParticipantsList = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
+
       setParticipants(data || []);
       setFilteredParticipants(data || []);
     } catch (error) {
@@ -117,7 +117,15 @@ const ParticipantsList = () => {
                       <TableCell>{participant.cidade}</TableCell>
                       <TableCell>{participant.telefone}</TableCell>
                       <TableCell>{participant.cpf}</TableCell>
-                      <TableCell>{participant.escolha}</TableCell>
+                      <TableCell>
+                        {participant.escolha === "team1"
+                          ? participant.time_a
+                          : participant.escolha === "team2"
+                            ? participant.time_b
+                            : participant.escolha === "draw"
+                              ? "Empate"
+                              : participant.escolha}
+                      </TableCell>
                       <TableCell>
                         {participant.placar_time_a}x{participant.placar_time_b}
                       </TableCell>
