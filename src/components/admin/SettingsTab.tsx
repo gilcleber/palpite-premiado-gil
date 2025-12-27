@@ -79,8 +79,8 @@ const SettingsTab = () => {
             prize_description: typedData.prize_description,
             prize_image_url: typedData.prize_image_url,
             draw_date: typedData.draw_date,
-            team_a: "Time A",
-            team_b: "Time B",
+            team_a: typedData.team_a || "Time A",
+            team_b: typedData.team_b || "Time B",
             team_a_logo_url: typedData.team_a_logo_url,
             team_b_logo_url: typedData.team_b_logo_url
           });
@@ -118,6 +118,8 @@ const SettingsTab = () => {
         prize_description: settings.prize_description,
         prize_image_url: settings.prize_image_url,
         draw_date: settings.draw_date,
+        team_a: settings.team_a,
+        team_b: settings.team_b,
         team_a_logo_url: settings.team_a_logo_url,
         team_b_logo_url: settings.team_b_logo_url,
         updated_at: new Date().toISOString(),

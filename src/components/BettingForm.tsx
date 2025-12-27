@@ -60,6 +60,13 @@ const BettingForm = () => {
           if (typedData.draw_date) {
             setGameDate(typedData.draw_date);
           }
+
+          setFormData(prev => ({
+            ...prev,
+            team1Name: typedData.team_a || "Time A",
+            team2Name: typedData.team_b || "Time B"
+          }));
+
           setLogos({
             team1: typedData.team_a_logo_url,
             team2: typedData.team_b_logo_url,
