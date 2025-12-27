@@ -296,7 +296,7 @@ const BettingForm = () => {
         </button>
       </div>
 
-      <p className="text-center text-xs text-blue-100 mt-4 opacity-80">
+      <p className="text-center text-xs text-gray-500 mt-4">
         Seus dados serão usados apenas para o sorteio e não serão compartilhados.
         Apenas um palpite por jogo.
       </p>
