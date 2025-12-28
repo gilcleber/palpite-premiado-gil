@@ -23,7 +23,7 @@ const Index = () => {
         {/* Radio Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
           <img
-            src="/palpite-premiado-gil/radio_logo.png"
+            src="./radio_logo.png"
             alt="Watermark"
             className="w-[90%] md:w-[70%] lg:w-[50%] opacity-15 mix-blend-normal grayscale blur-[1px]"
           />
@@ -38,9 +38,9 @@ const Index = () => {
             <PrizeAnnouncement />
           </div>
 
-          {/* Main Form Card with glassmorphism and blue accent */}
+          {/* Main Form Card - Transparent to unify blue theme */}
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
-            <Card className="glass-card border-0 shadow-glass backdrop-blur-xl bg-white/15 overflow-hidden">
+            <Card className="border-0 shadow-none bg-transparent overflow-hidden">
               <CardContent className="p-0">
                 <BettingForm />
               </CardContent>
