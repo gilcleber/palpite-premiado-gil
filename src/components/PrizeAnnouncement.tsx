@@ -35,7 +35,7 @@ const PrizeAnnouncement = () => {
         });
 
         const { data: prizesData } = await supabase
-          .from("prizes")
+          .from("prizes" as any)
           .select("*")
           .order("created_at", { ascending: true });
 

@@ -78,7 +78,7 @@ const SettingsTab = () => {
 
         // Load Extra Prizes
         const { data: prizesData, error: prizesError } = await supabase
-          .from("prizes")
+          .from("prizes" as any)
           .select("*")
           .order("created_at", { ascending: true });
 
@@ -156,10 +156,10 @@ const SettingsTab = () => {
     }
     setAddingPrize(true);
     try {
-      const { data, error } = await supabase.from("prizes").insert([newPrize]).select().single();
+      const { data, error } = await supabase.from("prizes" as any).insert([newPrize]).select().single();
       if (error) throw error;
       if (data) {
-        setPrizes([...prizes, data]);
+        setPrizes([...prizes, data as Prize]);
         setNewPrize({ title: "", description: "", image_url: null });
         toast({ title: "Prêmio Adicionado", description: "O novo prêmio foi salvo." });
       }
@@ -172,7 +172,7 @@ const SettingsTab = () => {
 
   const handleDeletePrize = async (id: string) => {
     try {
-      const { error } = await supabase.from("prizes").delete().eq("id", id);
+      const { error } = await supabase.from("prizes" as any).delete().eq("id", id);
       if (error) throw error;
       setPrizes(prizes.filter(p => p.id !== id));
       toast({ title: "Removido", description: "Prêmio removido com sucesso." });
@@ -332,7 +332,33 @@ const SettingsTab = () => {
             </div>
             <h3 className="font-bold text-lg text-[#d19563] mb-4">🏆 Prêmio Principal (Destaque)</h3>
             <div className="space-y-4">
-
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Título</label>
+                <Input
+                  name="prize_title"
+                  value={settings?.prize_title || ""}
+                  onChange={handleChange}
+                  className="bg-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Descrição</label>
+                <Textarea
+                  name="prize_description"
+                  value={settings?.prize_description || ""}
+                  onChange={handleChange}
+                  rows={2}
+                  className="bg-white"
+                />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Imagem do Prêmio</label>
+                <ImageUpload
+                  onUploadComplete={(url) => handleImageUpdate('prize_image_url', url)}
+                  currentImageUrl={settings?.prize_image_url}
+                  onClear={() => handleImageUpdate('prize_image_url', '')}
+                />
+              </div>
             </div>
             <p className="text-xs text-gray-500 italic text-center mt-2">
               * Para salvar alterações neste prêmio, utilize o botão "Salvar Alterações do Jogo" abaixo.
