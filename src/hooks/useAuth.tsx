@@ -12,11 +12,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       const result = await signInUser(email, password, authState.isFirstAccess);
-      
+
       if (authState.isFirstAccess) {
         updateIsFirstAccess(false);
       }
-      
+
       return result;
     } catch (error: any) {
       console.error("Complete sign in error:", error);
@@ -30,13 +30,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ 
-      session: authState.session, 
-      user: authState.user, 
-      signIn, 
-      signOut, 
-      loading: authState.loading, 
-      isAdmin: authState.isAdmin, 
+    <AuthContext.Provider value={{
+      session: authState.session,
+      user: authState.user,
+      signIn,
+      signOut,
+      loading: authState.loading,
+      isAdmin: authState.isAdmin,
+      role: authState.role,
+      tenantId: authState.tenantId,
+      licenseExpired: authState.licenseExpired,
       isFirstAccess: authState.isFirstAccess
     }}>
       {children}

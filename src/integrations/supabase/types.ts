@@ -27,6 +27,35 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_profiles: {
+        Row: {
+          id: string
+          tenant_id: string | null
+          role: 'super_admin' | 'admin' | null
+          created_at: string
+        }
+        Insert: {
+          id: string
+          tenant_id?: string | null
+          role?: 'super_admin' | 'admin' | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          tenant_id?: string | null
+          role?: 'super_admin' | 'admin' | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_profiles_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       app_settings: {
         Row: {
           created_at: string | null
@@ -44,6 +73,7 @@ export type Database = {
           score_team_b: number | null
           radio_logo_url: string | null
           radio_slogan: string | null
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -61,6 +91,7 @@ export type Database = {
           score_team_b?: number | null
           radio_logo_url?: string | null
           radio_slogan?: string | null
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -78,8 +109,17 @@ export type Database = {
           score_team_b?: number | null
           radio_logo_url?: string | null
           radio_slogan?: string | null
+          tenant_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "app_settings_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       palpites: {
         Row: {
@@ -96,6 +136,7 @@ export type Database = {
           telefone: string
           time_a: string
           time_b: string
+          tenant_id: string | null
         }
         Insert: {
           cidade: string
@@ -111,6 +152,7 @@ export type Database = {
           telefone: string
           time_a: string
           time_b: string
+          tenant_id?: string | null
         }
         Update: {
           cidade?: string
@@ -126,8 +168,17 @@ export type Database = {
           telefone?: string
           time_a?: string
           time_b?: string
+          tenant_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "palpites_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       prizes: {
         Row: {
@@ -137,6 +188,7 @@ export type Database = {
           image_url: string | null
           title: string
           updated_at: string | null
+          tenant_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -145,6 +197,7 @@ export type Database = {
           image_url?: string | null
           title: string
           updated_at?: string | null
+          tenant_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -153,6 +206,45 @@ export type Database = {
           image_url?: string | null
           title?: string
           updated_at?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prizes_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tenants: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          owner_email: string
+          valid_until: string | null
+          status: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          owner_email: string
+          valid_until?: string | null
+          status?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          owner_email?: string
+          valid_until?: string | null
+          status?: string | null
+          created_at?: string
         }
         Relationships: []
       }

@@ -10,6 +10,9 @@ export const useAuthState = () => {
     session: null,
     user: null,
     isAdmin: false,
+    role: null,
+    tenantId: null,
+    licenseExpired: false,
     loading: true,
     isFirstAccess: false,
   });
@@ -21,25 +24,28 @@ export const useAuthState = () => {
       try {
         // Check first access first
         const firstAccess = await checkFirstAccess();
-        
+
         // Get current session
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        
+
         if (error) {
           console.error("Error getting session:", error);
         }
-        
+
         if (!mounted) return;
 
-        let adminStatus = false;
+        let adminResult = { isAdmin: false, role: null as any, tenantId: null as any, licenseExpired: false };
         if (currentSession?.user) {
-          adminStatus = await checkAdminStatus(currentSession.user.id);
+          adminResult = await checkAdminStatus(currentSession.user.id);
         }
-        
+
         setAuthState({
           session: currentSession,
           user: currentSession?.user ?? null,
-          isAdmin: adminStatus,
+          isAdmin: adminResult.isAdmin,
+          role: adminResult.role,
+          tenantId: adminResult.tenantId,
+          licenseExpired: adminResult.licenseExpired,
           loading: false,
           isFirstAccess: firstAccess,
         });
@@ -57,24 +63,37 @@ export const useAuthState = () => {
         if (!mounted) return;
 
         console.log("Auth state changed:", event, newSession?.user?.id);
-        
-        let adminStatus = false;
-        if (newSession?.user && event === 'SIGNED_IN') {
-          // Add a small delay to ensure the user is properly inserted
-          setTimeout(async () => {
+
+        let adminResult = { isAdmin: false, role: null as any, tenantId: null as any, licenseExpired: false };
+
+        if (event === 'SIGNED_IN' || (event === 'TOKEN_REFRESHED' && newSession)) {
+          // Set loading true immediately to prevent early access denial
+          setAuthState(prev => ({ ...prev, loading: true }));
+
+          if (newSession?.user) {
+            // Add a small delay to ensure the user is properly inserted (if new) or data is propagated
+            // But usually immediate check is fine for existing users. 
+            // Keeping a small delay just in case of triggers.
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             if (mounted) {
-              adminStatus = await checkAdminStatus(newSession.user.id);
-              setAuthState(prev => ({ ...prev, isAdmin: adminStatus }));
+              adminResult = await checkAdminStatus(newSession.user.id);
             }
-          }, 500);
+          }
         }
-        
-        setAuthState(prev => ({
-          ...prev,
-          session: newSession,
-          user: newSession?.user ?? null,
-          isAdmin: newSession?.user ? adminStatus : false,
-        }));
+
+        if (mounted) {
+          setAuthState(prev => ({
+            ...prev,
+            session: newSession,
+            user: newSession?.user ?? null,
+            isAdmin: adminResult.isAdmin,
+            role: adminResult.role,
+            tenantId: adminResult.tenantId,
+            licenseExpired: adminResult.licenseExpired,
+            loading: false, // Finished loading
+          }));
+        }
       }
     );
 

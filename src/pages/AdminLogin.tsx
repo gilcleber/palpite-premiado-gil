@@ -1,6 +1,5 @@
-
 import { useState } from "react";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, isFirstAccess } = useAdminAuth();
+  const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,8 +32,8 @@ const AdminLogin = () => {
 
       const result = await signIn(email, password);
 
-      if (!result.success) {
-        throw new Error(result.error);
+      if (result.error) {
+        throw new Error(result.error.message);
       }
 
       toast({
@@ -42,10 +41,8 @@ const AdminLogin = () => {
         description: "Bem-vindo ao painel administrativo",
       });
 
-      // Força o redirecionamento após login bem-sucedido
-      setTimeout(() => {
-        navigate("/admin", { replace: true });
-      }, 500);
+      // Navegar imediatamente
+      navigate("/admin", { replace: true });
 
     } catch (error: any) {
       console.error("Login error:", error);

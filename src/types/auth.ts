@@ -8,13 +8,19 @@ export interface AuthContextProps {
   signOut: () => Promise<void>;
   loading: boolean;
   isAdmin: boolean;
+  role: 'super_admin' | 'admin' | null;
+  tenantId: string | null;
   isFirstAccess: boolean;
+  licenseExpired?: boolean;
 }
 
 export interface AuthState {
   session: Session | null;
   user: User | null;
   isAdmin: boolean;
+  role: 'super_admin' | 'admin' | null;
+  tenantId: string | null;
   loading: boolean;
   isFirstAccess: boolean;
+  licenseExpired?: boolean;
 }

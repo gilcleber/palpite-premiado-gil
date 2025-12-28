@@ -40,7 +40,7 @@ const Index = () => {
           <img
             src={radioLogo}
             alt="Radio Logo"
-            className="w-[80%] md:w-[60%] lg:w-[40%] opacity-15 mix-blend-normal grayscale blur-[0.5px] transition-all duration-700"
+            className="w-[80%] md:w-[60%] lg:w-[40%] opacity-[0.08] mix-blend-normal grayscale blur-[0.5px] transition-all duration-700 pointer-events-none"
           />
           {radioSlogan && (
             <p className="mt-4 text-white/10 text-xl md:text-3xl font-bold uppercase tracking-widest text-center max-w-2xl px-4">
