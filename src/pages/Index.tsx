@@ -23,7 +23,7 @@ const Index = () => {
         {/* Radio Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
           <img
-            src="/radio_logo.png"
+            src="/palpite-premiado-gil/radio_logo.png"
             alt="Watermark"
             className="w-[90%] md:w-[70%] lg:w-[50%] opacity-15 mix-blend-normal grayscale blur-[1px]"
           />
