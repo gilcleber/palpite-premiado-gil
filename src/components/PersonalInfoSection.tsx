@@ -45,6 +45,9 @@ const PersonalInfoSection = ({ formData, handleChange }: PersonalInfoSectionProp
             required
             className="touch-optimized"
           />
+          <p className="text-[10px] text-gray-400 pl-1">
+            * Obrigatório: Conferimos se segue o perfil oficial.
+          </p>
         </div>
         <div className="space-y-2">
           <ModernInput
