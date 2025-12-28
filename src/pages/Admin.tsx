@@ -6,12 +6,12 @@ import { Loader2 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import SettingsTab from "@/components/admin/SettingsTab";
 import ParticipantsList from "@/components/admin/ParticipantsList";
-import GameResultSelector from "@/components/admin/GameResultSelector";
+import ParticipantsList from "@/components/admin/ParticipantsList";
 import WinnerDraw from "@/components/admin/WinnerDraw";
 import LiveDraw from "@/components/admin/LiveDraw";
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState<'settings' | 'participants' | 'results' | 'winners' | 'live'>('settings');
+  const [activeTab, setActiveTab] = useState<'settings' | 'participants' | 'winners' | 'live'>('settings');
   const { isAdmin, signOut, user, loading } = useAdminAuth();
   const navigate = useNavigate();
 
@@ -41,7 +41,6 @@ const Admin = () => {
 
         {activeTab === 'settings' && <SettingsTab />}
         {activeTab === 'participants' && <ParticipantsList />}
-        {activeTab === 'results' && <GameResultSelector />}
         {activeTab === 'winners' && <WinnerDraw />}
         {activeTab === 'live' && <LiveDraw />}
       </div>

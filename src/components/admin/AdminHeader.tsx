@@ -3,8 +3,8 @@ import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink, Home } from "
 import { Button } from "@/components/ui/button";
 
 interface AdminHeaderProps {
-  activeTab: 'settings' | 'participants' | 'results' | 'winners' | 'live';
-  setActiveTab: (tab: 'settings' | 'participants' | 'results' | 'winners' | 'live') => void;
+  activeTab: 'settings' | 'participants' | 'winners' | 'live';
+  setActiveTab: (tab: 'settings' | 'participants' | 'winners' | 'live') => void;
   onLogout: () => void;
 }
 
@@ -35,16 +35,6 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) =>
         >
           <Filter className="h-4 w-4 mr-2" />
           Lista
-        </Button>
-        <Button
-          variant={activeTab === 'results' ? "default" : "outline"}
-          onClick={() => setActiveTab('results')}
-          className={activeTab === 'results' ?
-            "bg-[#d19563] text-white hover:bg-[#b8835a] border-0" :
-            "border-[#d19563] text-[#d19563] bg-transparent hover:bg-[#d19563] hover:text-white"}
-        >
-          <SortDesc className="h-4 w-4 mr-2" />
-          Resultado
         </Button>
 
         <Button
