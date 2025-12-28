@@ -1,4 +1,6 @@
 
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import BettingForm from "@/components/BettingForm";
 import PrizeAnnouncement from "@/components/PrizeAnnouncement";
@@ -9,6 +11,19 @@ import { Settings } from "lucide-react";
 
 const Index = () => {
   const { isAdmin } = useAuth();
+  const [radioLogo, setRadioLogo] = useState<string>("./radio_logo.png"); // Default fallback
+  const [radioSlogan, setRadioSlogan] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBranding = async () => {
+      const { data } = await supabase.from('app_settings').select('radio_logo_url, radio_slogan').single();
+      if (data) {
+        if (data.radio_logo_url) setRadioLogo(data.radio_logo_url);
+        if (data.radio_slogan) setRadioSlogan(data.radio_slogan);
+      }
+    };
+    fetchBranding();
+  }, []);
 
   return (
     <div className="min-h-screen w-full relative overflow-x-hidden safe-area-inset-top safe-area-inset-bottom">
@@ -21,12 +36,17 @@ const Index = () => {
           }}
         ></div>
         {/* Radio Watermark */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none overflow-hidden pb-32">
           <img
-            src="./radio_logo.png"
-            alt="Watermark"
-            className="w-[90%] md:w-[70%] lg:w-[50%] opacity-15 mix-blend-normal grayscale blur-[1px]"
+            src={radioLogo}
+            alt="Radio Logo"
+            className="w-[80%] md:w-[60%] lg:w-[40%] opacity-15 mix-blend-normal grayscale blur-[0.5px] transition-all duration-700"
           />
+          {radioSlogan && (
+            <p className="mt-4 text-white/10 text-xl md:text-3xl font-bold uppercase tracking-widest text-center max-w-2xl px-4">
+              {radioSlogan}
+            </p>
+          )}
         </div>
       </div>
 

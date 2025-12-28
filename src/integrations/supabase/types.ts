@@ -42,6 +42,8 @@ export type Database = {
           team_b_logo_url: string | null
           score_team_a: number | null
           score_team_b: number | null
+          radio_logo_url: string | null
+          radio_slogan: string | null
         }
         Insert: {
           created_at?: string | null
@@ -57,6 +59,8 @@ export type Database = {
           team_b_logo_url?: string | null
           score_team_a?: number | null
           score_team_b?: number | null
+          radio_logo_url?: string | null
+          radio_slogan?: string | null
         }
         Update: {
           created_at?: string | null
@@ -72,6 +76,8 @@ export type Database = {
           team_b_logo_url?: string | null
           score_team_a?: number | null
           score_team_b?: number | null
+          radio_logo_url?: string | null
+          radio_slogan?: string | null
         }
         Relationships: []
       }

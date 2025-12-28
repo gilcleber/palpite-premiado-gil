@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,23 +7,18 @@ import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 interface ImageUploadProps {
-    bucket?: string;
     onUploadComplete: (url: string) => void;
     currentImageUrl?: string | null;
     onClear?: () => void;
-    className?: string;
     label?: string;
+    bucketName?: string; // Optional bucket name
+    className?: string;
 }
 
-const ImageUpload = ({
-    bucket = "images",
-    onUploadComplete,
-    currentImageUrl,
-    onClear,
-    className = "",
-    label = "Upload Imagem"
-}: ImageUploadProps) => {
+const ImageUpload = ({ onUploadComplete, currentImageUrl, onClear, label = "Upload de Imagem", bucketName = "logos", className = "" }: ImageUploadProps) => {
     const [uploading, setUploading] = useState(false);
+    const [manualUrl, setManualUrl] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
@@ -40,7 +35,7 @@ const ImageUpload = ({
 
             // Upload file to Supabase Storage
             const { error: uploadError } = await supabase.storage
-                .from(bucket)
+                .from(bucketName) // Use dynamic bucket name
                 .upload(filePath, file);
 
             if (uploadError) {
@@ -49,7 +44,7 @@ const ImageUpload = ({
 
             // Get public URL
             const { data } = supabase.storage
-                .from(bucket)
+                .from(bucketName)
                 .getPublicUrl(filePath);
 
             onUploadComplete(data.publicUrl);
