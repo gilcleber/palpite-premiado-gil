@@ -67,18 +67,7 @@ const Index = () => {
                   </Link>
                 </Button>
               )}
-              {!isAdmin && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  asChild
-                  className="text-white/70 hover:text-white hover:bg-white/15 transition-all duration-300 touch-optimized backdrop-blur-sm"
-                >
-                  <Link to="/login">
-                    Área Administrativa
-                  </Link>
-                </Button>
-              )}
+
             </div>
           </div>
         </div>
