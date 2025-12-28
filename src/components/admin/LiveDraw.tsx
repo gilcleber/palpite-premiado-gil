@@ -27,11 +27,24 @@ const LiveDraw = () => {
     const [displayIndex, setDisplayIndex] = useState(0);
     const [showFullPhone, setShowFullPhone] = useState(false);
 
-    // Fetch candidates who guessed the exact score
+    // Load official result if available
+    useEffect(() => {
+        const savedResult = localStorage.getItem('official_result');
+        if (savedResult) {
+            try {
+                const parsed = JSON.parse(savedResult);
+                setGameResult({ a: parsed.teamA, b: parsed.teamB });
+            } catch (e) {
+                console.error("Error loading official result", e);
+            }
+        }
+    }, []);
+
     const fetchEligibleCandidates = async () => {
         setLoading(true);
         setWinner(null);
         try {
+            console.log(`Searching for: ${gameResult.a}x${gameResult.b}`);
             const { data, error } = await supabase
                 .from("palpites")
                 .select("*")
@@ -40,10 +53,12 @@ const LiveDraw = () => {
 
             if (error) throw error;
 
+            console.log("Found:", data);
+
             // Cast to ensure telefone is included (it might be missing in old records?)
             setCandidates(data as unknown as Palpite[]);
             if (data.length === 0) {
-                toast.info("Nenhum acertador para este placar (ainda).");
+                toast.info(`Nenhum acertador para o placar ${gameResult.a}x${gameResult.b}`);
             } else {
                 toast.success(`${data.length} acertadores encontrados!`);
             }
@@ -85,7 +100,7 @@ const LiveDraw = () => {
                     particleCount: 150,
                     spread: 70,
                     origin: { y: 0.6 },
-                    colors: ['#2563EB', '#FBBF24', '#ffffff']
+                    colors: ['#d19563', '#1d244a', '#ffffff'] // Theme colors confetti
                 });
             }
         }, interval);
@@ -120,7 +135,7 @@ const LiveDraw = () => {
 
             {/* Header for vMix/Streaming */}
             <div className="w-full text-center mb-10">
-                <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600 uppercase tracking-widest drop-shadow-sm">
+                <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#d19563] to-amber-200 uppercase tracking-widest drop-shadow-sm">
                     Sorteio Oficial
                 </h2>
                 <p className="text-slate-400 mt-2 text-lg">Palpite Premiado</p>
@@ -134,18 +149,18 @@ const LiveDraw = () => {
                             type="number"
                             value={gameResult.a}
                             onChange={(e) => setGameResult({ ...gameResult, a: parseInt(e.target.value) || 0 })}
-                            className="w-16 h-16 text-3xl text-center bg-slate-900 text-white rounded-lg border-2 border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-500/50"
+                            className="w-16 h-16 text-3xl text-center bg-slate-900 text-white rounded-lg border-2 border-[#d19563] focus:outline-none focus:ring-4 focus:ring-[#d19563]/50"
                         />
                         <span className="text-4xl text-white font-bold">X</span>
                         <input
                             type="number"
                             value={gameResult.b}
                             onChange={(e) => setGameResult({ ...gameResult, b: parseInt(e.target.value) || 0 })}
-                            className="w-16 h-16 text-3xl text-center bg-slate-900 text-white rounded-lg border-2 border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-500/50"
+                            className="w-16 h-16 text-3xl text-center bg-slate-900 text-white rounded-lg border-2 border-[#d19563] focus:outline-none focus:ring-4 focus:ring-[#d19563]/50"
                         />
                     </div>
                     <div className="text-center mt-6">
-                        <Button onClick={fetchEligibleCandidates} className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 text-lg font-bold">
+                        <Button onClick={fetchEligibleCandidates} className="bg-[#d19563] hover:bg-[#b07b4e] text-white px-8 py-2 text-lg font-bold">
                             Buscar Acertadores
                         </Button>
                     </div>
@@ -164,12 +179,12 @@ const LiveDraw = () => {
                 )}
 
                 {/* The Card / Name Display */}
-                <div className="relative w-full max-w-2xl aspect-video bg-white rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(37,99,235,0.3)] flex items-center justify-center transform transition-all duration-300">
+                <div className="relative w-full max-w-2xl aspect-video bg-white rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(209,149,99,0.3)] flex items-center justify-center transform transition-all duration-300">
                     {candidates.length > 0 ? (
                         <div className="text-center p-8 w-full animate-fade-in">
                             {winner ? (
                                 <div className="animate-scale-in flex flex-col items-center">
-                                    <Trophy className="w-24 h-24 text-yellow-500 mb-4 drop-shadow-md animate-bounce" />
+                                    <Trophy className="w-24 h-24 text-[#d19563] mb-4 drop-shadow-md animate-bounce" />
                                     <h3 className="text-2xl text-slate-500 font-bold mb-2">VENCEDOR(A)</h3>
                                     <h1 className="text-5xl md:text-6xl font-black text-slate-900 leading-tight mb-2 break-words">
                                         {winner.nome_completo.split(' ')[0]}
@@ -180,13 +195,13 @@ const LiveDraw = () => {
 
                                     <div className="flex flex-col gap-3 min-w-[300px]">
                                         {/* Instagram */}
-                                        <div className="flex items-center justify-center gap-3 text-xl text-blue-600 font-semibold bg-blue-50 py-2 px-6 rounded-full w-full">
+                                        <div className="flex items-center justify-center gap-3 text-xl text-[#1d244a] font-semibold bg-gray-100 py-2 px-6 rounded-full w-full">
                                             <Instagram className="w-6 h-6" />
                                             {winner.instagram_handle || "Sem Instagram"}
                                         </div>
 
                                         {/* Phone Number with Toggle */}
-                                        <div className="flex items-center justify-center gap-3 text-xl text-emerald-600 font-semibold bg-emerald-50 py-2 px-6 rounded-full w-full relative group">
+                                        <div className="flex items-center justify-center gap-3 text-xl text-gray-600 font-semibold bg-gray-100 py-2 px-6 rounded-full w-full relative group">
                                             <Phone className="w-6 h-6" />
                                             <span>
                                                 {showFullPhone
@@ -198,7 +213,7 @@ const LiveDraw = () => {
                                             {/* Privacy Toggle Button - Only visible on hover/focus to not clutter stream if possible, or small */}
                                             <button
                                                 onClick={() => setShowFullPhone(!showFullPhone)}
-                                                className="absolute right-3 p-1 hover:bg-emerald-200 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                                                className="absolute right-3 p-1 hover:bg-gray-300 rounded-full transition-colors opacity-0 group-hover:opacity-100"
                                                 title={showFullPhone ? "Ocultar" : "Mostrar Completo"}
                                             >
                                                 {showFullPhone ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -235,7 +250,7 @@ const LiveDraw = () => {
                 {candidates.length > 0 && !drawing && !winner && (
                     <Button
                         onClick={startDraw}
-                        className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white text-3xl font-black py-8 px-16 rounded-full shadow-[0_10px_30px_rgba(16,185,129,0.4)] transform hover:scale-105 transition-all active:scale-95 flex items-center gap-4"
+                        className="bg-gradient-to-r from-[#d19563] to-[#b8835a] hover:from-[#c28452] hover:to-[#a76f47] text-white text-3xl font-black py-8 px-16 rounded-full shadow-[0_10px_30px_rgba(209,149,99,0.4)] transform hover:scale-105 transition-all active:scale-95 flex items-center gap-4"
                     >
                         <Shuffle className="w-8 h-8" /> SORTEAR
                     </Button>
