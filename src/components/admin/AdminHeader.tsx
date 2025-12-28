@@ -1,5 +1,5 @@
 
-import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink } from "lucide-react";
+import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminHeaderProps {
@@ -54,6 +54,14 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) =>
         >
           <ExternalLink className="h-4 w-4 mr-2" />
           LIVE vMix (Popup)
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() => window.location.hash = "/"}
+          className="border-blue-300 text-blue-300 bg-transparent hover:bg-blue-300 hover:text-[#1d244a]"
+        >
+          <Home className="h-4 w-4 mr-2" />
+          Site
         </Button>
         <Button
           variant="outline"
