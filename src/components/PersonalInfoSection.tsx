@@ -12,7 +12,7 @@ const PersonalInfoSection = ({ formData, handleChange }: PersonalInfoSectionProp
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-2">
+        <div className="space-y-2 md:col-span-2">
           <ModernInput
             id="fullName"
             name="fullName"
@@ -91,7 +91,7 @@ const PersonalInfoSection = ({ formData, handleChange }: PersonalInfoSectionProp
             className="touch-optimized"
           />
         </div>
-        <div className="space-y-2 md:col-span-2">
+        <div className="space-y-2">
           <ModernInput
             id="city"
             name="city"
