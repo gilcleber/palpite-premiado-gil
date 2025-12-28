@@ -156,8 +156,9 @@ const LiveDraw = () => {
             <div className="flex-1 w-full flex flex-col items-center justify-center relative">
 
                 {/* Counter Badge */}
+                {/* Counter Badge - Moved up and styled to match theme */}
                 {candidates.length > 0 && !winner && (
-                    <div className="absolute top-0 right-0 bg-green-500/20 text-green-400 px-4 py-1 rounded-full border border-green-500/50 text-sm font-bold">
+                    <div className="absolute -top-12 right-0 bg-[#d19563]/10 text-[#d19563] px-6 py-2 rounded-full border border-[#d19563]/30 text-base font-bold shadow-lg backdrop-blur-sm z-10 animate-fade-in">
                         {candidates.length} Participantes
                     </div>
                 )}
