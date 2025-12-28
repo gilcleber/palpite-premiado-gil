@@ -18,7 +18,7 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast({
         title: "Campos obrigatórios",
@@ -27,38 +27,36 @@ const AdminLogin = () => {
       });
       return;
     }
-    
+
     try {
       setIsLoading(true);
-      
+
       const result = await signIn(email, password);
-      
+
       if (!result.success) {
         throw new Error(result.error);
       }
-      
+
       toast({
-        title: isFirstAccess ? "Admin criado com sucesso" : "Login realizado",
-        description: isFirstAccess 
-          ? "Primeiro admin criado com sucesso" 
-          : "Acesso autorizado ao painel administrativo",
+        title: "Login realizado com sucesso",
+        description: "Bem-vindo ao painel administrativo",
       });
-      
+
       // Força o redirecionamento após login bem-sucedido
       setTimeout(() => {
         navigate("/admin", { replace: true });
       }, 500);
-      
+
     } catch (error: any) {
       console.error("Login error:", error);
       let errorMessage = "Ocorreu um erro durante o login";
-      
+
       if (error.message?.includes("Invalid login credentials")) {
         errorMessage = "Email ou senha incorretos";
       } else if (error.message?.includes("Email not confirmed")) {
         errorMessage = "Email não confirmado";
       }
-      
+
       toast({
         title: "Erro no login",
         description: errorMessage,
@@ -80,7 +78,7 @@ const AdminLogin = () => {
             Área Administrativa
           </CardTitle>
           <CardDescription className="text-blue-100 text-center">
-            {isFirstAccess 
+            {isFirstAccess
               ? "Primeiro acesso - configure suas credenciais de admin"
               : "Acesso restrito - Faça login para continuar"}
           </CardDescription>
@@ -117,7 +115,7 @@ const AdminLogin = () => {
                   placeholder="Digite sua senha"
                   required
                 />
-                <button 
+                <button
                   type="button"
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#1d244a]"
                   onClick={() => setShowPassword(!showPassword)}
@@ -126,7 +124,7 @@ const AdminLogin = () => {
                 </button>
               </div>
             </div>
-            
+
             <Button
               type="submit"
               className="w-full bg-[#1d244a] hover:bg-[#2a3459] text-white"
@@ -140,7 +138,7 @@ const AdminLogin = () => {
               )}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <Button
               variant="outline"
