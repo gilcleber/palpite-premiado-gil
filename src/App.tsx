@@ -11,36 +11,24 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
-import AdminProtectedRoute from "./components/AdminProtectedRoute";
+import LiveDrawPage from "./pages/LiveDrawPage";
 
-const queryClient = new QueryClient();
+// ... (existing imports)
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <AdminAuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter basename={import.meta.env.BASE_URL}>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
+{/* Admin routes with protected access */ }
+<Route element={<AdminProtectedRoute />}>
+  <Route path="/admin" element={<Admin />} />
+  <Route path="/admin/live-draw" element={<LiveDrawPage />} />
+</Route>
 
-              {/* Admin routes with protected access */}
-              <Route element={<AdminProtectedRoute />}>
-                <Route path="/admin" element={<Admin />} />
-              </Route>
-
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </AdminAuthProvider>
-    </AuthProvider>
-  </QueryClientProvider>
+{/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */ }
+<Route path="*" element={<NotFound />} />
+            </Routes >
+          </BrowserRouter >
+        </TooltipProvider >
+      </AdminAuthProvider >
+    </AuthProvider >
+  </QueryClientProvider >
 );
 
 export default App;

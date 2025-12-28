@@ -1,5 +1,5 @@
 
-import { Shield, Settings, Filter, SortDesc, Award, LogOut } from "lucide-react";
+import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface AdminHeaderProps {
@@ -48,14 +48,12 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) =>
         </Button>
 
         <Button
-          variant={activeTab === 'live' ? "default" : "outline"}
-          onClick={() => setActiveTab('live')}
-          className={activeTab === 'live' ?
-            "bg-blue-600 text-white hover:bg-blue-700 border-0" :
-            "border-blue-500 text-blue-400 bg-transparent hover:bg-blue-500 hover:text-white"}
+          variant="outline"
+          onClick={() => window.open('/admin/live-draw', 'LiveDraw', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no')}
+          className="border-blue-500 text-blue-400 bg-transparent hover:bg-blue-500 hover:text-white"
         >
-          <Award className="h-4 w-4 mr-2" />
-          LIVE vMix
+          <ExternalLink className="h-4 w-4 mr-2" />
+          LIVE vMix (Popup)
         </Button>
         <Button
           variant="outline"
