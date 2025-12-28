@@ -49,7 +49,7 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) =>
 
         <Button
           variant="outline"
-          onClick={() => window.open('/admin/live-draw', 'LiveDraw', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no')}
+          onClick={() => window.open('#/admin/live-draw', 'LiveDraw', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no')}
           className="border-blue-500 text-blue-400 bg-transparent hover:bg-blue-500 hover:text-white"
         >
           <ExternalLink className="h-4 w-4 mr-2" />
