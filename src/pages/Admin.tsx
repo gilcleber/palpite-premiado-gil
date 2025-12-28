@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import SettingsTab from "@/components/admin/SettingsTab";
 import ParticipantsList from "@/components/admin/ParticipantsList";
-import ParticipantsList from "@/components/admin/ParticipantsList";
+
 import WinnerDraw from "@/components/admin/WinnerDraw";
 import LiveDraw from "@/components/admin/LiveDraw";
 

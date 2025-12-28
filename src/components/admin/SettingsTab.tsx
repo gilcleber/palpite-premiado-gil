@@ -78,7 +78,7 @@ const SettingsTab = () => {
 
         // Load Extra Prizes
         const { data: prizesData, error: prizesError } = await supabase
-          .from("prizes" as any)
+          .from("prizes")
           .select("*")
           .order("created_at", { ascending: true });
 
@@ -156,7 +156,7 @@ const SettingsTab = () => {
     }
     setAddingPrize(true);
     try {
-      const { data, error } = await supabase.from("prizes" as any).insert([newPrize]).select().single();
+      const { data, error } = await supabase.from("prizes").insert([newPrize]).select().single();
       if (error) throw error;
       if (data) {
         setPrizes([...prizes, data as Prize]);
@@ -172,7 +172,7 @@ const SettingsTab = () => {
 
   const handleDeletePrize = async (id: string) => {
     try {
-      const { error } = await supabase.from("prizes" as any).delete().eq("id", id);
+      const { error } = await supabase.from("prizes").delete().eq("id", id);
       if (error) throw error;
       setPrizes(prizes.filter(p => p.id !== id));
       toast({ title: "Removido", description: "Prêmio removido com sucesso." });

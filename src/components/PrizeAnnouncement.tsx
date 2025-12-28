@@ -34,8 +34,8 @@ const PrizeAnnouncement = () => {
           team2_name: (data as any).team_b || "Time B"
         });
 
-        const { data: prizesData } = await supabase
-          .from("prizes" as any)
+        const { data: prizesData, error: prizesError } = await supabase
+          .from("prizes") // Types are now defined
           .select("*")
           .order("created_at", { ascending: true });
 
