@@ -35,13 +35,17 @@ const WinnerDraw = () => {
   const [loading, setLoading] = useState(true);
   const [drawing, setDrawing] = useState(false);
 
+
+
+  const [drawMode, setDrawMode] = useState<'correct' | 'all'>('correct');
+
   useEffect(() => {
     loadParticipants();
   }, []);
 
   useEffect(() => {
-    filterCorrectGuesses();
-  }, [allParticipants]);
+    filterParticipants();
+  }, [allParticipants, drawMode]);
 
   const loadParticipants = async () => {
     try {
@@ -51,7 +55,7 @@ const WinnerDraw = () => {
         .select("*");
 
       if (error) throw error;
-      
+
       setAllParticipants(data || []);
     } catch (error) {
       console.error("Error loading participants:", error);
@@ -65,7 +69,12 @@ const WinnerDraw = () => {
     }
   };
 
-  const filterCorrectGuesses = () => {
+  const filterParticipants = () => {
+    if (drawMode === 'all') {
+      setCorrectGuesses(allParticipants);
+      return;
+    }
+
     const savedResult = localStorage.getItem('official_result');
     if (!savedResult) {
       setCorrectGuesses([]);
@@ -76,7 +85,7 @@ const WinnerDraw = () => {
     const filtered = allParticipants.filter(
       p => p.placar_time_a === officialResult.teamA && p.placar_time_b === officialResult.teamB
     );
-    
+
     setCorrectGuesses(filtered);
   };
 
@@ -84,14 +93,14 @@ const WinnerDraw = () => {
     if (correctGuesses.length === 0) {
       toast({
         title: "Aviso",
-        description: "Não há participantes com palpites corretos para sortear.",
+        description: "Não há participantes para sortear na categoria selecionada.",
         variant: "destructive",
       });
       return;
     }
-    
+
     setDrawing(true);
-    
+
     // Animation for drawing winner
     let counter = 0;
     const totalIterations = 20;
@@ -99,16 +108,16 @@ const WinnerDraw = () => {
       const randomIndex = Math.floor(Math.random() * correctGuesses.length);
       setWinner(correctGuesses[randomIndex]);
       counter++;
-      
+
       if (counter >= totalIterations) {
         clearInterval(interval);
         setDrawing(false);
-        
+
         toast({
           title: "Vencedor sorteado!",
           description: `${correctGuesses[randomIndex].nome_completo} foi o vencedor do sorteio!`,
         });
-        
+
         // Store winner in localStorage
         localStorage.setItem('winner', JSON.stringify(correctGuesses[randomIndex]));
       }
@@ -138,15 +147,37 @@ const WinnerDraw = () => {
       </CardHeader>
       <CardContent className="p-6">
         <div className="text-center mb-6">
+          {/* Draw Mode Selection */}
+          <div className="flex justify-center gap-4 mb-6">
+            <Button
+              variant={drawMode === 'correct' ? 'default' : 'outline'}
+              onClick={() => { setDrawMode('correct'); setWinner(null); }}
+              className={drawMode === 'correct' ? 'bg-[#d19563] hover:bg-[#b07b4e]' : ''}
+            >
+              <Award className="w-4 h-4 mr-2" />
+              Acertadores do Placar
+            </Button>
+            <Button
+              variant={drawMode === 'all' ? 'default' : 'outline'}
+              onClick={() => { setDrawMode('all'); setWinner(null); }}
+              className={drawMode === 'all' ? 'bg-[#d19563] hover:bg-[#b07b4e]' : ''}
+            >
+              <Award className="w-4 h-4 mr-2" />
+              Todos os Participantes (Sorteio Geral)
+            </Button>
+          </div>
+
           <p className="text-lg font-medium mb-2">
-            Participantes com o palpite correto: {correctGuesses.length}
+            Participantes elegíveis: {correctGuesses.length}
           </p>
           <p className="text-sm text-gray-500 mb-4">
-            {localStorage.getItem('official_result') 
-              ? `Resultado oficial: ${JSON.parse(localStorage.getItem('official_result')!).teamA}x${JSON.parse(localStorage.getItem('official_result')!).teamB}`
-              : "Resultado oficial ainda não definido"}
+            {drawMode === 'correct' ? (
+              localStorage.getItem('official_result')
+                ? `Resultado oficial: ${JSON.parse(localStorage.getItem('official_result')!).teamA}x${JSON.parse(localStorage.getItem('official_result')!).teamB}`
+                : "Resultado oficial ainda não definido"
+            ) : "Sorteio entre TODOS os palpites registrados"}
           </p>
-          
+
           <div className="flex justify-center space-x-4 mb-8">
             <Button
               onClick={drawWinner}
@@ -163,7 +194,7 @@ const WinnerDraw = () => {
                 </>
               )}
             </Button>
-            
+
             <Button
               onClick={sendToNDI}
               disabled={!winner}
@@ -172,7 +203,7 @@ const WinnerDraw = () => {
               <Send className="mr-2 h-4 w-4" /> Enviar para NDI
             </Button>
           </div>
-          
+
           {winner && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
               <h3 className="text-xl font-bold text-green-800 mb-2">
@@ -214,8 +245,8 @@ const WinnerDraw = () => {
               </TableHeader>
               <TableBody>
                 {correctGuesses.map((participant) => (
-                  <TableRow 
-                    key={participant.id} 
+                  <TableRow
+                    key={participant.id}
                     className={winner && winner.id === participant.id ? "bg-green-50" : ""}
                   >
                     <TableCell className="font-medium">
@@ -240,7 +271,7 @@ const WinnerDraw = () => {
         ) : (
           <div className="text-center p-8 border rounded-md bg-gray-50">
             <p className="text-gray-500">
-              {localStorage.getItem('official_result') 
+              {localStorage.getItem('official_result')
                 ? "Nenhum participante acertou o resultado oficial."
                 : "Defina o resultado oficial na aba 'Resultado Oficial' para ver os participantes com palpites corretos."}
             </p>
