@@ -27,17 +27,42 @@ const LiveDraw = () => {
     const [displayIndex, setDisplayIndex] = useState(0);
     const [showFullPhone, setShowFullPhone] = useState(false);
 
-    // Load official result if available
+    // Load official result from Database
     useEffect(() => {
-        const savedResult = localStorage.getItem('official_result');
-        if (savedResult) {
-            try {
-                const parsed = JSON.parse(savedResult);
-                setGameResult({ a: parsed.teamA, b: parsed.teamB });
-            } catch (e) {
-                console.error("Error loading official result", e);
+        const fetchOfficialResult = async () => {
+            const { data } = await supabase
+                .from('app_settings')
+                .select('score_team_a, score_team_b')
+                .single();
+
+            if (data) {
+                setGameResult({
+                    a: data.score_team_a || 0,
+                    b: data.score_team_b || 0
+                });
             }
-        }
+        };
+
+        fetchOfficialResult();
+
+        // Optional: Subscribe to changes for realtime updates
+        const channel = supabase
+            .channel('public:app_settings')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'app_settings' }, (payload) => {
+                const newData = payload.new as any;
+                if (newData) {
+                    setGameResult({
+                        a: newData.score_team_a || 0,
+                        b: newData.score_team_b || 0
+                    });
+                    toast.info("Resultado oficial atualizado!");
+                }
+            })
+            .subscribe();
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
     }, []);
 
     const fetchEligibleCandidates = async () => {

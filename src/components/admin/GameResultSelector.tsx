@@ -10,8 +10,8 @@ const GameResultSelector = () => {
   const [scoreTeamA, setScoreTeamA] = useState<number>(0);
   const [scoreTeamB, setScoreTeamB] = useState<number>(0);
   const [saving, setSaving] = useState(false);
-  const [officialResult, setOfficialResult] = useState<{teamA: number, teamB: number} | null>(null);
-  
+  const [officialResult, setOfficialResult] = useState<{ teamA: number, teamB: number } | null>(null);
+
   const handleScoreChange = (team: 'A' | 'B', value: number) => {
     if (value < 0) value = 0;
     if (team === 'A') {
@@ -24,12 +24,19 @@ const GameResultSelector = () => {
   const saveOfficialResult = async () => {
     try {
       setSaving(true);
-      
-      // Store the official result in local storage for now (in a real app, you would save this to the database)
-      const result = { teamA: scoreTeamA, teamB: scoreTeamB };
-      localStorage.setItem('official_result', JSON.stringify(result));
-      setOfficialResult(result);
-      
+
+      const { error } = await supabase
+        .from('app_settings')
+        .update({
+          score_team_a: scoreTeamA,
+          score_team_b: scoreTeamB
+        })
+        .gt('id', 0); // Updates all rows (should be only one) or use specific ID logic if known. usually ID=1.
+
+      if (error) throw error;
+
+      setOfficialResult({ teamA: scoreTeamA, teamB: scoreTeamB });
+
       toast({
         title: "Resultado salvo",
         description: `O resultado oficial foi definido como ${scoreTeamA}x${scoreTeamB}`,
@@ -38,7 +45,7 @@ const GameResultSelector = () => {
       console.error("Error saving official result:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível salvar o resultado oficial",
+        description: "Não foi possível salvar o resultado oficial no banco de dados",
         variant: "destructive",
       });
     } finally {
@@ -46,13 +53,29 @@ const GameResultSelector = () => {
     }
   };
 
-  const loadSavedResult = () => {
-    const savedResult = localStorage.getItem('official_result');
-    if (savedResult) {
-      const result = JSON.parse(savedResult);
-      setScoreTeamA(result.teamA);
-      setScoreTeamB(result.teamB);
-      setOfficialResult(result);
+  const loadSavedResult = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('app_settings')
+        .select('score_team_a, score_team_b')
+        .single();
+
+      if (error) {
+        // If no settings found or error, ignore (defaults to 0x0)
+        console.error("Error loading official result:", error);
+        return;
+      }
+
+      if (data) {
+        setScoreTeamA(data.score_team_a || 0);
+        setScoreTeamB(data.score_team_b || 0);
+        setOfficialResult({
+          teamA: data.score_team_a || 0,
+          teamB: data.score_team_b || 0
+        });
+      }
+    } catch (err) {
+      console.error("Unexpected error loading settings:", err);
     }
   };
 
