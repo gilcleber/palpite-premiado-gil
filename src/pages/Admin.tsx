@@ -16,10 +16,11 @@ const Admin = () => {
 
   // Removed handleLogout as it's not part of the new structure
 
-  if (loading) { // Added loading state check
+  if (loading || (!!useAuth().user && role === null)) { // Wait if loading OR if user exists but role is not yet determined
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1d244a] to-[#2a3459]">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
+        <span className="ml-2 text-white">Verificando permissões...</span>
       </div>
     );
   }

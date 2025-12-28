@@ -66,33 +66,39 @@ export const useAuthState = () => {
 
         let adminResult = { isAdmin: false, role: null as any, tenantId: null as any, licenseExpired: false };
 
-        if (event === 'SIGNED_IN' || (event === 'TOKEN_REFRESHED' && newSession)) {
-          // Set loading true immediately to prevent early access denial
-          setAuthState(prev => ({ ...prev, loading: true }));
-
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           if (newSession?.user) {
-            // Add a small delay to ensure the user is properly inserted (if new) or data is propagated
-            // But usually immediate check is fine for existing users. 
-            // Keeping a small delay just in case of triggers.
-            await new Promise(resolve => setTimeout(resolve, 500));
+            // Just update session immediately, then checking admin status
+            setAuthState(prev => ({
+              ...prev,
+              session: newSession,
+              user: newSession.user,
+              // Keep previous admin info until verified to avoid flashing
+            }));
 
             if (mounted) {
-              adminResult = await checkAdminStatus(newSession.user.id);
+              const adminResult = await checkAdminStatus(newSession.user.id);
+              setAuthState(prev => ({
+                ...prev,
+                isAdmin: adminResult.isAdmin,
+                role: adminResult.role,
+                tenantId: adminResult.tenantId,
+                licenseExpired: adminResult.licenseExpired,
+                loading: false
+              }));
             }
           }
-        }
-
-        if (mounted) {
-          setAuthState(prev => ({
-            ...prev,
-            session: newSession,
-            user: newSession?.user ?? null,
-            isAdmin: adminResult.isAdmin,
-            role: adminResult.role,
-            tenantId: adminResult.tenantId,
-            licenseExpired: adminResult.licenseExpired,
-            loading: false, // Finished loading
-          }));
+        } else if (event === 'SIGNED_OUT') {
+          setAuthState({
+            session: null,
+            user: null,
+            isAdmin: false,
+            role: null,
+            tenantId: null,
+            licenseExpired: false,
+            loading: false,
+            isFirstAccess: false
+          });
         }
       }
     );

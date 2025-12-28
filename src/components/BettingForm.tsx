@@ -29,8 +29,8 @@ const BettingForm = () => {
     phone: "",
     city: "",
     selectedOption: null,
-    team1Name: "Ponte Preta",
-    team2Name: "Guarani",
+    team1Name: "Time A",
+    team2Name: "Time B",
     score: null,
   });
 
