@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -55,6 +56,73 @@ const ParticipantsList = () => {
     }
   }, [searchTerm, participants]);
 
+  const handleExportCSV = () => {
+    if (filteredParticipants.length === 0) {
+      alert("Não há dados para exportar.");
+      return;
+    }
+
+    // Define columns
+    const headers = [
+      "Nome Completo",
+      "Cidade",
+      "Telefone",
+      "CPF",
+      "Escolha",
+      "Placar A",
+      "Placar B",
+      "Data do Palpite",
+      "Instagram",
+      "Total de Participações" // New column
+    ];
+
+    // Calculate participation counts based on CPF for ALL participants (not just filtered)
+    const participationCounts = new Map<string, number>();
+    participants.forEach(p => {
+      const key = p.cpf.replace(/\D/g, ""); // Normalize CPF
+      participationCounts.set(key, (participationCounts.get(key) || 0) + 1);
+    });
+
+    // Map data to CSV format (using semicolon for Excel compatibility in Brazil)
+    const csvContent = filteredParticipants.map(row => {
+      const createdDate = new Date(row.created_at).toLocaleDateString("pt-BR");
+      const cpfKey = row.cpf.replace(/\D/g, "");
+      const count = participationCounts.get(cpfKey) || 1;
+
+      // Clean data to avoid CSV breaks
+      const clean = (text: string) => `"${(text || "").replace(/"/g, '""')}"`;
+
+      return [
+        clean(row.nome_completo),
+        clean(row.cidade),
+        clean(row.telefone),
+        clean(row.cpf),
+        clean(row.escolha),
+        row.placar_time_a,
+        row.placar_time_b,
+        clean(createdDate),
+        // @ts-ignore - instagram might not be in interface yet but is in DB
+        clean(row.instagram_handle || ""),
+        count // Add count column
+      ].join(";");
+    });
+
+    // Combine headers and data
+    const csvString = [headers.join(";"), ...csvContent].join("\r\n");
+
+    // Add Byte Order Mark for UTF-8 (fixes generic encoding issues in Excel)
+    const blob = new Blob(["\ufeff" + csvString], { type: "text/csv;charset=utf-8;" });
+
+    // Create download link
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `participantes_palpite_premiado_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const loadParticipants = async () => {
     try {
       setLoading(true);
@@ -89,6 +157,17 @@ const ParticipantsList = () => {
             className="pl-10"
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+        </div>
+
+        <div className="flex justify-end mb-4">
+          <Button
+            variant="outline"
+            onClick={handleExportCSV}
+            className="border-[#d19563] text-[#d19563] hover:bg-[#d19563] hover:text-white"
+          >
+            <Download className="h-4 w-4 mr-2" />
+            Exportar Excel (CSV)
+          </Button>
         </div>
 
         {loading ? (

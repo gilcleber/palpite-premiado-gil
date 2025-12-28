@@ -25,6 +25,7 @@ interface Participant {
   placar_time_a: number;
   placar_time_b: number;
   created_at: string;
+  game_date?: string; // Optinal for backward compatibility
 }
 
 const WinnerDraw = () => {
@@ -40,26 +41,28 @@ const WinnerDraw = () => {
   const [scoreTeamB, setScoreTeamB] = useState<number>(0);
   const [savingScore, setSavingScore] = useState(false);
   const [officialResult, setOfficialResult] = useState<{ teamA: number, teamB: number } | null>(null);
+  const [currentGameDate, setCurrentGameDate] = useState<string | null>(null);
 
+  /* Load settings to get current draw date for filtering */
   useEffect(() => {
     loadInitialData();
   }, []);
 
   useEffect(() => {
     filterParticipants();
-  }, [allParticipants, drawMode, officialResult]); // Re-filter when result changes
+  }, [allParticipants, drawMode, officialResult, currentGameDate]); // Added currentGameDate to dependencies
 
   const loadInitialData = async () => {
     setLoading(true);
-    await Promise.all([loadParticipants(), loadOfficialResult()]);
+    await Promise.all([loadParticipants(), loadSettings()]); // Changed loadOfficialResult to loadSettings
     setLoading(false);
   };
 
-  const loadOfficialResult = async () => {
+  const loadSettings = async () => { // Renamed from loadOfficialResult to loadSettings
     try {
       const { data, error } = await supabase
         .from('app_settings')
-        .select('score_team_a, score_team_b')
+        .select('score_team_a, score_team_b, draw_date') // Added draw_date to select
         .single();
 
       if (data) {
@@ -69,6 +72,14 @@ const WinnerDraw = () => {
           teamA: data.score_team_a || 0,
           teamB: data.score_team_b || 0
         });
+
+        // Store Draw Date for filtering
+        if (data.draw_date) {
+          // Convert ISO string to YYYY-MM-DD for comparison
+          const dateOnly = data.draw_date.split('T')[0];
+          setCurrentGameDate(dateOnly);
+        }
+
         // Also update localStorage for backward compatibility or other components
         localStorage.setItem('official_result', JSON.stringify({
           teamA: data.score_team_a || 0,
@@ -133,8 +144,18 @@ const WinnerDraw = () => {
   };
 
   const filterParticipants = () => {
+    // First, filter by date if set
+    let eligible = allParticipants;
+
+    if (currentGameDate) {
+      eligible = allParticipants.filter(p => {
+        if (!p.game_date) return false; // Skip if no game date
+        return p.game_date === currentGameDate;
+      });
+    }
+
     if (drawMode === 'all') {
-      setCorrectGuesses(allParticipants);
+      setCorrectGuesses(eligible);
       return;
     }
 
@@ -143,7 +164,7 @@ const WinnerDraw = () => {
       return;
     }
 
-    const filtered = allParticipants.filter(
+    const filtered = eligible.filter(
       p => p.placar_time_a === officialResult.teamA && p.placar_time_b === officialResult.teamB
     );
 
