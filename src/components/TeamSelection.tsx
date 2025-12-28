@@ -33,35 +33,35 @@ const TeamSelection = ({
 
         {/* Team A */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center p-0">
+          <div className="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center p-0">
             {teamALogo ? (
-              <img src={teamALogo} alt={formData.team1Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-110" />
+              <img src={teamALogo} alt={formData.team1Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-105" />
             ) : (
-              <Shield className="w-16 h-16 text-white/50" />
+              <Shield className="w-20 h-20 text-white/50" />
             )}
           </div>
-          <span className="text-white font-bold text-sm sm:text-base tracking-wide text-center max-w-[120px] leading-tight drop-shadow-md">
+          <span className="text-white font-bold text-sm sm:text-lg tracking-wide text-center max-w-[140px] leading-tight drop-shadow-md">
             {formData.team1Name}
           </span>
         </div>
 
         {/* VS Badge */}
         <div className="flex flex-col items-center">
-          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#d19563] rounded-full flex items-center justify-center shadow-lg transform rotate-3 border-2 border-white/20">
-            <span className="text-white font-black text-sm sm:text-lg italic">VS</span>
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-[#d19563] rounded-full flex items-center justify-center shadow-lg transform rotate-3 border-2 border-white/20">
+            <span className="text-white font-black text-base sm:text-2xl italic">VS</span>
           </div>
         </div>
 
         {/* Team B */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-24 h-24 sm:w-32 sm:h-32 flex items-center justify-center p-0">
+          <div className="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center p-0">
             {teamBLogo ? (
-              <img src={teamBLogo} alt={formData.team2Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-110" />
+              <img src={teamBLogo} alt={formData.team2Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-105" />
             ) : (
-              <Shield className="w-16 h-16 text-white/50" />
+              <Shield className="w-20 h-20 text-white/50" />
             )}
           </div>
-          <span className="text-white font-bold text-sm sm:text-base tracking-wide text-center max-w-[120px] leading-tight drop-shadow-md">
+          <span className="text-white font-bold text-sm sm:text-lg tracking-wide text-center max-w-[140px] leading-tight drop-shadow-md">
             {formData.team2Name}
           </span>
         </div>
