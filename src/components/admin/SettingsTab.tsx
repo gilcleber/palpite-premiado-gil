@@ -315,7 +315,6 @@ const SettingsTab = () => {
                 <Save className="mr-2 h-4 w-4" /> Salvar Alterações do Jogo
               </>
             )}
-          </Button>
         </CardContent>
       </Card>
 
@@ -327,105 +326,108 @@ const SettingsTab = () => {
         <CardContent className="p-6 space-y-8">
 
           {/* Main Prize (from Settings) */}
-          <div className="p-4 border-2 border-[#d19563]/20 rounded-xl bg-[#d19563]/5">
+          <div className="p-4 border-2 border-[#d19563]/20 rounded-xl bg-[#d19563]/5 relative">
+            <div className="absolute top-0 right-0 bg-[#d19563] text-white text-xs px-2 py-1 rounded-bl-lg rounded-tr-lg font-bold">
+              PRINCIPAL (Salvo com Configurações)
+            </div>
             <h3 className="font-bold text-lg text-[#d19563] mb-4">🏆 Prêmio Principal (Destaque)</h3>
             <div className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Título</label>
-                <Input
-                  name="prize_title"
-                  value={settings?.prize_title || ""}
-                  onChange={handleChange}
-                  className="bg-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Descrição</label>
-                <Textarea
-                  name="prize_description"
-                  value={settings?.prize_description || ""}
-                  onChange={handleChange}
-                  rows={2}
-                  className="bg-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Imagem do Prêmio</label>
-                <ImageUpload
-                  onUploadComplete={(url) => handleImageUpdate('prize_image_url', url)}
-                  currentImageUrl={settings?.prize_image_url}
-                  onClear={() => handleImageUpdate('prize_image_url', '')}
-                />
-              </div>
-              <Button onClick={handleSave} size="sm" className="bg-[#d19563] hover:bg-[#b57b4a]">
-                Atualizar Destaque
-              </Button>
+
             </div>
+            <p className="text-xs text-gray-500 italic text-center mt-2">
+              * Para salvar alterações neste prêmio, utilize o botão "Salvar Alterações do Jogo" abaixo.
+            </p>
+          </div>
+        </div>
+
+        {/* Additional Prizes List */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="font-bold text-lg text-[#1d244a]">🎁 Prêmios Extras</h3>
           </div>
 
-          {/* Additional Prizes List */}
-          <div className="space-y-4">
-            <h3 className="font-bold text-lg text-[#1d244a]">🎁 Outros Prêmios</h3>
+          {prizes.length === 0 && (
+            <p className="text-gray-400 text-sm text-center py-4">Nenhum prêmio extra cadastrado.</p>
+          )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {prizes.map((prize) => (
-                <div key={prize.id} className="relative group border rounded-lg p-3 bg-white hover:shadow-md transition-all">
-                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button size="icon" variant="destructive" className="h-8 w-8" onClick={() => handleDeletePrize(prize.id)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="h-32 w-full bg-gray-100 rounded-md mb-2 overflow-hidden flex items-center justify-center">
-                    {prize.image_url ? (
-                      <img src={prize.image_url} alt={prize.title} className="w-full h-full object-contain" />
-                    ) : (
-                      <span className="text-gray-400 text-xs">Sem Imagem</span>
-                    )}
-                  </div>
-                  <h4 className="font-bold text-sm truncate" title={prize.title}>{prize.title}</h4>
-                  <p className="text-xs text-gray-500 line-clamp-2">{prize.description}</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {prizes.map((prize) => (
+              <div key={prize.id} className="relative group border rounded-lg p-3 bg-white hover:shadow-md transition-all">
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <Button size="icon" variant="destructive" className="h-8 w-8 shadow-sm" onClick={() => handleDeletePrize(prize.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
-              ))}
+                <div className="h-32 w-full bg-gray-100 rounded-md mb-2 overflow-hidden flex items-center justify-center">
+                  {prize.image_url ? (
+                    <img src={prize.image_url} alt={prize.title} className="w-full h-full object-contain" />
+                  ) : (
+                    <span className="text-gray-400 text-xs">Sem Imagem</span>
+                  )}
+                </div>
+                <h4 className="font-bold text-sm truncate text-[#1d244a]" title={prize.title}>{prize.title}</h4>
+                <p className="text-xs text-gray-500 line-clamp-2">{prize.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Add New Prize */}
+        <div className="p-4 border rounded-xl bg-gray-50 space-y-4">
+          <h4 className="font-semibold text-sm text-gray-600">Adicionar Novo Prêmio à Lista</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Input
+                placeholder="Título do Prêmio (ex: Camisa Oficial)"
+                value={newPrize.title}
+                onChange={(e) => setNewPrize({ ...newPrize, title: e.target.value })}
+                className="bg-white"
+              />
+              <Textarea
+                placeholder="Descrição curta"
+                value={newPrize.description}
+                onChange={(e) => setNewPrize({ ...newPrize, description: e.target.value })}
+                className="bg-white"
+              />
+            </div>
+            <div className="space-y-2">
+              <ImageUpload
+                label="Imagem do Prêmio"
+                onUploadComplete={(url) => setNewPrize({ ...newPrize, image_url: url })}
+                currentImageUrl={newPrize.image_url}
+                onClear={() => setNewPrize({ ...newPrize, image_url: null })}
+              />
             </div>
           </div>
+          <Button onClick={handleAddPrize} disabled={addingPrize} className="w-full bg-green-600 hover:bg-green-700 text-white">
+            {addingPrize ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+            Adicionar Prêmio (Salva na hora)
+          </Button>
+        </div>
 
-          {/* Add New Prize */}
-          <div className="p-4 border rounded-xl bg-gray-50 space-y-4">
-            <h4 className="font-semibold text-sm text-gray-600">Adicionar Novo Prêmio</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Input
-                  placeholder="Título do Prêmio (ex: Camisa Oficial)"
-                  value={newPrize.title}
-                  onChange={(e) => setNewPrize({ ...newPrize, title: e.target.value })}
-                  className="bg-white"
-                />
-                <Textarea
-                  placeholder="Descrição curta"
-                  value={newPrize.description}
-                  onChange={(e) => setNewPrize({ ...newPrize, description: e.target.value })}
-                  className="bg-white"
-                />
-              </div>
-              <div className="space-y-2">
-                <ImageUpload
-                  label="Imagem do Prêmio"
-                  onUploadComplete={(url) => setNewPrize({ ...newPrize, image_url: url })}
-                  currentImageUrl={newPrize.image_url}
-                  onClear={() => setNewPrize({ ...newPrize, image_url: null })}
-                />
-              </div>
-            </div>
-            <Button onClick={handleAddPrize} disabled={addingPrize} className="w-full" variant="secondary">
-              {addingPrize ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
-              Adicionar Prêmio à Lista
-            </Button>
-          </div>
+      </CardContent>
+    </Card>
 
-        </CardContent>
-      </Card>
-    </div>
-  );
+      {/* Main Save Action */ }
+  <div className="sticky bottom-4 z-50">
+    <Button
+      onClick={handleSave}
+      disabled={saving}
+      size="lg"
+      className="w-full shadow-2xl bg-[#1d244a] hover:bg-[#2a3459] text-white border-2 border-white/20 transform hover:scale-[1.01] transition-all"
+    >
+      {saving ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando Tudo...
+        </>
+      ) : (
+        <>
+          <Save className="mr-2 h-4 w-4" /> SALVAR ALTERAÇÕES DO JOGO E PRÊMIO PRINCIPAL
+        </>
+      )}
+    </Button>
+  </div>
+      );
 };
 
 export default SettingsTab;

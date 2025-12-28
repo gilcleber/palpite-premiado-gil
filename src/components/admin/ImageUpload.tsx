@@ -75,10 +75,11 @@ const ImageUpload = ({
             <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-[#1d244a]">{label}</label>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col gap-3">
+                    {/* Upload Button */}
                     <Button
                         variant="outline"
-                        className="relative w-full cursor-pointer bg-white border-dashed border-2 hover:bg-gray-50"
+                        className="relative w-full cursor-pointer bg-white border-dashed border-2 hover:bg-gray-50 h-12"
                         disabled={uploading}
                     >
                         {uploading ? (
@@ -86,7 +87,7 @@ const ImageUpload = ({
                         ) : (
                             <Upload className="h-4 w-4 mr-2" />
                         )}
-                        {uploading ? "Enviando..." : "Escolher Arquivo"}
+                        {uploading ? "Enviando..." : "Escolher Arquivo do Computador"}
                         <Input
                             type="file"
                             accept="image/*"
@@ -96,17 +97,33 @@ const ImageUpload = ({
                         />
                     </Button>
 
-                    {currentImageUrl && onClear && (
-                        <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={onClear}
-                            title="Remover imagem"
-                            className="shrink-0"
-                        >
-                            <X className="h-4 w-4 text-red-500" />
-                        </Button>
-                    )}
+                    <div className="relative flex items-center">
+                        <div className="flex-grow border-t border-gray-300"></div>
+                        <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase">Ou cole o link</span>
+                        <div className="flex-grow border-t border-gray-300"></div>
+                    </div>
+
+                    {/* Manual URL Input */}
+                    <div className="flex gap-2">
+                        <Input
+                            type="text"
+                            placeholder="https://exemplo.com/imagem.png"
+                            value={currentImageUrl || ""}
+                            onChange={(e) => onUploadComplete(e.target.value)}
+                            className="bg-white"
+                        />
+                        {currentImageUrl && onClear && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={onClear}
+                                title="Limpar"
+                                className="shrink-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -124,3 +141,4 @@ const ImageUpload = ({
 };
 
 export default ImageUpload;
+```
