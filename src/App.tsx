@@ -38,8 +38,8 @@ const App = () => (
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
-    </AdminAuthProvider>
-  </AuthProvider>
+
+    </AuthProvider>
   </QueryClientProvider >
 );
 
