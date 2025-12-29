@@ -15,32 +15,49 @@ import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter basename="/palpite-premiado-gil">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
+// MECHANISM TO FORCE CACHE CLEANUP ON UPDATE
+const APP_VERSION = '3.26-auto-clean';
 
-            {/* Admin routes with protected access */}
-            <Route element={<AdminProtectedRoute />}>
-              <Route path="/admin" element={<Admin />} />
-              <Route path="/admin/live-draw" element={<LiveDrawPage />} />
-            </Route>
+const App = () => {
+  // Check version and clear cache if mismatch
+  const storedVersion = localStorage.getItem('app_version');
+  if (storedVersion !== APP_VERSION) {
+    console.log(`Detected new version (${APP_VERSION}). Clearing cache...`);
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem('app_version', APP_VERSION);
+    // Force reload to ensure clean state
+    window.location.reload();
+    return null; // Stop rendering
+  }
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter basename="/palpite-premiado-gil">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
 
-    </AuthProvider>
-  </QueryClientProvider >
-);
+              {/* Admin routes with protected access */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route path="/admin" element={<Admin />} />
+                <Route path="/admin/live-draw" element={<LiveDrawPage />} />
+              </Route>
+
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+
+      </AuthProvider>
+    </QueryClientProvider >
+  );
+};
 
 export default App;
