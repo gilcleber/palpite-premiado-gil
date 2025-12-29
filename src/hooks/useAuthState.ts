@@ -22,8 +22,10 @@ export const useAuthState = () => {
 
     const initializeAuth = async () => {
       try {
-        // Check first access first
-        const firstAccess = await checkFirstAccess();
+        // Check first access first, OR if magic link is used
+        const dbFirstAccess = await checkFirstAccess();
+        const forceSetup = window.location.href.includes('setup=true');
+        const firstAccess = dbFirstAccess || forceSetup;
 
         // Get current session
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
