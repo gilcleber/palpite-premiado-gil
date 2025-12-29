@@ -1,9 +1,9 @@
 
 import { Navigate, Outlet } from "react-router-dom";
-import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useAuth } from "@/hooks/useAuth";
 
 const AdminProtectedRoute = () => {
-  const { isAdmin, loading, isFirstAccess, user } = useAdminAuth();
+  const { isAdmin, loading, isFirstAccess, user } = useAuth();
 
   console.log("AdminProtectedRoute - isAdmin:", isAdmin, "loading:", loading, "isFirstAccess:", isFirstAccess, "user:", !!user);
 
