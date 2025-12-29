@@ -14,6 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
+  const VERSION = "v2.5 (SaaS Fix)";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,6 +154,7 @@ const AdminLogin = () => {
               Voltar ao Site
             </Button>
           </div>
+          <p className="text-center text-xs text-gray-400 mt-4">{VERSION}</p>
         </CardContent>
       </Card>
     </div>
