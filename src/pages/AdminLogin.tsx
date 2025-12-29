@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v2.8 (Zombie Killer)";
+  const VERSION = "v2.9 (Final Rescue Link)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
