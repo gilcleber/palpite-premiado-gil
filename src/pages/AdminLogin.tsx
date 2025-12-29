@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.1 (Auto-Rescue)";
+  const VERSION = "v3.2 (Sync Fix)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,7 +38,7 @@ const AdminLogin = () => {
       );
 
       const result: any = await Promise.race([
-        signIn(email, password),
+        signIn(email, password, isSetupMode), // Pass setup mode to force creation
         timeoutPromise
       ]);
 
@@ -85,7 +85,7 @@ const AdminLogin = () => {
             Área Administrativa
           </CardTitle>
           <CardDescription className="text-blue-100 text-center">
-            {isFirstAccess
+            {isFirstAccess || isSetupMode
               ? "Primeiro acesso - configure suas credenciais de admin"
               : "Acesso restrito - Faça login para continuar"}
           </CardDescription>
@@ -157,7 +157,7 @@ const AdminLogin = () => {
               {isLoading ? "Processando..." : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
-                  {isFirstAccess ? "Criar Admin e Entrar" : "Acessar Painel"}
+                  {isFirstAccess || isSetupMode ? "Criar Admin e Entrar" : "Acessar Painel"}
                 </>
               )}
             </Button>

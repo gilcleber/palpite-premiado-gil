@@ -9,11 +9,12 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { authState, updateIsFirstAccess, updateIsAdmin } = useAuthState();
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, forceSetup: boolean = false) => {
     try {
-      const result = await signInUser(email, password, authState.isFirstAccess);
+      const isCreation = authState.isFirstAccess || forceSetup;
+      const result = await signInUser(email, password, isCreation);
 
-      if (authState.isFirstAccess) {
+      if (isCreation) {
         updateIsFirstAccess(false);
       }
 
