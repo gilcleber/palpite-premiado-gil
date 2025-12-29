@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.18 (Timeout+Cache)";
+  const VERSION = "v3.19 (Auto-Clean URL)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,8 +51,10 @@ const AdminLogin = () => {
         description: "Bem-vindo ao painel administrativo",
       });
 
-      // Navegar imediatamente
+      // Navegar imediatamente para o painel limpo (sem query params)
       navigate("/admin", { replace: true });
+      // Forçar limpeza da URL history caso o navigate não seja suficiente
+      window.history.replaceState({}, document.title, "/palpite-premiado-gil/admin");
 
     } catch (error: any) {
       console.error("Login error:", error);
