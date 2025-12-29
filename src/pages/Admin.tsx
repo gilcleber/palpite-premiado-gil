@@ -53,7 +53,14 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <AdminHeader /> {/* AdminHeader is now without props */}
+      <AdminHeader
+        activeTab="settings"
+        setActiveTab={() => { }}
+        onLogout={async () => {
+          // Basic logout mock since useAuth.signOut is void
+          window.location.href = '/';
+        }}
+      />
       <main className="container mx-auto py-8 px-4 animate-fade-in">
         <Tabs defaultValue={role === 'super_admin' ? "licenses" : "participants"} className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-4 h-auto p-1 bg-white border shadow-sm rounded-xl"> {/* Adjusted grid-cols */}
