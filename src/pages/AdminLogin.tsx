@@ -200,7 +200,8 @@ const AdminLogin = () => {
             )}
           </div>
         </CardContent>
-        <DebugNetwork />
+      </Card>
+      <DebugNetwork />
     </div>
   );
 };
