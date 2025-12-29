@@ -15,7 +15,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.24 (Final Fix)";
+  const VERSION = "v3.25 (Build Fixed)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
