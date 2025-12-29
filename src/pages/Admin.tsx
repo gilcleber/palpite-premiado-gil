@@ -62,13 +62,9 @@ const Admin = () => {
         }}
       />
       <main className="container mx-auto py-8 px-4 animate-fade-in">
-        <Tabs defaultValue={role === 'super_admin' ? "licenses" : "participants"} className="space-y-6">
+        <Tabs defaultValue="participants" className="space-y-6">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-4 h-auto p-1 bg-white border shadow-sm rounded-xl"> {/* Adjusted grid-cols */}
-            {role === 'super_admin' && (
-              <TabsTrigger value="licenses" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
-                🔑 Licenças (SaaS)
-              </TabsTrigger>
-            )}
+
             <TabsTrigger value="participants" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               👥 Participantes
             </TabsTrigger>
@@ -80,11 +76,7 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
-          {role === 'super_admin' && (
-            <TabsContent value="licenses" className="outline-none">
-              <LicenseManager />
-            </TabsContent>
-          )}
+
 
           <TabsContent value="participants" className="outline-none">
             <ParticipantsList />

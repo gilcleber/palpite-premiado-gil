@@ -38,7 +38,21 @@ export const useAuthState = () => {
 
         let adminResult = { isAdmin: false, role: null as any, tenantId: null as any, licenseExpired: false };
         if (currentSession?.user) {
-          adminResult = await checkAdminStatus(currentSession.user.id);
+          // SIMPLE MODE: Only check if user exists in admin_users
+          const { data: adminUser, error: adminError } = await supabase
+            .from('admin_users')
+            .select('id, email')
+            .eq('id', currentSession.user.id)
+            .maybeSingle();
+
+          if (adminUser && !adminError) {
+            adminResult = {
+              isAdmin: true,
+              role: 'super_admin', // Forced for classic mode
+              tenantId: adminUser.id, // Self-tenant
+              licenseExpired: false // Never expires in classic mode
+            };
+          }
         }
 
         setAuthState({
@@ -70,16 +84,29 @@ export const useAuthState = () => {
 
         if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           if (newSession?.user) {
-            // Just update session immediately, then checking admin status
             setAuthState(prev => ({
               ...prev,
               session: newSession,
               user: newSession.user,
-              // Keep previous admin info until verified to avoid flashing
             }));
 
             if (mounted) {
-              const adminResult = await checkAdminStatus(newSession.user.id);
+              // SIMPLE MODE REPEAT
+              const { data: adminUser } = await supabase
+                .from('admin_users')
+                .select('id')
+                .eq('id', newSession.user.id)
+                .maybeSingle();
+
+              if (adminUser) {
+                adminResult = {
+                  isAdmin: true,
+                  role: 'super_admin',
+                  tenantId: adminUser.id,
+                  licenseExpired: false
+                };
+              }
+
               setAuthState(prev => ({
                 ...prev,
                 isAdmin: adminResult.isAdmin,
