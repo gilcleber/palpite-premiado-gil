@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
@@ -13,10 +14,37 @@ const AdminLogin = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, isFirstAccess } = useAuth();
+  const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
   const navigate = useNavigate();
-  const VERSION = "v3.29 (System Restored)";
+  const VERSION = "v3.30 (Auto-Restore)";
   const isSetupMode = window.location.href.includes('setup=true');
+
+  // AUTO-RESTORE LOGIC (Priority Fix)
+  // If user is logged in but not admin, it means data is missing.
+  // We force-insert the user into admin_users to fix the "Zombie" state.
+  useEffect(() => {
+    const restoreAdmin = async () => {
+      if (user && !isAdmin) {
+        console.log("⚠️ Zombie Admin detected. Attempting auto-restoration...");
+        const { error } = await supabase.from('admin_users').insert({
+          id: user.id,
+          email: user.email
+        });
+
+        if (!error) {
+          toast({ title: "Acesso Restaurado!", description: "Recarregando..." });
+          setTimeout(() => window.location.reload(), 1000);
+        } else {
+          console.error("Auto-restore failed:", error);
+        }
+      }
+    };
+
+    // Only run if not loading
+    if (!isLoading) {
+      restoreAdmin();
+    }
+  }, [user, isAdmin, isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
