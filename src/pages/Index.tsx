@@ -74,20 +74,17 @@ const Index = () => {
             </p>
 
             <div className="flex justify-center gap-4">
-              {isAdmin && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  asChild
-                  className="glass-card border-white/30 text-white hover:bg-white/25 transition-all duration-300 touch-optimized button-modern backdrop-blur-sm"
-                >
-                  <Link to="/admin">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Administrar
-                  </Link>
-                </Button>
-              )}
-
+              <Button
+                variant="outline"
+                size="sm"
+                asChild
+                className="glass-card border-white/30 text-white hover:bg-white/25 transition-all duration-300 touch-optimized button-modern backdrop-blur-sm"
+              >
+                <Link to="/admin/login">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Área Administrativa
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
