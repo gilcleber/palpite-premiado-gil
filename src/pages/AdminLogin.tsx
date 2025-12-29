@@ -16,15 +16,23 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
   const navigate = useNavigate();
-  const VERSION = "v3.30 (Auto-Restore)";
+  const VERSION = "v3.31 (Redirect Fixes)";
   const isSetupMode = window.location.href.includes('setup=true');
+
+  // CHECK: If already admin, go straight to dashboard
+  useEffect(() => {
+    if (user && isAdmin && !isLoading) {
+      console.log("Already admin, redirecting...");
+      navigate("/admin", { replace: true });
+    }
+  }, [user, isAdmin, isLoading, navigate]);
 
   // AUTO-RESTORE LOGIC (Priority Fix)
   // If user is logged in but not admin, it means data is missing.
   // We force-insert the user into admin_users to fix the "Zombie" state.
   useEffect(() => {
     const restoreAdmin = async () => {
-      if (user && !isAdmin) {
+      if (user && !isAdmin && !isLoading) {
         console.log("⚠️ Zombie Admin detected. Attempting auto-restoration...");
         const { error } = await supabase.from('admin_users').insert({
           id: user.id,
@@ -36,15 +44,13 @@ const AdminLogin = () => {
           setTimeout(() => window.location.reload(), 1000);
         } else {
           console.error("Auto-restore failed:", error);
+          // If restore fails multiple times, maybe force logout?
         }
       }
     };
 
-    // Only run if not loading
-    if (!isLoading) {
-      restoreAdmin();
-    }
-  }, [user, isAdmin, isLoading]);
+    restoreAdmin();
+  }, [user, isAdmin, isLoading, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
