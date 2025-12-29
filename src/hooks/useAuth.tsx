@@ -11,9 +11,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string, forceSetup: boolean = false) => {
     try {
-      // BYPASS: Always succeed
-      console.log("🔓 SignIn Fake (Bypass)");
-      return { data: { user: authState.user, session: authState.session }, error: null };
+      const isCreation = authState.isFirstAccess || forceSetup;
+      const result = await signInUser(email, password, isCreation);
+
+      if (isCreation) {
+        updateIsFirstAccess(false);
+      }
+
+      return result;
     } catch (error: any) {
       console.error("Complete sign in error:", error);
       return { error };
