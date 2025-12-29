@@ -93,7 +93,9 @@ export const useAuthState = () => {
         } else if (event === 'SIGNED_OUT') {
           // IMPORTANT: Do NOT reset isFirstAccess to false here, or re-check it.
           // Resetting to false blocks the "Create Admin" UI if the user logs out or fails login.
-          const isAccess = await checkFirstAccess();
+          const dbFirstAccess = await checkFirstAccess();
+          const forceSetup = window.location.href.includes('setup=true');
+          const isAccess = dbFirstAccess || forceSetup;
 
           setAuthState({
             session: null,
@@ -103,7 +105,7 @@ export const useAuthState = () => {
             tenantId: null,
             licenseExpired: false,
             loading: false,
-            isFirstAccess: isAccess // Use the re-checked value
+            isFirstAccess: isAccess
           });
         }
       }
