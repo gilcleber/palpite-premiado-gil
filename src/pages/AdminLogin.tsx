@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, LogIn, Shield } from "lucide-react";
+import DebugNetwork from "@/components/DebugNetwork";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
@@ -14,7 +15,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.21 (Admin Button Back)";
+  const VERSION = "v3.22 (Connection Debug)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,9 +200,10 @@ const AdminLogin = () => {
             )}
           </div>
         </CardContent>
-      </Card>
+        <DebugNetwork />
     </div>
   );
 };
+
 
 export default AdminLogin;
