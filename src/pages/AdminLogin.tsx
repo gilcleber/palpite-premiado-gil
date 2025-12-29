@@ -16,7 +16,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
   const navigate = useNavigate();
-  const VERSION = "v3.31 (Redirect Fixes)";
+  const VERSION = "v3.32 (Clean UI Update)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   // CHECK: If already admin, go straight to dashboard
@@ -67,6 +67,9 @@ const AdminLogin = () => {
     try {
       setIsLoading(true);
 
+      // AUTO-CLEANUP: Force sign out to ensure clean handshake (Fix "First Try" issue)
+      await supabase.auth.signOut();
+
       // Race condition to prevent hanging
       const timeoutPromise = new Promise((_, reject) =>
         setTimeout(() => reject(new Error("Timeout")), 15000)
@@ -76,7 +79,7 @@ const AdminLogin = () => {
         signIn(email, password, isSetupMode), // Pass setup mode to force creation
         timeoutPromise
       ]);
-
+      // ... existing code ...
       if (result.error) {
         throw new Error(result.error.message);
       }
@@ -92,6 +95,7 @@ const AdminLogin = () => {
       window.history.replaceState({}, document.title, "/palpite-premiado-gil/admin");
 
     } catch (error: any) {
+      // ... existing catch block ...
       console.error("Login error:", error);
       let errorMessage = "Ocorreu um erro durante o login";
 
@@ -125,18 +129,10 @@ const AdminLogin = () => {
             Área Administrativa
           </CardTitle>
           <CardDescription className="text-blue-100 text-center">
-            {isFirstAccess || isSetupMode
-              ? "Primeiro acesso - configure suas credenciais de admin"
-              : "Acesso restrito - Faça login para continuar"}
+            Acesso restrito - Faça login para continuar
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 bg-white">
-          {isSetupMode && (
-            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
-              <p className="font-bold">Modo de Resgate Ativado</p>
-              <p>Criação de admin forçada.</p>
-            </div>
-          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-[#1d244a]">
@@ -178,40 +174,15 @@ const AdminLogin = () => {
               </div>
             </div>
 
-            {/* v3.1 Auto-Rescue Feature */}
-            <div className="text-center space-y-2">
-              <button
-                type="button"
-                onClick={() => window.location.href = window.location.href.split('?')[0] + '?setup=true'}
-                className="text-xs text-orange-500 hover:text-orange-700 underline block w-full"
-              >
-                Problemas de acesso? Forçar Criação de Admin
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirm('Isso vai limpar os dados salvos no navegador. Continuar?')) {
-                    localStorage.clear();
-                    sessionStorage.clear();
-                    window.location.reload();
-                  }
-                }}
-                className="text-xs text-blue-500 hover:text-blue-700 underline block w-full"
-              >
-                Limpar Cache / Resetar App
-              </button>
-            </div>
-
             <Button
               type="submit"
               className="w-full bg-[#1d244a] hover:bg-[#2a3459] text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Processando..." : (
+              {isLoading ? "Autenticando..." : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
-                  {isFirstAccess || isSetupMode ? "Criar Admin e Entrar" : "Acessar Painel"}
+                  Acessar Painel
                 </>
               )}
             </Button>
@@ -226,16 +197,15 @@ const AdminLogin = () => {
               Voltar ao Site
             </Button>
           </div>
-          <div className="mt-4 text-center text-[10px] text-gray-300">
+
+          {/* Subtle Version/Debug Info (Hidden unless needed) */}
+          <div className="mt-4 text-center text-[10px] text-gray-300 opacity-50 hover:opacity-100 transition-opacity">
             <p>{VERSION}</p>
-            <p>Setup: {isSetupMode ? 'ON' : 'OFF'} | FirstAccess: {isFirstAccess ? 'YES' : 'NO'}</p>
-            {!isFirstAccess && !isSetupMode && (
-              <p className="text-yellow-500 mt-1">Se você limpou o banco e vê isso, recarregue (F5)</p>
-            )}
           </div>
         </CardContent>
       </Card>
-      <DebugNetwork />
+      {/* Hidden Debug Network unless strictly needed */}
+      {/* <DebugNetwork /> */}
     </div>
   );
 };
