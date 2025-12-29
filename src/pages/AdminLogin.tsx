@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.11 (Real Auth Restored)";
+  const VERSION = "v3.12 (Debug UI)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -175,7 +175,13 @@ const AdminLogin = () => {
               Voltar ao Site
             </Button>
           </div>
-          <p className="text-center text-xs text-gray-400 mt-4">{VERSION}</p>
+          <div className="mt-4 text-center text-[10px] text-gray-300">
+            <p>{VERSION}</p>
+            <p>Setup: {isSetupMode ? 'ON' : 'OFF'} | FirstAccess: {isFirstAccess ? 'YES' : 'NO'}</p>
+            {!isFirstAccess && !isSetupMode && (
+              <p className="text-yellow-500 mt-1">Se você limpou o banco e vê isso, recarregue (F5)</p>
+            )}
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -183,3 +189,4 @@ const AdminLogin = () => {
 };
 
 export default AdminLogin;
+```
