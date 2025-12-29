@@ -16,7 +16,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
   const navigate = useNavigate();
-  const VERSION = "v3.32 (Clean UI Update)";
+  const VERSION = "v3.33 (Nuclear Login)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   // CHECK: If already admin, go straight to dashboard
@@ -67,7 +67,20 @@ const AdminLogin = () => {
     try {
       setIsLoading(true);
 
-      // AUTO-CLEANUP: Force sign out to ensure clean handshake (Fix "First Try" issue)
+      // NUCLEAR OPTION: The user says it only works if they click "Clear Cache".
+      // So we will DO EXACTLY THAT automatically.
+
+      // 1. Preserve critical flags if needed (none really, we want fresh)
+      // 2. Wipe everything
+      console.log("🧹 Executing Nuclear Cleanup...");
+      localStorage.clear();
+      sessionStorage.clear();
+
+      // 3. Restore App Version to prevent reload-loop on next F5
+      // (We hardcode the string or just let App handle it once)
+      localStorage.setItem('app_version', '3.26-auto-clean'); // Keep compatible with App.tsx
+
+      // 4. Force Supabase out (just in case)
       await supabase.auth.signOut();
 
       // Race condition to prevent hanging
