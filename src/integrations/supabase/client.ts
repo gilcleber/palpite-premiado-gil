@@ -8,4 +8,24 @@ const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Custom fetch with timeout (Priority 4 Fix)
+const fetchWithTimeout = (url: RequestInfo | URL, init?: RequestInit) => {
+    return Promise.race([
+        fetch(url, init),
+        new Promise<Response>((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout na conexão com Supabase')), 15000) // 15s timeout
+        )
+    ]);
+};
+
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+        storage: localStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+    },
+    global: {
+        fetch: fetchWithTimeout,
+    },
+});
