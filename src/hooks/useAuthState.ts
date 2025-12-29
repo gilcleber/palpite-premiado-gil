@@ -22,35 +22,43 @@ export const useAuthState = () => {
 
     const initializeAuth = async () => {
       try {
-        // Check first access first, OR if magic link is used
-        const dbFirstAccess = await checkFirstAccess();
-        const forceSetup = window.location.href.includes('setup=true');
-        const firstAccess = dbFirstAccess || forceSetup;
+        console.log("🔒 Autenticação ignorada (Bypass Ativo)");
 
-        // Get current session
-        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error("Error getting session:", error);
-        }
-
-        if (!mounted) return;
-
-        let adminResult = { isAdmin: false, role: null as any, tenantId: null as any, licenseExpired: false };
-        if (currentSession?.user) {
-          adminResult = await checkAdminStatus(currentSession.user.id);
-        }
+        // MOCK SUPER ADMIN SESSION
+        const mockSession = {
+          access_token: "mock_token",
+          token_type: "bearer",
+          expires_in: 3600,
+          refresh_token: "mock_refresh",
+          user: {
+            id: "bypass-admin-id",
+            aud: "authenticated",
+            role: "authenticated",
+            email: "admin@bypass.com",
+            email_confirmed_at: new Date().toISOString(),
+            phone: "",
+            confirmation_sent_at: "",
+            confirmed_at: new Date().toISOString(),
+            last_sign_in_at: new Date().toISOString(),
+            app_metadata: { provider: "email", providers: ["email"] },
+            user_metadata: {},
+            identities: [],
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }
+        };
 
         setAuthState({
-          session: currentSession,
-          user: currentSession?.user ?? null,
-          isAdmin: adminResult.isAdmin,
-          role: adminResult.role,
-          tenantId: adminResult.tenantId,
-          licenseExpired: adminResult.licenseExpired,
+          session: mockSession as any,
+          user: mockSession.user as any,
+          isAdmin: true, // FORCE ADMIN
+          role: 'super_admin', // FORCE SUPER ADMIN
+          tenantId: 'bypass-tenant-id',
+          licenseExpired: false,
           loading: false,
-          isFirstAccess: firstAccess,
+          isFirstAccess: false,
         });
+
       } catch (error) {
         console.error("Error in initializeAuth:", error);
         if (mounted) {
