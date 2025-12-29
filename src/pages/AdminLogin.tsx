@@ -14,7 +14,8 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v2.7 (Magic Link Setup)";
+  const VERSION = "v2.8 (Zombie Killer)";
+  const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,6 +91,12 @@ const AdminLogin = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 bg-white">
+          {isSetupMode && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4" role="alert">
+              <p className="font-bold">Modo de Resgate Ativado</p>
+              <p>Criação de admin forçada.</p>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-[#1d244a]">
