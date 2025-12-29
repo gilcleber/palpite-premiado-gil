@@ -30,7 +30,15 @@ const AdminLogin = () => {
     try {
       setIsLoading(true);
 
-      const result = await signIn(email, password);
+      // Race condition to prevent hanging
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), 10000)
+      );
+
+      const result: any = await Promise.race([
+        signIn(email, password),
+        timeoutPromise
+      ]);
 
       if (result.error) {
         throw new Error(result.error.message);

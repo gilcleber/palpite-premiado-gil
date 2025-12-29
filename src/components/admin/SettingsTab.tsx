@@ -197,169 +197,136 @@ const SettingsTab = () => {
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        {/* Radio Identity Section */}
-        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl h-fit">
-          <CardHeader className="bg-[#1d244a] text-white rounded-t-lg">
-            <CardTitle className="text-white">Identidade da Rádio (SaaS)</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 p-6">
-            <div>
-              <label className="text-sm font-medium">Logo da Rádio</label>
-              <div className="mt-2">
+      {/* Game Settings at Top */}
+      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl h-fit">
+        <CardHeader className="bg-[#1d244a] text-white rounded-t-lg">
+          <CardTitle className="text-white">Configurações da Partida</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+
+          {/* Teams Configuration */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+              <h4 className="font-semibold text-[#1d244a]">Time A (Mandante)</h4>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nome do Time</label>
+                <Input
+                  name="team_a"
+                  value={settings?.team_a || ""}
+                  onChange={handleChange}
+                  placeholder="Ex: Ponte Preta"
+                  className="bg-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Logo do Time</label>
                 <ImageUpload
-                  currentImageUrl={settings?.radio_logo_url}
-                  onUploadComplete={(url) => handleImageUpdate('radio_logo_url', url)}
-                  bucketName="images"
-                  label="Logo da Rádio"
-                  onClear={() => handleImageUpdate('radio_logo_url', '')}
+                  onUploadComplete={(url) => handleImageUpdate('team_a_logo_url', url)}
+                  currentImageUrl={settings?.team_a_logo_url}
+                  onClear={() => handleImageUpdate('team_a_logo_url', '')}
                 />
               </div>
             </div>
-            <div>
-              <label className="text-sm font-medium" htmlFor="slogan">Slogan da Rádio</label>
+
+            <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+              <h4 className="font-semibold text-[#1d244a]">Time B (Visitante)</h4>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Nome do Time</label>
+                <Input
+                  name="team_b"
+                  value={settings?.team_b || ""}
+                  onChange={handleChange}
+                  placeholder="Ex: Guarani"
+                  className="bg-white"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Logo do Time</label>
+                <ImageUpload
+                  onUploadComplete={(url) => handleImageUpdate('team_b_logo_url', url)}
+                  currentImageUrl={settings?.team_b_logo_url}
+                  onClear={() => handleImageUpdate('team_b_logo_url', '')}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+            <div className="space-y-2">
+              <label htmlFor="draw_date_day" className="text-sm font-medium text-[#1d244a]">
+                Data do Sorteio
+              </label>
               <Input
-                id="slogan"
-                name="radio_slogan"
-                value={settings?.radio_slogan || ""}
-                onChange={handleChange}
-                placeholder="Ex: A rádio que fala com você!"
-                className="bg-white mt-1"
+                id="draw_date_day"
+                type="date"
+                value={settings?.draw_date ? new Date(settings.draw_date).toLocaleDateString('pt-BR').split('/').reverse().join('-') : ""}
+                onChange={(e) => {
+                  if (!settings) return;
+                  const dateVal = e.target.value;
+                  if (!dateVal) {
+                    setSettings({ ...settings, draw_date: null });
+                    return;
+                  }
+                  const currentDt = settings.draw_date ? new Date(settings.draw_date) : new Date();
+                  const timeVal = settings.draw_date
+                    ? `${String(currentDt.getHours()).padStart(2, '0')}:${String(currentDt.getMinutes()).padStart(2, '0')}`
+                    : "19:00";
+                  const newLocalIso = `${dateVal}T${timeVal}`;
+                  setSettings({ ...settings, draw_date: new Date(newLocalIso).toISOString() });
+                }}
+                className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
               />
             </div>
-          </CardContent>
-        </Card>
 
-        <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl h-fit">
-          <CardHeader className="bg-[#1d244a] text-white rounded-t-lg">
-            <CardTitle className="text-white">Configurações da Partida</CardTitle>
-          </CardHeader>
-          <CardContent className="p-6 space-y-6">
-
-            {/* Teams Configuration */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-semibold text-[#1d244a]">Time A (Mandante)</h4>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome do Time</label>
-                  <Input
-                    name="team_a"
-                    value={settings?.team_a || ""}
-                    onChange={handleChange}
-                    placeholder="Ex: Ponte Preta"
-                    className="bg-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Logo do Time</label>
-                  <ImageUpload
-                    onUploadComplete={(url) => handleImageUpdate('team_a_logo_url', url)}
-                    currentImageUrl={settings?.team_a_logo_url}
-                    onClear={() => handleImageUpdate('team_a_logo_url', '')}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                <h4 className="font-semibold text-[#1d244a]">Time B (Visitante)</h4>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome do Time</label>
-                  <Input
-                    name="team_b"
-                    value={settings?.team_b || ""}
-                    onChange={handleChange}
-                    placeholder="Ex: Guarani"
-                    className="bg-white"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Logo do Time</label>
-                  <ImageUpload
-                    onUploadComplete={(url) => handleImageUpdate('team_b_logo_url', url)}
-                    currentImageUrl={settings?.team_b_logo_url}
-                    onClear={() => handleImageUpdate('team_b_logo_url', '')}
-                  />
-                </div>
-              </div>
+            <div className="space-y-2">
+              <label htmlFor="draw_date_time" className="text-sm font-medium text-[#1d244a]">
+                Horário
+              </label>
+              <Input
+                id="draw_date_time"
+                type="time"
+                value={settings?.draw_date ? (() => {
+                  const d = new Date(settings.draw_date);
+                  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                })() : ""}
+                onChange={(e) => {
+                  if (!settings) return;
+                  const timeVal = e.target.value;
+                  if (!timeVal) return;
+                  const datePart = settings.draw_date
+                    ? new Date(settings.draw_date).toLocaleDateString('pt-BR').split('/').reverse().join('-')
+                    : new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-');
+                  const newLocalIso = `${datePart}T${timeVal}`;
+                  setSettings({ ...settings, draw_date: new Date(newLocalIso).toISOString() });
+                }}
+                className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
+              />
             </div>
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
-              <div className="space-y-2">
-                <label htmlFor="draw_date_day" className="text-sm font-medium text-[#1d244a]">
-                  Data do Sorteio
-                </label>
-                <Input
-                  id="draw_date_day"
-                  type="date"
-                  value={settings?.draw_date ? new Date(settings.draw_date).toLocaleDateString('pt-BR').split('/').reverse().join('-') : ""}
-                  onChange={(e) => {
-                    if (!settings) return;
-                    const dateVal = e.target.value;
-                    if (!dateVal) {
-                      setSettings({ ...settings, draw_date: null });
-                      return;
-                    }
-                    const currentDt = settings.draw_date ? new Date(settings.draw_date) : new Date();
-                    const timeVal = settings.draw_date
-                      ? `${String(currentDt.getHours()).padStart(2, '0')}:${String(currentDt.getMinutes()).padStart(2, '0')}`
-                      : "19:00";
-                    const newLocalIso = `${dateVal}T${timeVal}`;
-                    setSettings({ ...settings, draw_date: new Date(newLocalIso).toISOString() });
-                  }}
-                  className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-                />
-              </div>
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full mt-6 bg-[#1d244a] hover:bg-[#2a3459] text-white border-0"
+          >
+            {saving ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" /> Salvar Alterações do Jogo
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
 
-              <div className="space-y-2">
-                <label htmlFor="draw_date_time" className="text-sm font-medium text-[#1d244a]">
-                  Horário
-                </label>
-                <Input
-                  id="draw_date_time"
-                  type="time"
-                  value={settings?.draw_date ? (() => {
-                    const d = new Date(settings.draw_date);
-                    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-                  })() : ""}
-                  onChange={(e) => {
-                    if (!settings) return;
-                    const timeVal = e.target.value;
-                    if (!timeVal) return;
-                    const datePart = settings.draw_date
-                      ? new Date(settings.draw_date).toLocaleDateString('pt-BR').split('/').reverse().join('-')
-                      : new Date().toLocaleDateString('pt-BR').split('/').reverse().join('-');
-                    const newLocalIso = `${datePart}T${timeVal}`;
-                    setSettings({ ...settings, draw_date: new Date(newLocalIso).toISOString() });
-                  }}
-                  className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-                />
-              </div>
-            </div>
-
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full mt-6 bg-[#1d244a] hover:bg-[#2a3459] text-white border-0"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Salvando...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" /> Salvar Alterações do Jogo
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      </div> {/* End of Grid */}
-
-      {/* PRIZES MANAGEMENT CARD */}
+      {/* PRIZES MANAGEMENT CARD (Middle) */}
       <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader className="bg-[#d19563] text-white rounded-t-lg">
           <CardTitle className="text-white">Gerenciar Prêmios</CardTitle>
@@ -401,9 +368,6 @@ const SettingsTab = () => {
                 />
               </div>
             </div>
-            <p className="text-xs text-gray-500 italic text-center mt-2">
-              * Para salvar alterações neste prêmio, utilize o botão "Salvar Alterações do Jogo" abaixo.
-            </p>
           </div>
 
           {/* Additional Prizes List */}
@@ -471,6 +435,44 @@ const SettingsTab = () => {
             </Button>
           </div>
 
+        </CardContent>
+      </Card>
+
+      {/* Radio Identity Section (Bottom) */}
+      <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl h-fit">
+        <CardHeader className="bg-[#1d244a] text-white rounded-t-lg">
+          <CardTitle className="text-white">Identidade da Rádio (SaaS)</CardTitle>
+          <p className="text-xs text-white/70">Configure aqui o logo e slogan que aparecem no rodapé e marca d'água.</p>
+        </CardHeader>
+        <CardContent className="space-y-4 p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="text-sm font-medium">Logo da Rádio</label>
+              <div className="mt-2">
+                <ImageUpload
+                  currentImageUrl={settings?.radio_logo_url}
+                  onUploadComplete={(url) => handleImageUpdate('radio_logo_url', url)}
+                  bucketName="images"
+                  label="Logo da Rádio"
+                  onClear={() => handleImageUpdate('radio_logo_url', '')}
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium" htmlFor="slogan">Slogan da Rádio</label>
+              <Input
+                id="slogan"
+                name="radio_slogan"
+                value={settings?.radio_slogan || ""}
+                onChange={handleChange}
+                placeholder="Ex: A rádio que fala com você!"
+                className="bg-white mt-1 mb-4"
+              />
+              <p className="text-xs text-gray-500">
+                O slogan aparece no rodapé e abaixo da marca d'água na página inicial.
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
