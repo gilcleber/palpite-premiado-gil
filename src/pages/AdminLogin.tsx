@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.0 (Rescue Fixed)";
+  const VERSION = "v3.1 (Auto-Rescue)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -136,6 +136,17 @@ const AdminLogin = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+            </div>
+
+            {/* v3.1 Auto-Rescue Feature */}
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => window.location.href = window.location.href.split('?')[0] + '?setup=true'}
+                className="text-xs text-orange-500 hover:text-orange-700 underline"
+              >
+                Problemas de acesso? Forçar Criação de Admin
+              </button>
             </div>
 
             <Button
