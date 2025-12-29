@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v3.17 (Lint Clean)";
+  const VERSION = "v3.18 (Timeout+Cache)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +34,7 @@ const AdminLogin = () => {
 
       // Race condition to prevent hanging
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 10000)
+        setTimeout(() => reject(new Error("Timeout")), 15000)
       );
 
       const result: any = await Promise.race([
@@ -142,13 +142,27 @@ const AdminLogin = () => {
             </div>
 
             {/* v3.1 Auto-Rescue Feature */}
-            <div className="text-center">
+            <div className="text-center space-y-2">
               <button
                 type="button"
                 onClick={() => window.location.href = window.location.href.split('?')[0] + '?setup=true'}
-                className="text-xs text-orange-500 hover:text-orange-700 underline"
+                className="text-xs text-orange-500 hover:text-orange-700 underline block w-full"
               >
                 Problemas de acesso? Forçar Criação de Admin
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm('Isso vai limpar os dados salvos no navegador. Continuar?')) {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                    window.location.reload();
+                  }
+                }}
+                className="text-xs text-blue-500 hover:text-blue-700 underline block w-full"
+              >
+                Limpar Cache / Resetar App
               </button>
             </div>
 
