@@ -38,20 +38,30 @@ export const useAuthState = () => {
 
         let adminResult = { isAdmin: false, role: null as any, tenantId: null as any, licenseExpired: false };
         if (currentSession?.user) {
-          // SIMPLE MODE: Only check if user exists in admin_users
-          const { data: adminUser, error: adminError } = await supabase
-            .from('admin_users')
-            .select('id, email')
-            .eq('id', currentSession.user.id)
-            .maybeSingle();
-
-          if (adminUser && !adminError) {
+          // EMERGENCY BYPASS
+          if (currentSession.user.email === 'gilcleberlocutor@gmail.com') {
             adminResult = {
               isAdmin: true,
-              role: 'super_admin', // Forced for classic mode
-              tenantId: adminUser.id, // Self-tenant
-              licenseExpired: false // Never expires in classic mode
+              role: 'super_admin',
+              tenantId: currentSession.user.id,
+              licenseExpired: false
             };
+          } else {
+            // SIMPLE MODE: Only check if user exists in admin_users
+            const { data: adminUser, error: adminError } = await supabase
+              .from('admin_users')
+              .select('id, email')
+              .eq('id', currentSession.user.id)
+              .maybeSingle();
+
+            if (adminUser && !adminError) {
+              adminResult = {
+                isAdmin: true,
+                role: 'super_admin', // Forced for classic mode
+                tenantId: adminUser.id, // Self-tenant
+                licenseExpired: false // Never expires in classic mode
+              };
+            }
           }
         }
 
@@ -91,20 +101,34 @@ export const useAuthState = () => {
             }));
 
             if (mounted) {
-              // SIMPLE MODE REPEAT
-              const { data: adminUser } = await supabase
-                .from('admin_users')
-                .select('id')
-                .eq('id', newSession.user.id)
-                .maybeSingle();
+              // EMERGENCY HARDCODED BYPASS (v3.34)
+              // If it's the master email, grant access immediately without relying on DB
+              const isMasterUser = newSession.user.email === 'gilcleberlocutor@gmail.com';
 
-              if (adminUser) {
+              if (isMasterUser) {
+                console.log("🔓 Hardcoded Master Access Granted");
                 adminResult = {
                   isAdmin: true,
                   role: 'super_admin',
-                  tenantId: adminUser.id,
+                  tenantId: newSession.user.id,
                   licenseExpired: false
                 };
+              } else {
+                // Normal DB Check for others
+                const { data: adminUser } = await supabase
+                  .from('admin_users')
+                  .select('id')
+                  .eq('id', newSession.user.id)
+                  .maybeSingle();
+
+                if (adminUser) {
+                  adminResult = {
+                    isAdmin: true,
+                    role: 'super_admin',
+                    tenantId: adminUser.id,
+                    licenseExpired: false
+                  };
+                }
               }
 
               setAuthState(prev => ({
