@@ -14,7 +14,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v2.5 (SaaS Fix)";
+  const VERSION = "v2.6 (Auth Race Fix)";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
