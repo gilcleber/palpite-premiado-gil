@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-// import { useAuth } from "@/hooks/useAuth"; // DETACHED FOR STABILITY
+import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,15 +12,26 @@ const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [statusText, setStatusText] = useState("Carregando...");
   const [showPassword, setShowPassword] = useState(false);
-  // const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // DETACHED
+
+  // RECONNECTED Global Auth State
+  const { signIn, user, isAdmin } = useAuth();
   const navigate = useNavigate();
-  const VERSION = "v4.5 (Isolation Mode)";
+  const VERSION = "v5.0 (Final Integration)";
+  const isSetupMode = window.location.href.includes('setup=true');
+
+  // CHECK: If already admin, go straight to dashboard
+  useEffect(() => {
+    if (user && isAdmin && !isLoading) {
+      console.log("Already admin, redirecting...", { user: user.email, isAdmin });
+      navigate("/admin", { replace: true });
+    }
+  }, [user, isAdmin, isLoading, navigate]);
 
   // Quick Health Check on Mount
   useEffect(() => {
-    console.log("🏥 AdminLogin v4.5 Mounted");
-    // Optional: Wake up DB
+    console.log(`🏥 AdminLogin ${VERSION} Mounted`);
     supabase.from('app_settings').select('count', { count: 'exact', head: true })
       .then(() => console.log("✅ DB Ping OK"))
       .catch(err => console.warn("⚠️ DB Ping Fail:", err));
@@ -34,36 +45,37 @@ const AdminLogin = () => {
       setIsLoading(true);
 
       // 1. Connectivity Test
-      console.log("📡 Testing Connection...");
+      setStatusText("Testando conexão...");
       const pingStart = Date.now();
-      // REMOVED .timeout(5000) as it is not supported in this client version
       const { error: pingError } = await supabase.from('admin_users').select('count', { count: 'exact', head: true });
       console.log(`📡 Ping took ${Date.now() - pingStart}ms`);
 
-      if (pingError) {
-        console.warn("Ping Warning:", pingError);
-        // We continue anyway, but log it.
+      if (pingError) console.warn("Ping Warning:", pingError);
+
+      // 2. Global Login (Triggering Master Bypass if needed)
+      setStatusText("Autenticando...");
+      console.log("🔑 Authenticating via Global Hook...");
+
+      // Use the hook's signIn which handles everything
+      const result = await signIn(email, password, isSetupMode);
+
+      if (result.error) {
+        throw result.error;
       }
 
-      // 2. Direct Memory Login (Persistence is OFF, so this stays in RAM)
-      console.log("🔑 Authenticating...");
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password: password
-      });
-
-      if (error) throw error;
-
-      console.log("✅ Success! Session established in memory.");
+      setStatusText("Entrando...");
+      console.log("✅ Login Success!");
       toast({ title: "Bem-vindo!", description: "Acesso autorizado." });
 
-      // 3. Soft Navigate (Do NOT Reload, or RAM session is lost)
+      // 3. Navigation
+      // The useEffect above will likely catch the state change first, 
+      // but we force navigation here just in case.
       navigate("/admin", { replace: true });
 
     } catch (error: any) {
       console.error("Login Fatal:", error);
       let msg = error.message;
-      if (msg === "Invalid login credentials") msg = "Senha ou email incorretos";
+      if (msg?.includes("Invalid login")) msg = "Senha ou email incorretos";
 
       toast({
         title: "Falha de Acesso",
@@ -72,6 +84,7 @@ const AdminLogin = () => {
       });
     } finally {
       setIsLoading(false);
+      setStatusText("Entrar");
     }
   };
 
@@ -86,7 +99,7 @@ const AdminLogin = () => {
             Área Administrativa
           </CardTitle>
           <CardDescription className="text-blue-100 text-center">
-            Acesso Restrito (Modo Seguro v4.5)
+            Acesso Restrito
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 bg-white">
@@ -139,7 +152,7 @@ const AdminLogin = () => {
               {isLoading ? statusText : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
-                  Entrar (Safe Mode)
+                  Entrar
                 </>
               )}
             </Button>
@@ -155,9 +168,8 @@ const AdminLogin = () => {
             </Button>
           </div>
 
-          <div className="mt-4 text-center text-[10px] text-gray-300 opacity-50">
+          <div className="mt-4 text-center text-[10px] text-gray-300 opacity-50 hover:opacity-100 transition-opacity">
             <p>{VERSION}</p>
-            <p>Persistence: OFF (RAM ONLY)</p>
           </div>
         </CardContent>
       </Card>
