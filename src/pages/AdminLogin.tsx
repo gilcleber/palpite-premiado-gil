@@ -36,7 +36,8 @@ const AdminLogin = () => {
       // 1. Connectivity Test
       console.log("📡 Testing Connection...");
       const pingStart = Date.now();
-      const { error: pingError } = await supabase.from('admin_users').select('count', { count: 'exact', head: true }).timeout(5000);
+      // REMOVED .timeout(5000) as it is not supported in this client version
+      const { error: pingError } = await supabase.from('admin_users').select('count', { count: 'exact', head: true });
       console.log(`📡 Ping took ${Date.now() - pingStart}ms`);
 
       if (pingError) {
