@@ -142,6 +142,15 @@ const AdminLogin = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <p className="text-xs text-right text-red-400 cursor-pointer hover:underline" onClick={() => {
+                if (confirm("Isso vai limpar a memória do navegador para corrigir problemas de acesso. Continuar?")) {
+                  localStorage.clear();
+                  sessionStorage.clear();
+                  window.location.reload();
+                }
+              }}>
+                Problemas de acesso? Clique aqui.
+              </p>
             </div>
 
             <Button
