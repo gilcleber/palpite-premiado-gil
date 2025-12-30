@@ -136,7 +136,7 @@ const AdminLogin = () => {
               className="w-full bg-[#1d244a] hover:bg-[#2a3459] text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Estabelecendo Conexão Segura..." : (
+              {isLoading ? statusText : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
                   Entrar (Safe Mode)
