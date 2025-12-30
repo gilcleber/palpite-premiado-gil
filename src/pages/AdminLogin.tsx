@@ -16,7 +16,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
   const navigate = useNavigate();
-  const VERSION = "v4.3 (Final Logic Swap)";
+  const VERSION = "v4.4 (Raw Metal)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   // CHECK: If already admin, go straight to dashboard
