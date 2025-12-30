@@ -16,7 +16,7 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
   const navigate = useNavigate();
-  const VERSION = "v3.34 (Master Access)";
+  const VERSION = "v3.35 (Anti-Lockout)";
   const isSetupMode = window.location.href.includes('setup=true');
 
   // CHECK: If already admin, go straight to dashboard
@@ -200,6 +200,20 @@ const AdminLogin = () => {
               )}
             </Button>
           </form>
+
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => {
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.reload();
+              }}
+              className="text-[10px] text-gray-300 hover:text-red-400 opacity-50 transition-colors"
+            >
+              Resetar Sistema
+            </button>
+          </div>
 
           <div className="mt-6 text-center">
             <Button
