@@ -1,130 +1,73 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/useAuth";
+// import { useAuth } from "@/hooks/useAuth"; // DETACHED FOR STABILITY
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, LogIn, Shield } from "lucide-react";
-import DebugNetwork from "@/components/DebugNetwork";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // Destructure user and isAdmin
+  // const { signIn, isFirstAccess, user, isAdmin } = useAuth(); // DETACHED
   const navigate = useNavigate();
-  const VERSION = "v4.4 (Raw Metal)";
-  const isSetupMode = window.location.href.includes('setup=true');
+  const VERSION = "v4.5 (Isolation Mode)";
 
-  // CHECK: If already admin, go straight to dashboard
+  // Quick Health Check on Mount
   useEffect(() => {
-    if (user && isAdmin && !isLoading) {
-      console.log("Already admin, redirecting...");
-      navigate("/admin", { replace: true });
-    }
-  }, [user, isAdmin, isLoading, navigate]);
-
-  // AUTO-RESTORE LOGIC (Priority Fix)
-  // If user is logged in but not admin, it means data is missing.
-  // We force-insert the user into admin_users to fix the "Zombie" state.
-  useEffect(() => {
-    const restoreAdmin = async () => {
-      if (user && !isAdmin && !isLoading) {
-        console.log("⚠️ Zombie Admin detected. Attempting auto-restoration...");
-        const { error } = await supabase.from('admin_users').insert({
-          id: user.id,
-          email: user.email
-        });
-
-        if (!error) {
-          toast({ title: "Acesso Restaurado!", description: "Recarregando..." });
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          console.error("Auto-restore failed:", error);
-          // If restore fails multiple times, maybe force logout?
-        }
-      }
-    };
-
-    restoreAdmin();
-  }, [user, isAdmin, isLoading, supabase]);
+    console.log("🏥 AdminLogin v4.5 Mounted");
+    // Optional: Wake up DB
+    supabase.from('app_settings').select('count', { count: 'exact', head: true })
+      .then(() => console.log("✅ DB Ping OK"))
+      .catch(err => console.warn("⚠️ DB Ping Fail:", err));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!email || !password) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Por favor, preencha email e senha",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!email || !password) return;
 
     try {
       setIsLoading(true);
 
-      // NUCLEAR OPTION: The user says it only works if they click "Clear Cache".
-      // So we will DO EXACTLY THAT automatically.
+      // 1. Connectivity Test
+      console.log("📡 Testing Connection...");
+      const pingStart = Date.now();
+      const { error: pingError } = await supabase.from('admin_users').select('count', { count: 'exact', head: true }).timeout(5000);
+      console.log(`📡 Ping took ${Date.now() - pingStart}ms`);
 
-      // 1. Preserve critical flags if needed (none really, we want fresh)
-      // 2. Wipe everything
-      console.log("🧹 Executing Nuclear Cleanup...");
-      localStorage.clear();
-      sessionStorage.clear();
-
-      // 3. Restore App Version to prevent reload-loop on next F5
-      // (We hardcode the string or just let App handle it once)
-      localStorage.setItem('app_version', '3.26-auto-clean'); // Keep compatible with App.tsx
-
-      // 4. Force Supabase out (just in case)
-      await supabase.auth.signOut();
-
-      // Race condition to prevent hanging
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error("Timeout")), 15000)
-      );
-
-      const result: any = await Promise.race([
-        signIn(email, password, isSetupMode), // Pass setup mode to force creation
-        timeoutPromise
-      ]);
-      // ... existing code ...
-      if (result.error) {
-        throw new Error(result.error.message);
+      if (pingError) {
+        console.warn("Ping Warning:", pingError);
+        // We continue anyway, but log it.
       }
 
-      toast({
-        title: "Login realizado com sucesso",
-        description: "Bem-vindo ao painel administrativo",
+      // 2. Direct Memory Login (Persistence is OFF, so this stays in RAM)
+      console.log("🔑 Authenticating...");
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password
       });
 
-      // Navegar imediatamente para o painel limpo (sem query params)
+      if (error) throw error;
+
+      console.log("✅ Success! Session established in memory.");
+      toast({ title: "Bem-vindo!", description: "Acesso autorizado." });
+
+      // 3. Soft Navigate (Do NOT Reload, or RAM session is lost)
       navigate("/admin", { replace: true });
-      // Forçar limpeza da URL history caso o navigate não seja suficiente
-      window.history.replaceState({}, document.title, "/palpite-premiado-gil/admin");
 
     } catch (error: any) {
-      // ... existing catch block ...
-      console.error("Login error:", error);
-      let errorMessage = "Ocorreu um erro durante o login";
-
-      if (error.message?.includes("Invalid login credentials")) {
-        errorMessage = "Email ou senha incorretos";
-      } else if (error.message?.includes("Email not confirmed")) {
-        errorMessage = "Email não confirmado";
-      } else {
-        // Show raw error for debugging
-        errorMessage = `Erro: ${error.message || "Desconhecido"}`;
-      }
+      console.error("Login Fatal:", error);
+      let msg = error.message;
+      if (msg === "Invalid login credentials") msg = "Senha ou email incorretos";
 
       toast({
-        title: "Erro no login",
-        description: errorMessage,
-        variant: "destructive",
+        title: "Falha de Acesso",
+        description: msg,
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -142,14 +85,14 @@ const AdminLogin = () => {
             Área Administrativa
           </CardTitle>
           <CardDescription className="text-blue-100 text-center">
-            Acesso restrito - Faça login para continuar
+            Acesso Restrito (Modo Seguro v4.5)
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6 bg-white">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium text-[#1d244a]">
-                Email do Administrador
+                Email
               </label>
               <Input
                 id="email"
@@ -157,8 +100,8 @@ const AdminLogin = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className="border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-                placeholder="Digite seu email administrativo"
+                className="border-gray-300"
+                placeholder="admin@exemplo.com"
                 required
               />
             </div>
@@ -173,13 +116,13 @@ const AdminLogin = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={isLoading}
-                  className="pr-10 border-gray-300 focus:border-[#1d244a] focus:ring-[#1d244a]/20"
-                  placeholder="Digite sua senha"
+                  className="pr-10 border-gray-300"
+                  placeholder="******"
                   required
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-[#1d244a]"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -192,28 +135,14 @@ const AdminLogin = () => {
               className="w-full bg-[#1d244a] hover:bg-[#2a3459] text-white"
               disabled={isLoading}
             >
-              {isLoading ? "Autenticando..." : (
+              {isLoading ? "Estabelecendo Conexão Segura..." : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
-                  Acessar Painel
+                  Entrar (Safe Mode)
                 </>
               )}
             </Button>
           </form>
-
-          <div className="mt-4 text-center">
-            <button
-              type="button"
-              onClick={() => {
-                localStorage.clear();
-                sessionStorage.clear();
-                window.location.reload();
-              }}
-              className="text-[10px] text-gray-300 hover:text-red-400 opacity-50 transition-colors"
-            >
-              Resetar Sistema
-            </button>
-          </div>
 
           <div className="mt-6 text-center">
             <Button
@@ -225,17 +154,14 @@ const AdminLogin = () => {
             </Button>
           </div>
 
-          {/* Subtle Version/Debug Info (Hidden unless needed) */}
-          <div className="mt-4 text-center text-[10px] text-gray-300 opacity-50 hover:opacity-100 transition-opacity">
+          <div className="mt-4 text-center text-[10px] text-gray-300 opacity-50">
             <p>{VERSION}</p>
+            <p>Persistence: OFF (RAM ONLY)</p>
           </div>
         </CardContent>
       </Card>
-      {/* Hidden Debug Network unless strictly needed */}
-      {/* <DebugNetwork /> */}
     </div>
   );
 };
-
 
 export default AdminLogin;
