@@ -258,8 +258,8 @@ const BettingForm = () => {
         <div className="flex justify-center mb-2">
           <Trophy className="h-8 w-8 text-[#d19563]" />
         </div>
-        <h1 className="text-2xl font-bold text-[#1d244a]">PALPITE PREMIADO</h1>
-        <p className="text-gray-600 mt-1">
+        <h1 className="text-2xl font-bold text-white">PALPITE PREMIADO</h1>
+        <p className="text-gray-200 mt-1">
           Preencha seus dados e escolha o cartaz para participar do sorteio
         </p>
       </div>
