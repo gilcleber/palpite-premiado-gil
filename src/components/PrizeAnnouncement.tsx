@@ -96,7 +96,7 @@ const PrizeAnnouncement = () => {
 
                   {/* Thumbnails */}
                   {(settings.prize_gallery && settings.prize_gallery.length > 0) && (
-                    <div className="flex gap-2 overflow-x-auto max-w-[250px] sm:max-w-xs pb-2 justify-center">
+                    <div className="flex gap-2 flex-wrap max-w-[250px] justify-center pb-2">
                       <button
                         onClick={() => setSelectedImage(settings.prize_image_url)}
                         className={`w-12 h-12 rounded-md overflow-hidden border-2 flex-shrink-0 ${selectedImage === settings.prize_image_url ? 'border-[#d19563]' : 'border-transparent'}`}
