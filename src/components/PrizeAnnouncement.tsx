@@ -8,13 +8,15 @@ interface PrizeSettings {
   prize_title: string;
   prize_description: string;
   prize_image_url: string | null;
+  prize_gallery?: string[]; // New
   draw_date: string | null;
-  team1_name?: string; // Made optional
-  team2_name?: string; // Made optional
+  team1_name?: string;
+  team2_name?: string;
 }
 
 const PrizeAnnouncement = () => {
   const [settings, setSettings] = useState<PrizeSettings | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); // New State
   const [extraPrizes, setExtraPrizes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,9 +32,15 @@ const PrizeAnnouncement = () => {
 
         setSettings({
           ...data,
+          prize_gallery: (data as any).prize_gallery || [],
           team1_name: (data as any).team_a || "Time A",
           team2_name: (data as any).team_b || "Time B"
         });
+
+        // Init selected image
+        if (data.prize_image_url) {
+          setSelectedImage(data.prize_image_url);
+        }
 
         const { data: prizesData, error: prizesError } = await supabase
           .from("prizes") // Types are now defined
@@ -73,14 +81,39 @@ const PrizeAnnouncement = () => {
       <Card className="mb-2 bg-gradient-to-r from-[#1d244a]/10 to-[#1d244a]/5 overflow-hidden border-blue-100/50">
         <CardContent className="p-6">
           <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="relative">
+
+            {/* Gallery / Main Image */}
+            <div className="relative flex flex-col items-center">
               {settings.prize_image_url ? (
-                <div className="w-32 h-32 rounded-xl overflow-hidden shadow-lg border-2 border-white ring-4 ring-[#d19563]/10">
-                  <img
-                    src={settings.prize_image_url}
-                    alt={settings.prize_title}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="space-y-2">
+                  <div className="w-48 h-48 sm:w-64 sm:h-64 rounded-xl overflow-hidden shadow-lg border-2 border-white ring-4 ring-[#d19563]/10 bg-white">
+                    <img
+                      src={selectedImage || settings.prize_image_url}
+                      alt={settings.prize_title}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+
+                  {/* Thumbnails */}
+                  {(settings.prize_gallery && settings.prize_gallery.length > 0) && (
+                    <div className="flex gap-2 overflow-x-auto max-w-[250px] sm:max-w-xs pb-2 justify-center">
+                      <button
+                        onClick={() => setSelectedImage(settings.prize_image_url)}
+                        className={`w-12 h-12 rounded-md overflow-hidden border-2 flex-shrink-0 ${selectedImage === settings.prize_image_url ? 'border-[#d19563]' : 'border-transparent'}`}
+                      >
+                        <img src={settings.prize_image_url} className="w-full h-full object-cover" />
+                      </button>
+                      {settings.prize_gallery.map((url, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setSelectedImage(url)}
+                          className={`w-12 h-12 rounded-md overflow-hidden border-2 flex-shrink-0 ${selectedImage === url ? 'border-[#d19563]' : 'border-transparent'}`}
+                        >
+                          <img src={url} className="w-full h-full object-cover" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="w-24 h-24 bg-[#1d244a]/10 rounded-full flex items-center justify-center">

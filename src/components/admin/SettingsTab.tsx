@@ -13,6 +13,7 @@ interface AppSettings {
   prize_title: string;
   prize_description: string;
   prize_image_url: string | null;
+  prize_gallery?: string[]; // New Gallery Field
   draw_date: string | null;
   team_a: string;
   team_b: string;
@@ -58,7 +59,6 @@ const SettingsTab = () => {
           console.error("Settings error:", error);
           if (error.code === 'PGRST116') {
             // ... existing default creation logic (omitted for brevity, assume usually exists)
-            // simplified for this edit as the file continues
           } else {
             throw error;
           }
@@ -70,6 +70,7 @@ const SettingsTab = () => {
             prize_title: typedData.prize_title,
             prize_description: typedData.prize_description,
             prize_image_url: typedData.prize_image_url,
+            prize_gallery: typedData.prize_gallery || [], // Load Gallery
             draw_date: typedData.draw_date,
             team_a: typedData.team_a || "Time A",
             team_b: typedData.team_b || "Time B",
@@ -112,6 +113,22 @@ const SettingsTab = () => {
     }
   };
 
+  // Gallery Handlers
+  const handleAddGalleryImage = (url: string) => {
+    if (settings) {
+      const currentGallery = settings.prize_gallery || [];
+      setSettings({ ...settings, prize_gallery: [...currentGallery, url] });
+    }
+  };
+
+  const handleRemoveGalleryImage = (indexToRemove: number) => {
+    if (settings) {
+      const currentGallery = settings.prize_gallery || [];
+      const newGallery = currentGallery.filter((_, idx) => idx !== indexToRemove);
+      setSettings({ ...settings, prize_gallery: newGallery });
+    }
+  };
+
   const handleSave = async () => {
     if (!settings) return;
 
@@ -122,13 +139,14 @@ const SettingsTab = () => {
         prize_title: settings.prize_title,
         prize_description: settings.prize_description,
         prize_image_url: settings.prize_image_url,
+        prize_gallery: settings.prize_gallery, // Save Gallery
         draw_date: settings.draw_date,
         team_a: settings.team_a,
         team_b: settings.team_b,
         team_a_logo_url: settings.team_a_logo_url,
         team_b_logo_url: settings.team_b_logo_url,
-        radio_logo_url: settings.radio_logo_url, // @ts-ignore
-        radio_slogan: settings.radio_slogan, // @ts-ignore
+        radio_logo_url: settings.radio_logo_url,
+        radio_slogan: settings.radio_slogan,
         updated_at: new Date().toISOString(),
       };
 
@@ -360,12 +378,43 @@ const SettingsTab = () => {
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium">Imagem do Prêmio</label>
+                <label className="text-sm font-medium">Imagem Principal (Capa)</label>
                 <ImageUpload
                   onUploadComplete={(url) => handleImageUpdate('prize_image_url', url)}
                   currentImageUrl={settings?.prize_image_url}
                   onClear={() => handleImageUpdate('prize_image_url', '')}
                 />
+              </div>
+
+              {/* Gallery Section */}
+              <div className="space-y-2 pt-4 border-t border-[#d19563]/20">
+                <label className="text-sm font-medium">Galeria de Fotos (Opcional - Mais ângulos do prêmio)</label>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                  {settings?.prize_gallery?.map((url, idx) => (
+                    <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border group">
+                      <img src={url} alt={`Galeria ${idx}`} className="w-full h-full object-cover" />
+                      <button
+                        onClick={() => handleRemoveGalleryImage(idx)}
+                        className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Remover foto"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-3 bg-white rounded-lg border border-dashed border-gray-300">
+                  <p className="text-xs text-gray-500 mb-2 text-center">Adicionar nova foto à galeria:</p>
+                  <ImageUpload
+                    label="Selecionar Foto Extra"
+                    onUploadComplete={(url) => handleAddGalleryImage(url)}
+                    // No current image url needed as this is an 'adder'
+                    onClear={() => { }}
+                    className="w-full"
+                  />
+                </div>
               </div>
             </div>
           </div>
