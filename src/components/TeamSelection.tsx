@@ -54,7 +54,7 @@ const TeamSelection = ({
 
         {/* Team B */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center p-0">
+          <div className="w-24 h-24 flex items-center justify-center p-0">
             {teamBLogo ? (
               <img src={teamBLogo} alt={formData.team2Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-105" />
             ) : (
