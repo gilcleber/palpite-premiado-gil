@@ -33,11 +33,11 @@ const TeamSelection = ({
 
         {/* Team A */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-32 h-32 sm:w-40 sm:h-40 flex items-center justify-center p-0">
+          <div className="w-24 h-24 sm:w-28 sm:h-28 flex items-center justify-center p-0">
             {teamALogo ? (
               <img src={teamALogo} alt={formData.team1Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-105" />
             ) : (
-              <Shield className="w-20 h-20 text-white/50" />
+              <Shield className="w-16 h-16 text-white/50" />
             )}
           </div>
           <span className="text-white font-bold text-sm sm:text-lg tracking-wide text-center max-w-[140px] leading-tight drop-shadow-md">

@@ -74,17 +74,12 @@ const Index = () => {
             </p>
 
             <div className="flex justify-center gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="glass-card border-white/30 text-white hover:bg-white/25 transition-all duration-300 touch-optimized button-modern backdrop-blur-sm"
+              <Link
+                to="/admin/login"
+                className="text-[10px] text-white/10 hover:text-white/50 transition-colors uppercase tracking-widest"
               >
-                <Link to="/admin/login">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Área Administrativa
-                </Link>
-              </Button>
+                ADM
+              </Link>
             </div>
           </div>
         </div>
