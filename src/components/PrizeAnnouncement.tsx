@@ -149,7 +149,7 @@ const PrizeAnnouncement = () => {
 
       {/* Extra Prizes Grid */}
       {extraPrizes.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-fade-in">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 animate-fade-in">
           {extraPrizes.map((prize) => (
             <Card key={prize.id} className="bg-white/80 backdrop-blur-sm border-0 shadow-sm hover:shadow-md transition-all">
               <CardContent className="p-4 flex items-center gap-4">
