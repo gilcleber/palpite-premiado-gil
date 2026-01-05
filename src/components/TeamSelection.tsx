@@ -33,7 +33,7 @@ const TeamSelection = ({
 
         {/* Team A */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-28 h-20 sm:w-40 sm:h-24 flex items-center justify-center p-0">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center p-0">
             {teamALogo ? (
               <img src={teamALogo} alt={formData.team1Name} className="w-full h-full object-contain drop-shadow-2xl transition-transform hover:scale-105" />
             ) : (
