@@ -15,7 +15,7 @@ interface ImageUploadProps {
     className?: string;
 }
 
-const ImageUpload = ({ onUploadComplete, currentImageUrl, onClear, label = "Upload de Imagem", bucketName = "logos", className = "" }: ImageUploadProps) => {
+const ImageUpload = ({ onUploadComplete, currentImageUrl, onClear, label = "Upload de Imagem", bucketName = "images", className = "" }: ImageUploadProps) => {
     const [uploading, setUploading] = useState(false);
     const [manualUrl, setManualUrl] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);

@@ -244,6 +244,7 @@ const SettingsTab = () => {
                   onUploadComplete={(url) => handleImageUpdate('team_a_logo_url', url)}
                   currentImageUrl={settings?.team_a_logo_url}
                   onClear={() => handleImageUpdate('team_a_logo_url', '')}
+                  bucketName="images"
                 />
               </div>
             </div>
@@ -268,6 +269,7 @@ const SettingsTab = () => {
                   onUploadComplete={(url) => handleImageUpdate('team_b_logo_url', url)}
                   currentImageUrl={settings?.team_b_logo_url}
                   onClear={() => handleImageUpdate('team_b_logo_url', '')}
+                  bucketName="images"
                 />
               </div>
             </div>
@@ -383,6 +385,7 @@ const SettingsTab = () => {
                   onUploadComplete={(url) => handleImageUpdate('prize_image_url', url)}
                   currentImageUrl={settings?.prize_image_url}
                   onClear={() => handleImageUpdate('prize_image_url', '')}
+                  bucketName="images"
                 />
               </div>
 
@@ -475,6 +478,7 @@ const SettingsTab = () => {
                   onUploadComplete={(url) => setNewPrize({ ...newPrize, image_url: url })}
                   currentImageUrl={newPrize.image_url}
                   onClear={() => setNewPrize({ ...newPrize, image_url: null })}
+                  bucketName="images"
                 />
               </div>
             </div>
