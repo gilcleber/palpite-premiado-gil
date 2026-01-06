@@ -64,19 +64,20 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
     if (!matchId) return;
     try {
       const { data, error } = await supabase
-        .from('matches')
+        .from('matches' as any)
         .select('score_team_a, score_team_b, team_a_name, team_b_name')
         .eq('id', matchId)
         .single();
 
       if (data) {
-        setScoreTeamA(data.score_team_a || 0);
-        setScoreTeamB(data.score_team_b || 0);
-        setTeamAName(data.team_a_name);
-        setTeamBName(data.team_b_name);
+        const d = data as any;
+        setScoreTeamA(d.score_team_a || 0);
+        setScoreTeamB(d.score_team_b || 0);
+        setTeamAName(d.team_a_name);
+        setTeamBName(d.team_b_name);
         setOfficialResult({
-          teamA: data.score_team_a || 0,
-          teamB: data.score_team_b || 0
+          teamA: d.score_team_a || 0,
+          teamB: d.score_team_b || 0
         });
       }
     } catch (err) {
@@ -90,7 +91,7 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
       setSavingScore(true);
 
       const { error } = await supabase
-        .from('matches')
+        .from('matches' as any)
         .update({
           score_team_a: scoreTeamA,
           score_team_b: scoreTeamB
@@ -137,12 +138,7 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
     // First, filter by date if set
     let eligible = allParticipants;
 
-    if (currentGameDate) {
-      eligible = allParticipants.filter(p => {
-        if (!p.game_date) return false; // Skip if no game date
-        return p.game_date === currentGameDate;
-      });
-    }
+
 
     if (drawMode === 'all') {
       setCorrectGuesses(eligible);
@@ -293,138 +289,139 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
               )}
             </div>
           </div>
+        </div>
 
-          <div className="text-center mb-6 border-t pt-6">
-            {/* Draw Mode Selection */}
-            <div className="flex justify-center gap-4 mb-6">
-              <Button
-                variant={drawMode === 'correct' ? 'default' : 'outline'}
-                onClick={() => { setDrawMode('correct'); setWinner(null); }}
-                className={drawMode === 'correct' ? 'bg-[#d19563] hover:bg-[#b07b4e]' : ''}
-              >
-                <Award className="w-4 h-4 mr-2" />
-                Acertadores do Placar
-              </Button>
-              <Button
-                variant={drawMode === 'all' ? 'default' : 'outline'}
-                onClick={() => { setDrawMode('all'); setWinner(null); }}
-                className={drawMode === 'all' ? 'bg-[#d19563] hover:bg-[#b07b4e]' : ''}
-              >
-                <Award className="w-4 h-4 mr-2" />
-                Todos os Participantes
-              </Button>
-            </div>
-
-            <p className="text-lg font-medium mb-2">
-              Participantes elegíveis para sorteio: <span className="text-[#d19563] font-bold text-xl">{correctGuesses.length}</span>
-            </p>
-            <p className="text-sm text-gray-500 mb-4">
-              {drawMode === 'correct' ? (
-                officialResult
-                  ? `Filtrando por: ${officialResult.teamA}x${officialResult.teamB}`
-                  : "Defina o placar oficial acima para filtrar."
-              ) : "Filtrando por: Todos os palpites registrados"}
-            </p>
-
-            <div className="flex justify-center space-x-4 mb-8">
-              <Button
-                onClick={drawWinner}
-                disabled={drawing || correctGuesses.length === 0}
-                className="bg-[#1d244a] hover:bg-[#1d244a]/90"
-              >
-                {drawing ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sorteando...
-                  </>
-                ) : (
-                  <>
-                    <Award className="mr-2 h-4 w-4" /> Sortear Vencedor
-                  </>
-                )}
-              </Button>
-
-              <Button
-                onClick={sendToNDI}
-                disabled={!winner}
-                variant="outline"
-              >
-                <Send className="mr-2 h-4 w-4" /> Enviar para NDI
-              </Button>
-            </div>
-
-            {winner && (
-              <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
-                <h3 className="text-xl font-bold text-green-800 mb-2">
-                  Vencedor do Sorteio
-                </h3>
-                <p className="text-2xl font-bold mb-2">
-                  {winner.nome_completo}
-                </p>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div className="text-left">
-                    <p><strong>Cidade:</strong> {winner.cidade}</p>
-                    <p><strong>Telefone:</strong> {winner.telefone}</p>
-                  </div>
-                  <div className="text-left">
-                    <p><strong>Time escolhido:</strong> {winner.escolha}</p>
-                    <p><strong>Palpite:</strong> {winner.placar_time_a}x{winner.placar_time_b}</p>
-                  </div>
-                </div>
-              </div>
-            )}
+        <div className="text-center mb-6 border-t pt-6">
+          {/* Draw Mode Selection */}
+          <div className="flex justify-center gap-4 mb-6">
+            <Button
+              variant={drawMode === 'correct' ? 'default' : 'outline'}
+              onClick={() => { setDrawMode('correct'); setWinner(null); }}
+              className={drawMode === 'correct' ? 'bg-[#d19563] hover:bg-[#b07b4e]' : ''}
+            >
+              <Award className="w-4 h-4 mr-2" />
+              Acertadores do Placar
+            </Button>
+            <Button
+              variant={drawMode === 'all' ? 'default' : 'outline'}
+              onClick={() => { setDrawMode('all'); setWinner(null); }}
+              className={drawMode === 'all' ? 'bg-[#d19563] hover:bg-[#b07b4e]' : ''}
+            >
+              <Award className="w-4 h-4 mr-2" />
+              Todos os Participantes
+            </Button>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center p-8">
-              <Loader2 className="h-8 w-8 animate-spin text-[#1d244a]" />
-            </div>
-          ) : correctGuesses.length > 0 ? (
-            <div className="overflow-x-auto">
-              <h3 className="font-medium mb-2">Participantes com palpites corretos:</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Nome</TableHead>
-                    <TableHead>Cidade</TableHead>
-                    <TableHead>Telefone</TableHead>
-                    <TableHead>Time Escolhido</TableHead>
-                    <TableHead>Palpite</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {correctGuesses.map((participant) => (
-                    <TableRow
-                      key={participant.id}
-                      className={winner && winner.id === participant.id ? "bg-green-50" : ""}
-                    >
-                      <TableCell className="font-medium">
-                        {participant.nome_completo}
-                        {winner && winner.id === participant.id && (
-                          <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                            <Award className="h-3 w-3 mr-1" /> Vencedor
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell>{participant.cidade}</TableCell>
-                      <TableCell>{participant.telefone}</TableCell>
-                      <TableCell>{participant.escolha}</TableCell>
-                      <TableCell>
-                        {participant.placar_time_a}x{participant.placar_time_b}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="text-center p-8 border rounded-md bg-gray-50">
-              <p className="text-gray-500">
-                {localStorage.getItem('official_result')
-                  ? "Nenhum participante acertou o resultado oficial."
-                  : "Defina o resultado oficial na aba 'Resultado Oficial' para ver os participantes com palpites corretos."}
+          <p className="text-lg font-medium mb-2">
+            Participantes elegíveis para sorteio: <span className="text-[#d19563] font-bold text-xl">{correctGuesses.length}</span>
+          </p>
+          <p className="text-sm text-gray-500 mb-4">
+            {drawMode === 'correct' ? (
+              officialResult
+                ? `Filtrando por: ${officialResult.teamA}x${officialResult.teamB}`
+                : "Defina o placar oficial acima para filtrar."
+            ) : "Filtrando por: Todos os palpites registrados"}
+          </p>
+
+          <div className="flex justify-center space-x-4 mb-8">
+            <Button
+              onClick={drawWinner}
+              disabled={drawing || correctGuesses.length === 0}
+              className="bg-[#1d244a] hover:bg-[#1d244a]/90"
+            >
+              {drawing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sorteando...
+                </>
+              ) : (
+                <>
+                  <Award className="mr-2 h-4 w-4" /> Sortear Vencedor
+                </>
+              )}
+            </Button>
+
+            <Button
+              onClick={sendToNDI}
+              disabled={!winner}
+              variant="outline"
+            >
+              <Send className="mr-2 h-4 w-4" /> Enviar para NDI
+            </Button>
+          </div>
+
+          {winner && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-8">
+              <h3 className="text-xl font-bold text-green-800 mb-2">
+                Vencedor do Sorteio
+              </h3>
+              <p className="text-2xl font-bold mb-2">
+                {winner.nome_completo}
               </p>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div className="text-left">
+                  <p><strong>Cidade:</strong> {winner.cidade}</p>
+                  <p><strong>Telefone:</strong> {winner.telefone}</p>
+                </div>
+                <div className="text-left">
+                  <p><strong>Time escolhido:</strong> {winner.escolha}</p>
+                  <p><strong>Palpite:</strong> {winner.placar_time_a}x{winner.placar_time_b}</p>
+                </div>
+              </div>
             </div>
           )}
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center p-8">
+            <Loader2 className="h-8 w-8 animate-spin text-[#1d244a]" />
+          </div>
+        ) : correctGuesses.length > 0 ? (
+          <div className="overflow-x-auto">
+            <h3 className="font-medium mb-2">Participantes com palpites corretos:</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Cidade</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Time Escolhido</TableHead>
+                  <TableHead>Palpite</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {correctGuesses.map((participant) => (
+                  <TableRow
+                    key={participant.id}
+                    className={winner && winner.id === participant.id ? "bg-green-50" : ""}
+                  >
+                    <TableCell className="font-medium">
+                      {participant.nome_completo}
+                      {winner && winner.id === participant.id && (
+                        <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                          <Award className="h-3 w-3 mr-1" /> Vencedor
+                        </span>
+                      )}
+                    </TableCell>
+                    <TableCell>{participant.cidade}</TableCell>
+                    <TableCell>{participant.telefone}</TableCell>
+                    <TableCell>{participant.escolha}</TableCell>
+                    <TableCell>
+                      {participant.placar_time_a}x{participant.placar_time_b}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        ) : (
+          <div className="text-center p-8 border rounded-md bg-gray-50">
+            <p className="text-gray-500">
+              {localStorage.getItem('official_result')
+                ? "Nenhum participante acertou o resultado oficial."
+                : "Defina o resultado oficial na aba 'Resultado Oficial' para ver os participantes com palpites corretos."}
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

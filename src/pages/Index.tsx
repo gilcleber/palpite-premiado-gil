@@ -5,12 +5,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import BettingForm from "@/components/BettingForm";
 import PrizeAnnouncement from "@/components/PrizeAnnouncement";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Settings } from "lucide-react";
 
 const Index = () => {
   const { isAdmin } = useAuth();
+  const { matchId } = useParams<{ matchId: string }>();
   const [radioLogo, setRadioLogo] = useState<string>("./radio_logo.png"); // Default fallback
   const [radioSlogan, setRadioSlogan] = useState<string | null>(null);
 
@@ -55,14 +56,14 @@ const Index = () => {
         <div className="max-w-2xl mx-auto space-y-8">
           {/* Prize Announcement Section with animation */}
           <div className="animate-fade-in">
-            <PrizeAnnouncement />
+            <PrizeAnnouncement matchId={matchId} />
           </div>
 
           {/* Main Form Card - Transparent to unify blue theme */}
           <div className="animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <Card className="border-0 shadow-none bg-transparent overflow-hidden">
               <CardContent className="p-0">
-                <BettingForm />
+                <BettingForm matchId={matchId} />
               </CardContent>
             </Card>
           </div>

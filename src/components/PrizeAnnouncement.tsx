@@ -14,7 +14,7 @@ interface PrizeSettings {
   team2_name?: string;
 }
 
-const PrizeAnnouncement = () => {
+const PrizeAnnouncement = ({ matchId: propMatchId }: { matchId?: string }) => {
   const [settings, setSettings] = useState<PrizeSettings | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null); // New State
   const [extraPrizes, setExtraPrizes] = useState<any[]>([]);
@@ -24,13 +24,15 @@ const PrizeAnnouncement = () => {
     const fetchSettings = async () => {
       try {
         // Fetch latest match prizes
-        const { data, error } = await supabase
-          .from("matches")
-          .select("*")
-          .eq('status', 'open')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        let query = supabase.from("matches" as any).select("*");
+
+        if (propMatchId) {
+          query = query.eq('id', propMatchId);
+        } else {
+          query = query.eq('status', 'open').order('created_at', { ascending: false }).limit(1);
+        }
+
+        const { data, error } = await query.single();
 
         if (error) throw error;
 
@@ -69,7 +71,7 @@ const PrizeAnnouncement = () => {
     };
 
     fetchSettings();
-  }, []);
+  }, [propMatchId]);
 
   if (loading) {
     return (

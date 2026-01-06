@@ -39,30 +39,31 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
             if (!matchId) return; // New mode
             setLoading(true);
 
-            const { data, error } = await supabase.from("matches").select("*").eq("id", matchId).single();
+            const { data, error } = await supabase.from("matches" as any).select("*").eq("id", matchId).single();
             if (error) {
                 toast({ title: "Erro", description: "Falha ao carregar jogo.", variant: "destructive" });
             } else if (data) {
+                const match = data as any;
                 // Parse date/time
                 let dDate = "";
                 let dTime = "";
-                if (data.draw_date) {
-                    const dateObj = new Date(data.draw_date);
+                if (match.draw_date) {
+                    const dateObj = new Date(match.draw_date);
                     dDate = dateObj.toLocaleDateString('pt-BR').split('/').reverse().join('-'); // YYYY-MM-DD
                     dTime = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 }
 
                 setFormData({
-                    team_a_name: data.team_a_name || "",
-                    team_b_name: data.team_b_name || "",
-                    team_a_logo: data.team_a_logo || "",
-                    team_b_logo: data.team_b_logo || "",
+                    team_a_name: match.team_a_name || "",
+                    team_b_name: match.team_b_name || "",
+                    team_a_logo: match.team_a_logo || "",
+                    team_b_logo: match.team_b_logo || "",
                     draw_date: dDate,
                     draw_time: dTime,
-                    prize_title: data.prize_title || "",
-                    prize_description: data.prize_description || "",
-                    prize_image_url: data.prize_image_url || "",
-                    prize_gallery: (data.prize_gallery as string[]) || []
+                    prize_title: match.prize_title || "",
+                    prize_description: match.prize_description || "",
+                    prize_image_url: match.prize_image_url || "",
+                    prize_gallery: (match.prize_gallery as string[]) || []
                 });
             }
             setLoading(false);
@@ -118,15 +119,19 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
             };
 
             if (matchId) {
-                const { error } = await supabase.from("matches").update(payload).eq("id", matchId);
+                const { error } = await supabase.from("matches" as any).update(payload).eq("id", matchId);
                 if (error) throw error;
                 toast({ title: "Salvo!", description: "Dados da partida atualizados." });
                 onSaveSuccess();
             } else {
-                const { data, error } = await supabase.from("matches").insert([payload]).select().single();
+                const { data, error } = await supabase
+                    .from('matches' as any)
+                    .upsert(payload)
+                    .select()
+                    .single();
                 if (error) throw error;
                 toast({ title: "Criado!", description: "Nova partida criada com sucesso." });
-                if (data) onSaveSuccess(data.id);
+                if (data) onSaveSuccess((data as any).id);
             }
         } catch (e) {
             console.error(e);
@@ -163,12 +168,12 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                         <strong>ID:</strong>&nbsp;{matchId.slice(0, 8)}...
                     </span>
                     <Button variant="outline" size="sm" onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/game/${matchId}`);
+                        navigator.clipboard.writeText(`${window.location.origin}/#/game/${matchId}`);
                         toast({ title: "Copiado", description: "Link da partida copiado!" });
                     }}>
                         <Copy className="w-4 h-4 mr-2" /> Copiar Link
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => window.open(`/game/${matchId}`, '_blank')}>
+                    <Button variant="outline" size="sm" onClick={() => window.open(`/#/game/${matchId}`, '_blank')}>
                         <ExternalLink className="w-4 h-4 mr-2" /> Ver Página
                     </Button>
                 </div>

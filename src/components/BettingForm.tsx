@@ -20,7 +20,7 @@ export type FormData = {
   score: string | null;
 };
 
-const BettingForm = () => {
+const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
   const [formData, setFormData] = useState<FormData>({
     fullName: "",
     email: "",
@@ -53,13 +53,15 @@ const BettingForm = () => {
     const fetchSettings = async () => {
       try {
         // Fetch latest active match from the new table
-        const { data, error } = await supabase
-          .from("matches")
-          .select("*")
-          .eq('status', 'open')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        let query = supabase.from("matches" as any).select("*");
+
+        if (propMatchId) {
+          query = query.eq('id', propMatchId);
+        } else {
+          query = query.eq('status', 'open').order('created_at', { ascending: false }).limit(1);
+        }
+
+        const { data, error } = await query.single();
 
         if (!error && data) {
           const typedData = data as any;
@@ -86,7 +88,7 @@ const BettingForm = () => {
     };
 
     fetchSettings();
-  }, []);
+  }, [propMatchId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
