@@ -129,6 +129,7 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
       const { data, error } = await supabase
         .from("palpites")
         .select("*")
+        .eq("match_id", matchId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;

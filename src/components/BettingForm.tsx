@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
-import { Trophy } from "lucide-react";
+import { Trophy, Instagram, CheckCircle2 } from "lucide-react"; // Import new icons
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import PersonalInfoSection from "./PersonalInfoSection";
 import TeamSelection from "./TeamSelection";
 import ScoreSelection from "./ScoreSelection";
-import FormSubmission from "./FormSubmission";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export type FormData = {
   fullName: string;
@@ -18,6 +26,50 @@ export type FormData = {
   team1Name: string;
   team2Name: string;
   score: string | null;
+};
+
+export const SuccessModal = ({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) => {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md bg-gradient-to-br from-[#1d244a] to-[#2a3459] border-blue-400/30 text-white">
+        <DialogHeader className="flex flex-col items-center gap-4 py-4">
+          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center animate-in zoom-in duration-300">
+            <CheckCircle2 className="w-10 h-10 text-green-400" />
+          </div>
+          <DialogTitle className="text-2xl font-bold text-center">Palpite Registrado!</DialogTitle>
+          <DialogDescription className="text-blue-100 text-center text-lg">
+            Boa sorte! Seu palpite foi salvo com sucesso.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="p-6 bg-white/5 rounded-xl border border-white/10 space-y-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-pink-600/20 rounded-lg">
+              <Instagram className="w-6 h-6 text-pink-500" />
+            </div>
+            <div className="space-y-1">
+              <h4 className="font-bold text-pink-400">Atenção: Regra Obrigatória</h4>
+              <p className="text-sm text-gray-300 leading-relaxed">
+                Para validar seu prêmio caso seja sorteado, você <strong>DEVE</strong> estar seguindo nosso perfil no Instagram.
+              </p>
+              <p className="text-xs text-gray-400 mt-2">
+                O ganhador que não estiver seguindo perderá o direito ao prêmio.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <DialogFooter className="flex-col sm:justify-center gap-2 mt-4">
+          <button
+            onClick={() => onOpenChange(false)}
+            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 uppercase tracking-wider"
+          >
+            Entendido, estou seguindo!
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
 };
 
 const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
@@ -41,6 +93,7 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
 
   const [loading, setLoading] = useState(false);
   const [gameDate, setGameDate] = useState<string>("");
+  const [showSuccess, setShowSuccess] = useState(false); // Success Modal State
 
   const [logos, setLogos] = useState<{ team1: string | null; team2: string | null }>({
     team1: null,
@@ -239,7 +292,9 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
         return;
       }
 
-      toast.success("Seu palpite foi registrado com sucesso!");
+      // Show Success Modal instead of just toast
+      setShowSuccess(true);
+      // toast.success("Seu palpite foi registrado com sucesso!"); 
 
       // Reset form
       setFormData({
@@ -264,54 +319,57 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-6">
-      <div className="text-center mb-8">
-        <div className="flex justify-center mb-2">
-          <Trophy className="h-8 w-8 text-[#d19563]" />
+    <>
+      <form onSubmit={handleSubmit} className="space-y-6 p-6">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-2">
+            <Trophy className="h-8 w-8 text-[#d19563]" />
+          </div>
+          <h1 className="text-2xl font-bold text-white">PALPITE PREMIADO</h1>
+          <p className="text-gray-200 mt-1">
+            Preencha seus dados e escolha o cartaz para participar do sorteio
+          </p>
         </div>
-        <h1 className="text-2xl font-bold text-white">PALPITE PREMIADO</h1>
-        <p className="text-gray-200 mt-1">
-          Preencha seus dados e escolha o cartaz para participar do sorteio
-        </p>
-      </div>
 
-      <PersonalInfoSection formData={formData} handleChange={handleChange} />
+        <PersonalInfoSection formData={formData} handleChange={handleChange} />
 
-      <div className="border-t border-gray-200 my-6"></div>
+        <div className="border-t border-gray-200 my-6"></div>
 
-      <TeamSelection
-        formData={formData}
-        isEditing={isEditing}
-        handleTeamNameChange={handleTeamNameChange}
-        toggleEdit={toggleEdit}
-        handleOptionSelect={handleOptionSelect}
-        teamALogo={logos.team1}
-        teamBLogo={logos.team2}
-      />
-
-      {formData.selectedOption && (
-        <ScoreSelection
-          selectedOption={formData.selectedOption}
-          handleScoreSelect={handleScoreSelect}
-          currentScore={formData.score}
+        <TeamSelection
+          formData={formData}
+          isEditing={isEditing}
+          handleTeamNameChange={handleTeamNameChange}
+          toggleEdit={toggleEdit}
+          handleOptionSelect={handleOptionSelect}
+          teamALogo={logos.team1}
+          teamBLogo={logos.team2}
         />
-      )}
 
-      <div className="pt-4">
-        <button
-          disabled={loading}
-          type="submit"
-          className="w-full bg-[#d19563] hover:bg-[#b07b4e] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
-        >
-          {loading ? "Enviando..." : "Confirmar Palpite"}
-        </button>
-      </div>
+        {formData.selectedOption && (
+          <ScoreSelection
+            selectedOption={formData.selectedOption}
+            handleScoreSelect={handleScoreSelect}
+            currentScore={formData.score}
+          />
+        )}
 
-      <p className="text-center text-xs text-gray-500 mt-4">
-        Seus dados serão usados apenas para o sorteio e não serão compartilhados.
-        Apenas um palpite por jogo.
-      </p>
-    </form>
+        <div className="pt-4">
+          <button
+            disabled={loading}
+            type="submit"
+            className="w-full bg-[#d19563] hover:bg-[#b07b4e] text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider"
+          >
+            {loading ? "Enviando..." : "Confirmar Palpite"}
+          </button>
+        </div>
+
+        <p className="text-center text-xs text-gray-500 mt-4">
+          Seus dados serão usados apenas para o sorteio e não serão compartilhados.
+          Apenas um palpite por jogo.
+        </p>
+      </form>
+      <SuccessModal open={showSuccess} onOpenChange={setShowSuccess} />
+    </>
   );
 };
 
