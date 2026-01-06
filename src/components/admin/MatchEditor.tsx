@@ -146,7 +146,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         if (!confirm("Tem certeza que deseja excluir este jogo? Essa ação não pode ser desfeita.")) return;
 
         setSaving(true);
-        const { error } = await supabase.from("matches").delete().eq("id", matchId);
+        const { error } = await supabase.from("matches" as any).delete().eq("id", matchId);
         setSaving(false);
 
         if (error) {
@@ -168,12 +168,18 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                         <strong>ID:</strong>&nbsp;{matchId.slice(0, 8)}...
                     </span>
                     <Button variant="outline" size="sm" onClick={() => {
-                        navigator.clipboard.writeText(`${window.location.origin}/#/game/${matchId}`);
+                        const baseUrl = window.location.origin + window.location.pathname;
+                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${matchId}`;
+                        navigator.clipboard.writeText(finalUrl);
                         toast({ title: "Copiado", description: "Link da partida copiado!" });
                     }}>
                         <Copy className="w-4 h-4 mr-2" /> Copiar Link
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => window.open(`/#/game/${matchId}`, '_blank')}>
+                    <Button variant="outline" size="sm" onClick={() => {
+                        const baseUrl = window.location.origin + window.location.pathname;
+                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${matchId}`;
+                        window.open(finalUrl, '_blank');
+                    }}>
                         <ExternalLink className="w-4 h-4 mr-2" /> Ver Página
                     </Button>
                 </div>

@@ -28,12 +28,12 @@ const SettingsTab = () => {
   const fetchEverything = async () => {
     setLoading(true);
     // 1. Fetch Matches
-    const { data: matchesData } = await supabase.from("matches").select("id, team_a_name, team_b_name").order("created_at", { ascending: true });
+    const { data: matchesData } = await supabase.from("matches" as any).select("id, team_a_name, team_b_name").order("created_at", { ascending: true });
 
     // 2. Fetch Global Settings
     const { data: appData } = await supabase.from("app_settings").select("id, radio_logo_url, radio_slogan").single();
 
-    if (matchesData) setMatches(matchesData as any);
+    if (matchesData) setMatches(matchesData as unknown as MatchSimple[]);
     if (appData) setGlobalSettings(appData as any);
 
     // Auto-select first match if exists and we are in "loading" phase

@@ -24,6 +24,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
     const [drawing, setDrawing] = useState(false);
     const [winner, setWinner] = useState<Palpite | null>(null);
     const [gameResult, setGameResult] = useState({ a: 0, b: 0 });
+    const [teamNames, setTeamNames] = useState({ a: "", b: "" });
     const [displayIndex, setDisplayIndex] = useState(0);
     const [showFullPhone, setShowFullPhone] = useState(false);
 
@@ -33,7 +34,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
             if (matchId) {
                 const { data } = await supabase
                     .from('matches' as any)
-                    .select('score_team_a, score_team_b')
+                    .select('score_team_a, score_team_b, team_a_name, team_b_name')
                     .eq('id', matchId)
                     .single();
 
@@ -42,6 +43,10 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                     setGameResult({
                         a: d.score_team_a || 0,
                         b: d.score_team_b || 0
+                    });
+                    setTeamNames({
+                        a: d.team_a_name || "Time A",
+                        b: d.team_b_name || "Time B"
                     });
                 }
             } else {
@@ -56,6 +61,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                         a: data.score_team_a || 0,
                         b: data.score_team_b || 0
                     });
+                    setTeamNames({ a: "Time A", b: "Time B" });
                 }
             }
         };
@@ -75,6 +81,12 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                         a: newData.score_team_a || 0,
                         b: newData.score_team_b || 0
                     });
+                    if (newData.team_a_name) {
+                        setTeamNames({
+                            a: newData.team_a_name,
+                            b: newData.team_b_name
+                        });
+                    }
                     toast.info("Resultado oficial atualizado!");
                 }
             })
@@ -191,6 +203,11 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                     Sorteio Oficial
                 </h2>
                 <p className="text-slate-400 mt-2 text-lg">Palpite Premiado</p>
+                {matchId && (
+                    <div className="mt-4 text-2xl text-white font-bold bg-white/10 px-6 py-2 rounded-full inline-block border border-white/10">
+                        {teamNames.a} <span className="text-[#d19563] mx-2">x</span> {teamNames.b}
+                    </div>
+                )}
             </div>
 
             {!winner && !drawing && (

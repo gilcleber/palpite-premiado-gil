@@ -51,10 +51,7 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: Adm
 
         <Button
           variant="outline"
-          onClick={() => {
-            const hashRoute = selectedMatchId ? `#/game/${selectedMatchId}` : '#/';
-            window.open(`${window.location.origin}/${hashRoute}`, '_blank');
-          }}
+          onClick={() => window.open(window.location.origin + window.location.pathname, '_blank')}
           className="border-blue-300 text-blue-300 bg-transparent hover:bg-blue-300 hover:text-[#1d244a]"
         >
           <Home className="h-4 w-4 mr-2" />

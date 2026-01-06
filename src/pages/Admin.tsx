@@ -22,8 +22,9 @@ const Admin = () => {
   const fetchMatches = async () => {
     const { data } = await supabase.from("matches" as any).select("*").order("created_at", { ascending: false });
     if (data && data.length > 0) {
-      setMatches(data);
-      if (!selectedMatchId) setSelectedMatchId(data[0].id);
+      const allMatches = data as any[];
+      setMatches(allMatches);
+      if (!selectedMatchId) setSelectedMatchId(allMatches[0].id);
     }
   };
 
