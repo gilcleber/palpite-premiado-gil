@@ -6,9 +6,10 @@ interface AdminHeaderProps {
   activeTab: 'settings' | 'participants' | 'winners' | 'live';
   setActiveTab: (tab: 'settings' | 'participants' | 'winners' | 'live') => void;
   onLogout: () => void;
+  selectedMatchId?: string | null;
 }
 
-const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) => {
+const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: AdminHeaderProps) => {
   return (
     <header className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
       <div className="flex items-center">
@@ -23,7 +24,23 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) =>
           variant="outline"
           onClick={() => {
             // Safe Popup for Live Draw
-            const url = window.location.origin + window.location.pathname.replace('/admin', '/live-draw');
+            let url = window.location.origin + window.location.pathname.replace('/admin', '/live-draw');
+            if (url.includes('/#')) {
+              // Handle HashRouter: origin/#/live-draw
+              url = url.replace(/\/$/, ""); // trim trailing slash
+            } else {
+              // If we are on /#/admin, pathname is just / usually in hash router context? 
+              // Actually with HashRouter, window.location.pathname is usually /index.html or just /.
+              // The hash part is window.location.hash
+              const baseUrl = window.location.origin + window.location.pathname;
+              url = baseUrl + '#/live-draw';
+            }
+
+            // Append matchId
+            if (selectedMatchId) {
+              url += `?matchId=${selectedMatchId}`;
+            }
+
             window.open(url, 'LiveDraw', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
           }}
           className="border-blue-500 text-blue-400 bg-transparent hover:bg-blue-500 hover:text-white"
@@ -34,7 +51,10 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout }: AdminHeaderProps) =>
 
         <Button
           variant="outline"
-          onClick={() => window.location.href = '/palpite-premiado-gil/'} // Correct GH Pages Home
+          onClick={() => {
+            const hashRoute = selectedMatchId ? `#/game/${selectedMatchId}` : '#/';
+            window.open(`${window.location.origin}/${hashRoute}`, '_blank');
+          }}
           className="border-blue-300 text-blue-300 bg-transparent hover:bg-blue-300 hover:text-[#1d244a]"
         >
           <Home className="h-4 w-4 mr-2" />

@@ -18,7 +18,7 @@ type Palpite = {
     cpf: string;
 };
 
-const LiveDraw = () => {
+const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
     const [candidates, setCandidates] = useState<Palpite[]>([]);
     const [loading, setLoading] = useState(false);
     const [drawing, setDrawing] = useState(false);
@@ -30,25 +30,45 @@ const LiveDraw = () => {
     // Load official result from Database
     useEffect(() => {
         const fetchOfficialResult = async () => {
-            const { data } = await supabase
-                .from('app_settings')
-                .select('score_team_a, score_team_b')
-                .single();
+            if (matchId) {
+                const { data } = await supabase
+                    .from('matches' as any)
+                    .select('score_team_a, score_team_b')
+                    .eq('id', matchId)
+                    .single();
 
-            if (data) {
-                setGameResult({
-                    a: data.score_team_a || 0,
-                    b: data.score_team_b || 0
-                });
+                if (data) {
+                    const d = data as any;
+                    setGameResult({
+                        a: d.score_team_a || 0,
+                        b: d.score_team_b || 0
+                    });
+                }
+            } else {
+                // Fallback to app_settings (legacy or default)
+                const { data } = await supabase
+                    .from('app_settings')
+                    .select('score_team_a, score_team_b')
+                    .single();
+
+                if (data) {
+                    setGameResult({
+                        a: data.score_team_a || 0,
+                        b: data.score_team_b || 0
+                    });
+                }
             }
         };
 
         fetchOfficialResult();
 
-        // Optional: Subscribe to changes for realtime updates
+        // Subscribe to real-time updates
+        const table = matchId ? 'matches' : 'app_settings';
+        const filter = matchId ? `id=eq.${matchId}` : undefined;
+
         const channel = supabase
-            .channel('public:app_settings')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'app_settings' }, (payload) => {
+            .channel('public:live_draw_updates')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table, filter }, (payload) => {
                 const newData = payload.new as any;
                 if (newData) {
                     setGameResult({
@@ -63,18 +83,25 @@ const LiveDraw = () => {
         return () => {
             supabase.removeChannel(channel);
         };
-    }, []);
+    }, [matchId]);
 
     const fetchEligibleCandidates = async () => {
         setLoading(true);
         setWinner(null);
         try {
             console.log(`Searching for: ${gameResult.a}x${gameResult.b}`);
-            const { data, error } = await supabase
+
+            let query = supabase
                 .from("palpites")
                 .select("*")
                 .eq("placar_time_a", gameResult.a)
                 .eq("placar_time_b", gameResult.b);
+
+            if (matchId) {
+                query = query.eq('match_id', matchId);
+            }
+
+            const { data, error } = await query;
 
             if (error) throw error;
 
@@ -251,7 +278,7 @@ const LiveDraw = () => {
                             ) : (
                                 <div>
                                     <h2 className="text-4xl font-bold text-slate-800 mb-4 transition-all">
-                                        {drawing ? candidates[displayIndex]?.nome_completo : "Preparado?"}
+                                        {drawing ? (candidates[displayIndex] ? candidates[displayIndex].nome_completo : "...") : "Preparado?"}
                                     </h2>
                                     {drawing && (
                                         <p className="text-xl text-slate-500 animate-pulse">Sorteando...</p>

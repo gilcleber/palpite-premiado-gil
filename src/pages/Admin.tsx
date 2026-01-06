@@ -20,7 +20,7 @@ const Admin = () => {
   }, []);
 
   const fetchMatches = async () => {
-    const { data } = await supabase.from("matches").select("*").order("created_at", { ascending: false });
+    const { data } = await supabase.from("matches" as any).select("*").order("created_at", { ascending: false });
     if (data && data.length > 0) {
       setMatches(data);
       if (!selectedMatchId) setSelectedMatchId(data[0].id);
@@ -68,6 +68,7 @@ const Admin = () => {
         onLogout={async () => {
           window.location.href = '/';
         }}
+        selectedMatchId={selectedMatchId}
       />
 
       {/* GLOBAL GAME SELECTOR */}
