@@ -40,7 +40,7 @@ const Index = () => {
       const { data } = await supabase
         .from('matches' as any)
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('draw_date', { ascending: true });
 
       if (data) {
         setAvailableMatches(data);
