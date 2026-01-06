@@ -47,29 +47,37 @@ const BettingForm = () => {
     team2: null,
   });
 
+  const [matchId, setMatchId] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
+        // Fetch latest active match from the new table
         const { data, error } = await supabase
-          .from("app_settings")
+          .from("matches")
           .select("*")
+          .eq('status', 'open')
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single();
 
         if (!error && data) {
           const typedData = data as any;
+          setMatchId(typedData.id); // Save Match ID
+
           if (typedData.draw_date) {
             setGameDate(typedData.draw_date);
           }
 
           setFormData(prev => ({
             ...prev,
-            team1Name: typedData.team_a || "Time A",
-            team2Name: typedData.team_b || "Time B"
+            team1Name: typedData.team_a_name || "Time A", // Note column name changes
+            team2Name: typedData.team_b_name || "Time B"
           }));
 
           setLogos({
-            team1: typedData.team_a_logo_url,
-            team2: typedData.team_b_logo_url,
+            team1: typedData.team_a_logo,
+            team2: typedData.team_b_logo,
           });
         }
       } catch (err) {
@@ -216,7 +224,8 @@ const BettingForm = () => {
         placar_time_a: a,
         placar_time_b: b,
         escolha: formData.selectedOption || "",
-        game_date: effectiveDate
+        game_date: effectiveDate,
+        match_id: matchId // Link bet to specific match
       };
 
       const { error: insertError } = await supabase.from("palpites").insert(insertPayload);

@@ -68,7 +68,23 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
             setLoading(false);
         };
 
-        loadMatch();
+        if (matchId) {
+            loadMatch();
+        } else {
+            // RESET FORM FOR NEW GAME
+            setFormData({
+                team_a_name: "",
+                team_b_name: "",
+                team_a_logo: "",
+                team_b_logo: "",
+                draw_date: "",
+                draw_time: "",
+                prize_title: "",
+                prize_description: "",
+                prize_image_url: "",
+                prize_gallery: []
+            });
+        }
     }, [matchId]);
 
     const handleChange = (field: string, value: any) => {
