@@ -107,7 +107,7 @@ const PrizeAnnouncement = ({ matchId: propMatchId }: { matchId?: string }) => {
 
               <div className="flex items-center justify-center text-sm text-[#1d244a]/80 font-medium bg-blue-50/50 py-1.5 px-4 rounded-full inline-flex border border-blue-100">
                 <Calendar className="h-4 w-4 mr-2 text-[#d19563]" />
-                <span>Sortneio: {settings.draw_date ? new Date(settings.draw_date).toLocaleString('pt-BR', {
+                <span>Sorteio: {settings.draw_date ? new Date(settings.draw_date).toLocaleString('pt-BR', {
                   day: '2-digit',
                   month: '2-digit',
                   year: 'numeric',
