@@ -29,20 +29,19 @@ const ModernInput = React.forwardRef<HTMLInputElement, ModernInputProps>(
       <div className="relative">
         <input
           type={type}
-          className={cn(
-            "peer w-full px-4 pt-6 pb-2 text-base bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-xl",
-            "focus:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20",
-            "transition-all duration-300 placeholder-transparent",
-            "hover:border-white/30",
-            error && "border-red-400 focus:border-red-400 focus:ring-red-400/20",
-            className
+            "peer w-full px-4 pt-6 pb-2 text-base text-white bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-xl",
+        "focus:border-white/50 focus:outline-none focus:ring-2 focus:ring-white/20",
+        "transition-all duration-300 placeholder-transparent",
+        "hover:border-white/30",
+        error && "border-red-400 focus:border-red-400 focus:ring-red-400/20",
+        className
           )}
-          ref={ref}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          onChange={handleChange}
-          placeholder=" "
-          {...props}
+        ref={ref}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        onChange={handleChange}
+        placeholder=" "
+        {...props}
         />
         {label && (
           <label
