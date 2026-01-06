@@ -119,7 +119,7 @@ const PrizeAnnouncement = ({ matchId: propMatchId }: { matchId?: string }) => {
 
             {/* Images Grid (Bottom - Side by Side) */}
             <div className="w-full flex justify-center">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 animate-fade-in">
+              <div className="flex flex-wrap justify-center gap-4 animate-fade-in">
 
                 {/* Main Image */}
                 {settings.prize_image_url && (
