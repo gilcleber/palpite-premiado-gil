@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom"; // Keep useNavigate for potential future use or if it's implicitly used elsewhere
 import { Loader2 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -9,15 +11,22 @@ import LicenseManager from "@/components/admin/LicenseManager";
 import { useAuth } from "@/hooks/useAuth"; // Changed from useAdminAuth
 
 const Admin = () => {
-  const { isAdmin, role, licenseExpired, loading } = useAuth(); // Added role, licenseExpired, loading
-  const navigate = useNavigate(); // Keep navigate for potential future use, though not used in the provided snippet
+  const { isAdmin, role, licenseExpired, loading } = useAuth();
+  const [matches, setMatches] = useState<any[]>([]);
+  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
-  // console.log("Admin component - isAdmin:", isAdmin, "user:", !!user); // Removed, as user is not destructured from useAuth anymore
+  useEffect(() => {
+    fetchMatches();
+  }, []);
 
-  // Removed handleLogout as it's not part of the new structure
+  const fetchMatches = async () => {
+    const { data } = await supabase.from("matches").select("*").order("created_at", { ascending: false });
+    if (data && data.length > 0) {
+      setMatches(data);
+      if (!selectedMatchId) setSelectedMatchId(data[0].id);
+    }
+  };
 
-  // FIX: Only show loading spinner if actually loading. 
-  // If loading is false and role is null, we should fall through to "Acesso Negado".
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1d244a] to-[#2a3459]">
@@ -28,7 +37,7 @@ const Admin = () => {
   }
 
   if (!isAdmin) {
-    return <div className="text-center mt-20 text-white text-xl">Acesso Negado</div>; // Added text-white for visibility
+    return <div className="text-center mt-20 text-white text-xl">Acesso Negado</div>;
   }
 
   if (licenseExpired) {
@@ -57,14 +66,39 @@ const Admin = () => {
         activeTab="settings"
         setActiveTab={() => { }}
         onLogout={async () => {
-          // Basic logout mock since useAuth.signOut is void
           window.location.href = '/';
         }}
       />
+
+      {/* GLOBAL GAME SELECTOR */}
+      <div className="bg-white border-b shadow-sm sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Gerenciando Jogo:</span>
+            <select
+              className="bg-[#1d244a] text-white px-4 py-2 rounded-lg font-medium outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer text-sm shadow-md transition-all hover:bg-[#2a3459]"
+              value={selectedMatchId || ""}
+              onChange={(e) => setSelectedMatchId(e.target.value)}
+            >
+              {matches.map(m => (
+                <option key={m.id} value={m.id}>
+                  {m.team_a_name} x {m.team_b_name}
+                </option>
+              ))}
+              {matches.length === 0 && <option value="">Nenhum jogo criado</option>}
+            </select>
+          </div>
+          {selectedMatchId && (
+            <div className="text-xs text-gray-400">
+              ID: {selectedMatchId.slice(0, 8)}...
+            </div>
+          )}
+        </div>
+      </div>
+
       <main className="container mx-auto py-8 px-4 animate-fade-in">
         <Tabs defaultValue="participants" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-4 h-auto p-1 bg-white border shadow-sm rounded-xl"> {/* Adjusted grid-cols */}
-
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-4 h-auto p-1 bg-white border shadow-sm rounded-xl">
             <TabsTrigger value="participants" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               👥 Participantes
             </TabsTrigger>
@@ -76,13 +110,11 @@ const Admin = () => {
             </TabsTrigger>
           </TabsList>
 
-
-
           <TabsContent value="participants" className="outline-none">
-            <ParticipantsList />
+            <ParticipantsList matchId={selectedMatchId} />
           </TabsContent>
           <TabsContent value="winners">
-            <WinnerDraw />
+            <WinnerDraw matchId={selectedMatchId} />
           </TabsContent>
           <TabsContent value="settings">
             <SettingsTab />

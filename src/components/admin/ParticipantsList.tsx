@@ -28,7 +28,7 @@ interface Participant {
   created_at: string;
 }
 
-const ParticipantsList = () => {
+const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [filteredParticipants, setFilteredParticipants] = useState<Participant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,7 +36,7 @@ const ParticipantsList = () => {
 
   useEffect(() => {
     loadParticipants();
-  }, []);
+  }, [matchId]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {

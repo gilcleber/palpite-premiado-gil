@@ -189,7 +189,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                                 <Input
                                     value={formData.team_a_name}
                                     onChange={e => handleChange("team_a_name", e.target.value)}
-                                    placeholder="Ex: Guarani"
+                                    placeholder="Ex: Brasil"
                                     className="bg-white"
                                 />
                             </div>
@@ -212,7 +212,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                                 <Input
                                     value={formData.team_b_name}
                                     onChange={e => handleChange("team_b_name", e.target.value)}
-                                    placeholder="Ex: Primavera"
+                                    placeholder="Ex: Argentina"
                                     className="bg-white"
                                 />
                             </div>
