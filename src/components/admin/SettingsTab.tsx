@@ -1,29 +1,51 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Plus, Settings2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/hooks/use-toast";
-import { Save, Loader2 } from "lucide-react";
-import ImageUpload from "./ImageUpload";
-import MatchList from "./MatchList";
+import { Input } from "@/components/ui/input";
 import MatchEditor from "./MatchEditor";
+import ImageUpload from "./ImageUpload";
+import { toast } from "@/hooks/use-toast";
+import { Loader2, Save } from "lucide-react";
+
+interface MatchSimple {
+  id: string;
+  team_a_name: string;
+  team_b_name: string;
+}
 
 const SettingsTab = () => {
-  const [view, setView] = useState<'list' | 'create' | 'edit'>('list');
-  const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
+  const [matches, setMatches] = useState<MatchSimple[]>([]);
+  const [activeTab, setActiveTab] = useState<string>("new");
+  const [loading, setLoading] = useState(true);
 
-  // Global Radio Settings State
+  // Global Settings State
   const [globalSettings, setGlobalSettings] = useState<{ id: string, radio_logo_url: string | null, radio_slogan: string | null } | null>(null);
   const [savingGlobal, setSavingGlobal] = useState(false);
 
-  // Load Global Settings (Radio Identity)
+  const fetchEverything = async () => {
+    setLoading(true);
+    // 1. Fetch Matches
+    const { data: matchesData } = await supabase.from("matches").select("id, team_a_name, team_b_name").order("created_at", { ascending: true });
+
+    // 2. Fetch Global Settings
+    const { data: appData } = await supabase.from("app_settings").select("id, radio_logo_url, radio_slogan").single();
+
+    if (matchesData) setMatches(matchesData as any);
+    if (appData) setGlobalSettings(appData as any);
+
+    // Auto-select first match if exists and we are in "loading" phase
+    if (matchesData && matchesData.length > 0 && activeTab === 'new' && loading) {
+      setActiveTab(matchesData[0].id);
+    }
+
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const fetchGlobal = async () => {
-      const { data } = await supabase.from("app_settings").select("id, radio_logo_url, radio_slogan").single();
-      if (data) setGlobalSettings(data as any);
-    };
-    fetchGlobal();
+    fetchEverything();
   }, []);
 
   const saveGlobalSettings = async () => {
@@ -36,38 +58,64 @@ const SettingsTab = () => {
     }).eq("id", globalSettings.id);
 
     setSavingGlobal(false);
-    if (!error) toast({ title: "Salvo", description: "Identidade da Rádio atualizada." });
-    else toast({ title: "Erro", description: "Falha ao salvar.", variant: "destructive" });
+    if (!error) toast({ title: "Salvo", description: "Identidade Global atualizada." });
+    else toast({ title: "Erro", description: "Falha ao salvar identidade." });
   };
-
-  // View Handlers
-  const handleCreate = () => {
-    setSelectedMatchId(null);
-    setView('create');
-  };
-
-  const handleEdit = (id: string) => {
-    setSelectedMatchId(id);
-    setView('edit');
-  };
-
-  const handleBack = () => {
-    setView('list');
-    setSelectedMatchId(null);
-  };
-
-  // Renders
-  if (view === 'create' || view === 'edit') {
-    return <MatchEditor matchId={selectedMatchId} onBack={handleBack} onSave={handleBack} />;
-  }
 
   return (
     <div className="space-y-8">
-      {/* Global Identity Section */}
+      {/* HEADER with TABS */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-[#1d244a]">Gerenciar Jogos</h2>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="w-full justify-start h-auto flex-wrap gap-2 bg-transparent p-0">
+            {matches.map(m => (
+              <TabsTrigger
+                key={m.id}
+                value={m.id}
+                className="data-[state=active]:bg-[#1d244a] data-[state=active]:text-white border bg-gray-50 px-4 py-2 rounded-lg"
+              >
+                {m.team_a_name} x {m.team_b_name}
+              </TabsTrigger>
+            ))}
+
+            <TabsTrigger
+              value="new"
+              className="data-[state=active]:bg-green-600 data-[state=active]:text-white border border-green-200 bg-green-50 text-green-700 font-bold px-4 py-2 rounded-lg ml-auto"
+            >
+              <Plus className="w-4 h-4 mr-2" /> ADICIONAR NOVO JOGO
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Content Area */}
+          <div className="mt-6">
+            {activeTab === 'new' ? (
+              <MatchEditor
+                matchId={null}
+                onSaveSuccess={() => {
+                  fetchEverything();
+                  // Ideally switch to the new one, but fetching puts it in list
+                }}
+              />
+            ) : (
+              <MatchEditor
+                key={activeTab} // Force re-render on tab change
+                matchId={activeTab}
+                onSaveSuccess={fetchEverything}
+              />
+            )}
+          </div>
+        </Tabs>
+      </div>
+
+      {/* GLOBAL IDENTITY SECTION (Always Visible at Bottom) */}
       <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-lg">
         <CardHeader className="bg-[#1d244a] text-white rounded-t-lg">
-          <CardTitle className="text-white">Identidade da Rádio (Global)</CardTitle>
-          <p className="text-xs text-white/70">Logo e slogan que aparecem em todos os jogos.</p>
+          <CardTitle className="text-white flex items-center"><Settings2 className="mr-2" /> Identidade da Rádio (Global)</CardTitle>
+          <p className="text-xs text-white/70">Logo e slogan que aparecem em TODOS os jogos.</p>
         </CardHeader>
         <CardContent className="space-y-4 p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -100,9 +148,6 @@ const SettingsTab = () => {
           </div>
         </CardContent>
       </Card>
-
-      {/* Matches List */}
-      <MatchList onCreate={handleCreate} onEdit={handleEdit} />
     </div>
   );
 };

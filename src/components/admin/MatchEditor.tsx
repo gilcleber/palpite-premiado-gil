@@ -5,224 +5,284 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Save, ArrowLeft, Trash2, Plus } from "lucide-react";
+import { Loader2, Save, Trash2, Plus, Copy, ExternalLink } from "lucide-react";
 import ImageUpload from "./ImageUpload";
-
-interface MatchData {
-    id?: string;
-    team_a_name: string;
-    team_b_name: string;
-    team_a_logo: string | null;
-    team_b_logo: string | null;
-    draw_date: string | null;
-    prize_title: string;
-    prize_description: string;
-    prize_image_url: string | null;
-    prize_gallery: string[];
-    status: string;
-}
+import { format } from "date-fns";
 
 interface MatchEditorProps {
-    matchId: string | null; // Null = Create New
-    onBack: () => void;
-    onSave: () => void;
+    matchId: string | null; // If null, we are creating a new one
+    onSaveSuccess: () => void;
+    onCancel?: () => void;
 }
 
-const MatchEditor = ({ matchId, onBack, onSave }: MatchEditorProps) => {
-    const [loading, setLoading] = useState(false); // Init false, set true if fetching
+const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => {
+    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
 
-    const [data, setData] = useState<MatchData>({
+    // Form State
+    const [formData, setFormData] = useState({
         team_a_name: "",
         team_b_name: "",
-        team_a_logo: null,
-        team_b_logo: null,
-        draw_date: null,
+        team_a_logo: "",
+        team_b_logo: "",
+        draw_date: "",
+        draw_time: "",
         prize_title: "",
         prize_description: "",
-        prize_image_url: null,
-        prize_gallery: [],
-        status: "open"
+        prize_image_url: "",
+        prize_gallery: [] as string[]
     });
 
-    // Load data if editing
+    // Load Match Data
     useEffect(() => {
-        if (matchId) {
-            const loadMatch = async () => {
-                setLoading(true);
-                const { data: match, error } = await supabase.from("matches").select("*").eq("id", matchId).single();
-                if (error) {
-                    toast({ title: "Erro", description: "Falha ao carregar jogo.", variant: "destructive" });
-                    onBack();
-                    return;
+        const loadMatch = async () => {
+            if (!matchId) return; // New mode
+            setLoading(true);
+
+            const { data, error } = await supabase.from("matches").select("*").eq("id", matchId).single();
+            if (error) {
+                toast({ title: "Erro", description: "Falha ao carregar jogo.", variant: "destructive" });
+            } else if (data) {
+                // Parse date/time
+                let dDate = "";
+                let dTime = "";
+                if (data.draw_date) {
+                    const dateObj = new Date(data.draw_date);
+                    dDate = dateObj.toLocaleDateString('pt-BR').split('/').reverse().join('-'); // YYYY-MM-DD
+                    dTime = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 }
-                if (match) {
-                    // Type safely map fields
-                    setData({
-                        id: match.id,
-                        team_a_name: match.team_a_name,
-                        team_b_name: match.team_b_name,
-                        team_a_logo: match.team_a_logo,
-                        team_b_logo: match.team_b_logo,
-                        draw_date: match.draw_date,
-                        prize_title: match.prize_title || "",
-                        prize_description: match.prize_description || "",
-                        prize_image_url: match.prize_image_url,
-                        prize_gallery: (match.prize_gallery as string[]) || [],
-                        status: match.status || "open"
-                    });
-                }
-                setLoading(false);
-            };
-            loadMatch();
-        }
+
+                setFormData({
+                    team_a_name: data.team_a_name || "",
+                    team_b_name: data.team_b_name || "",
+                    team_a_logo: data.team_a_logo || "",
+                    team_b_logo: data.team_b_logo || "",
+                    draw_date: dDate,
+                    draw_time: dTime,
+                    prize_title: data.prize_title || "",
+                    prize_description: data.prize_description || "",
+                    prize_image_url: data.prize_image_url || "",
+                    prize_gallery: (data.prize_gallery as string[]) || []
+                });
+            }
+            setLoading(false);
+        };
+
+        loadMatch();
     }, [matchId]);
 
+    const handleChange = (field: string, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
     const handleSave = async () => {
-        if (!data.team_a_name || !data.team_b_name) {
-            toast({ title: "Atenção", description: "Preencha o nome dos times.", variant: "destructive" });
+        if (!formData.team_a_name || !formData.team_b_name) {
+            toast({ title: "Atenção", description: "Preencha os nomes dos times.", variant: "destructive" });
             return;
         }
 
         setSaving(true);
         try {
+            // Construct Timestamp
+            let finalDate = null;
+            if (formData.draw_date && formData.draw_time) {
+                finalDate = new Date(`${formData.draw_date}T${formData.draw_time}`).toISOString();
+            }
+
             const payload = {
-                team_a_name: data.team_a_name,
-                team_b_name: data.team_b_name,
-                team_a_logo: data.team_a_logo,
-                team_b_logo: data.team_b_logo,
-                draw_date: data.draw_date,
-                prize_title: data.prize_title,
-                prize_description: data.prize_description,
-                prize_image_url: data.prize_image_url,
-                prize_gallery: data.prize_gallery,
-                status: data.status,
-                updated_at: new Date().toISOString(),
+                team_a_name: formData.team_a_name,
+                team_b_name: formData.team_b_name,
+                team_a_logo: formData.team_a_logo,
+                team_b_logo: formData.team_b_logo,
+                draw_date: finalDate,
+                prize_title: formData.prize_title,
+                prize_description: formData.prize_description,
+                prize_image_url: formData.prize_image_url,
+                prize_gallery: formData.prize_gallery
             };
 
             if (matchId) {
-                // Update
                 const { error } = await supabase.from("matches").update(payload).eq("id", matchId);
                 if (error) throw error;
-                toast({ title: "Sucesso", description: "Jogo atualizado!" });
+                toast({ title: "Salvo!", description: "Dados da partida atualizados." });
             } else {
-                // Create
                 const { error } = await supabase.from("matches").insert([payload]);
                 if (error) throw error;
-                toast({ title: "Criado", description: "Novo jogo criado com sucesso!" });
+                toast({ title: "Criado!", description: "Nova partida criada com sucesso." });
             }
-            onSave(); // Go back to list
-        } catch (error) {
-            console.error(error);
-            toast({ title: "Erro", description: "Erro ao salvar.", variant: "destructive" });
+            onSaveSuccess();
+        } catch (e) {
+            console.error(e);
+            toast({ title: "Erro", description: "Erro ao salvar partida.", variant: "destructive" });
         } finally {
             setSaving(false);
         }
     };
 
-    // Helper Inputs
-    const handlePropChange = (field: keyof MatchData, val: any) => setData({ ...data, [field]: val });
-
-    if (loading) return <div className="p-8"><Loader2 className="animate-spin" /> Carregando...</div>;
+    if (loading) return <div className="p-8"><Loader2 className="animate-spin" /> Carregando partida...</div>;
 
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" onClick={onBack} size="sm"><ArrowLeft className="mr-2 h-4 w-4" /> Voltar</Button>
-                <h2 className="text-xl font-bold text-[#1d244a]">{matchId ? "Editar Jogo" : "Criar Novo Jogo"}</h2>
-            </div>
+        <div className="space-y-8 animate-fade-in">
+            {/* HEADER ACTIONS (Link Copy) */}
+            {matchId && (
+                <div className="flex justify-end gap-2 bg-blue-50 p-2 rounded-lg border border-blue-100">
+                    <span className="text-sm text-blue-800 flex items-center mr-auto px-2">
+                        <strong>ID:</strong>&nbsp;{matchId.slice(0, 8)}...
+                    </span>
+                    <Button variant="outline" size="sm" onClick={() => {
+                        navigator.clipboard.writeText(`${window.location.origin}/game/${matchId}`);
+                        toast({ title: "Copiado", description: "Link da partida copiado!" });
+                    }}>
+                        <Copy className="w-4 h-4 mr-2" /> Copiar Link
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => window.open(`/game/${matchId}`, '_blank')}>
+                        <ExternalLink className="w-4 h-4 mr-2" /> Ver Página
+                    </Button>
+                </div>
+            )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Teams */}
-                <Card>
-                    <CardHeader><CardTitle>Times</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                            <label className="text-sm font-medium">Time A (Mandante)</label>
-                            <Input value={data.team_a_name} onChange={e => handlePropChange("team_a_name", e.target.value)} placeholder="Ex: Flamengo" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Logo A</label>
-                            <ImageUpload
-                                bucketName="images"
-                                currentImageUrl={data.team_a_logo}
-                                onUploadComplete={url => handlePropChange("team_a_logo", url)}
-                                onClear={() => handlePropChange("team_a_logo", null)}
-                            />
-                        </div>
-                        <div className="border-t pt-4">
-                            <label className="text-sm font-medium">Time B (Visitante)</label>
-                            <Input value={data.team_b_name} onChange={e => handlePropChange("team_b_name", e.target.value)} placeholder="Ex: Vasco" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium">Logo B</label>
-                            <ImageUpload
-                                bucketName="images"
-                                currentImageUrl={data.team_b_logo}
-                                onUploadComplete={url => handlePropChange("team_b_logo", url)}
-                                onClear={() => handlePropChange("team_b_logo", null)}
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
-
-                {/* Schedule & Main Prize */}
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader><CardTitle>Data & Horário</CardTitle></CardHeader>
-                        <CardContent>
-                            <Input
-                                type="datetime-local"
-                                value={data.draw_date ? new Date(data.draw_date).toISOString().slice(0, 16) : ""}
-                                onChange={e => handlePropChange("draw_date", new Date(e.target.value).toISOString())}
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader><CardTitle>Prêmio Principal</CardTitle></CardHeader>
-                        <CardContent className="space-y-4">
-                            <Input placeholder="Título do Prêmio" value={data.prize_title} onChange={e => handlePropChange("prize_title", e.target.value)} />
-                            <Textarea placeholder="Descrição" value={data.prize_description} onChange={e => handlePropChange("prize_description", e.target.value)} />
+            {/* CARD 1: PARTIDA */}
+            <Card className="bg-white/95 backdrop-blur-sm border-0 shadow-xl h-fit">
+                <CardHeader className="bg-[#1d244a] text-white rounded-t-lg">
+                    <CardTitle className="text-white">Configurações da Partida</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Team A */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                            <h4 className="font-semibold text-[#1d244a]">Time A (Mandante)</h4>
                             <div className="space-y-2">
-                                <label className="text-sm">Imagem de Capa</label>
-                                <ImageUpload
-                                    bucketName="images"
-                                    currentImageUrl={data.prize_image_url}
-                                    onUploadComplete={url => handlePropChange("prize_image_url", url)}
-                                    onClear={() => handlePropChange("prize_image_url", null)}
+                                <label className="text-sm font-medium">Nome do Time</label>
+                                <Input
+                                    value={formData.team_a_name}
+                                    onChange={e => handleChange("team_a_name", e.target.value)}
+                                    placeholder="Ex: Guarani"
+                                    className="bg-white"
                                 />
                             </div>
-                            {/* Gallery Logic Simplified */}
-                            <div className="space-y-2 pt-2 border-t">
-                                <label className="text-sm">Galeria ({data.prize_gallery.length} fotos)</label>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Logo do Time</label>
                                 <ImageUpload
-                                    label="Adicionar Foto à Galeria"
                                     bucketName="images"
-                                    onUploadComplete={url => handlePropChange("prize_gallery", [...data.prize_gallery, url])}
-                                    onClear={() => { }}
+                                    currentImageUrl={formData.team_a_logo}
+                                    onUploadComplete={url => handleChange("team_a_logo", url)}
+                                    onClear={() => handleChange("team_a_logo", "")}
                                 />
-                                <div className="flex gap-2 flex-wrap">
-                                    {data.prize_gallery.map((url, i) => (
-                                        <div key={i} className="relative w-16 h-16 border rounded bg-gray-100">
-                                            <img src={url} className="w-full h-full object-cover rounded" />
+                            </div>
+                        </div>
+
+                        {/* Team B */}
+                        <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
+                            <h4 className="font-semibold text-[#1d244a]">Time B (Visitante)</h4>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Nome do Time</label>
+                                <Input
+                                    value={formData.team_b_name}
+                                    onChange={e => handleChange("team_b_name", e.target.value)}
+                                    placeholder="Ex: Primavera"
+                                    className="bg-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Logo do Time</label>
+                                <ImageUpload
+                                    bucketName="images"
+                                    currentImageUrl={formData.team_b_logo}
+                                    onUploadComplete={url => handleChange("team_b_logo", url)}
+                                    onClear={() => handleChange("team_b_logo", "")}
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Date / Time */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Data do Sorteio</label>
+                            <Input type="date" value={formData.draw_date} onChange={e => handleChange("draw_date", e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Horário</label>
+                            <Input type="time" value={formData.draw_time} onChange={e => handleChange("draw_time", e.target.value)} />
+                        </div>
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* CARD 2: PREMIOS */}
+            <Card className="shadow-xl border-0 bg-white/95 backdrop-blur-sm">
+                <CardHeader className="bg-[#d19563] text-white rounded-t-lg">
+                    <CardTitle className="text-white">Gerenciar Prêmios</CardTitle>
+                </CardHeader>
+                <CardContent className="p-6 space-y-8">
+                    {/* Main Prize */}
+                    <div className="p-4 border-2 border-[#d19563]/20 rounded-xl bg-[#d19563]/5 relative">
+                        <div className="absolute top-0 right-0 bg-[#d19563] text-white text-xs px-2 py-1 rounded-bl-lg rounded-tr-lg font-bold">
+                            PRINCIPAL
+                        </div>
+                        <h3 className="font-bold text-lg text-[#d19563] mb-4">🏆 Prêmio Principal (Destaque)</h3>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Título</label>
+                                <Input value={formData.prize_title} onChange={e => handleChange("prize_title", e.target.value)} className="bg-white" />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Descrição</label>
+                                <Textarea value={formData.prize_description} onChange={e => handleChange("prize_description", e.target.value)} className="bg-white" rows={2} />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Imagem Principal (Capa)</label>
+                                <ImageUpload
+                                    bucketName="images"
+                                    currentImageUrl={formData.prize_image_url}
+                                    onUploadComplete={url => handleChange("prize_image_url", url)}
+                                    onClear={() => handleChange("prize_image_url", "")}
+                                />
+                            </div>
+
+                            {/* Gallery */}
+                            <div className="space-y-2 pt-4 border-t border-[#d19563]/20">
+                                <label className="text-sm font-medium">Galeria de Fotos (Opcional)</label>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
+                                    {formData.prize_gallery.map((url, idx) => (
+                                        <div key={idx} className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden border group">
+                                            <img src={url} className="w-full h-full object-cover" />
                                             <button onClick={() => {
-                                                const newG = [...data.prize_gallery];
-                                                newG.splice(i, 1);
-                                                handlePropChange("prize_gallery", newG);
-                                            }} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs">x</button>
+                                                const newG = [...formData.prize_gallery];
+                                                newG.splice(idx, 1);
+                                                handleChange("prize_gallery", newG);
+                                            }} className="absolute top-1 right-1 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
                                         </div>
                                     ))}
                                 </div>
+                                <ImageUpload
+                                    label="Adicionar foto à Galeria"
+                                    bucketName="images"
+                                    onUploadComplete={url => handleChange("prize_gallery", [...formData.prize_gallery, url])}
+                                    onClear={() => { }}
+                                />
                             </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
+                        </div>
 
-            <div className="flex justify-end pt-6">
-                <Button size="lg" onClick={handleSave} disabled={saving} className="bg-[#1d244a] text-white">
-                    {saving ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} {matchId ? "Salvar Alterações" : "Criar Jogo"}
+                        {/* NOTE: We removed the "Prêmios Extras" subsection from here because it requires a separate relation. 
+                    In the future, we can add a sub-component here to list/add Prizes linked to this matchId. 
+                    For now, focusing on the Main Prize as per the new structure. 
+                    If the user wants Extra Prizes per game, we need a PrizeList component that accepts matchId. 
+                */}
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="sticky bottom-4 z-50">
+                <Button
+                    onClick={handleSave}
+                    disabled={saving}
+                    size="lg"
+                    className="w-full shadow-2xl bg-[#1d244a] hover:bg-[#2a3459] text-white border-2 border-white/20"
+                >
+                    {saving ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} SALVAR DADOS DO JOGO
                 </Button>
             </div>
         </div>
