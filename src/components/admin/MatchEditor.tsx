@@ -11,7 +11,7 @@ import { format } from "date-fns";
 
 interface MatchEditorProps {
     matchId: string | null; // If null, we are creating a new one
-    onSaveSuccess: () => void;
+    onSaveSuccess: (newId?: string) => void;
     onCancel?: () => void;
 }
 
@@ -121,17 +121,34 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 const { error } = await supabase.from("matches").update(payload).eq("id", matchId);
                 if (error) throw error;
                 toast({ title: "Salvo!", description: "Dados da partida atualizados." });
+                onSaveSuccess();
             } else {
-                const { error } = await supabase.from("matches").insert([payload]);
+                const { data, error } = await supabase.from("matches").insert([payload]).select().single();
                 if (error) throw error;
                 toast({ title: "Criado!", description: "Nova partida criada com sucesso." });
+                if (data) onSaveSuccess(data.id);
             }
-            onSaveSuccess();
         } catch (e) {
             console.error(e);
             toast({ title: "Erro", description: "Erro ao salvar partida.", variant: "destructive" });
         } finally {
             setSaving(false);
+        }
+    };
+
+    const handleDelete = async () => {
+        if (!matchId) return;
+        if (!confirm("Tem certeza que deseja excluir este jogo? Essa ação não pode ser desfeita.")) return;
+
+        setSaving(true);
+        const { error } = await supabase.from("matches").delete().eq("id", matchId);
+        setSaving(false);
+
+        if (error) {
+            toast({ title: "Erro", description: "Falha ao excluir jogo.", variant: "destructive" });
+        } else {
+            toast({ title: "Excluído", description: "Jogo removido com sucesso." });
+            onSaveSuccess(); // Trigger refresh (parent will handle tab switch if logic provided, but simpler to just reload)
         }
     };
 
@@ -291,7 +308,17 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 </CardContent>
             </Card>
 
-            <div className="sticky bottom-4 z-50">
+            <div className="sticky bottom-4 z-50 flex gap-4">
+                {matchId && (
+                    <Button
+                        onClick={handleDelete}
+                        variant="destructive"
+                        size="lg"
+                        disabled={saving}
+                    >
+                        <Trash2 className="mr-2" /> EXCLUIR JOGO
+                    </Button>
+                )}
                 <Button
                     onClick={handleSave}
                     disabled={saving}

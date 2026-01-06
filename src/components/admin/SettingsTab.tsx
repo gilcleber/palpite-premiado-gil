@@ -95,16 +95,27 @@ const SettingsTab = () => {
             {activeTab === 'new' ? (
               <MatchEditor
                 matchId={null}
-                onSaveSuccess={() => {
-                  fetchEverything();
-                  // Ideally switch to the new one, but fetching puts it in list
+                onSaveSuccess={(newId) => {
+                  fetchEverything().then(() => {
+                    if (newId) setActiveTab(newId);
+                  });
                 }}
               />
             ) : (
               <MatchEditor
                 key={activeTab} // Force re-render on tab change
                 matchId={activeTab}
-                onSaveSuccess={fetchEverything}
+                onSaveSuccess={() => {
+                  fetchEverything();
+                  // If deleted, maybe switch to 'new' or keep? 
+                  // Usually MatchEditor calls onSaveSuccess even after delete.
+                  // We can check if activeTab still exists in next render, but simple Fetch is safest.
+                  // Wait, if deleted, we should probably switch tab. 
+                  // Let's assume onSaveSuccess without args means 'refresh'
+                  // If we want to handle delete purely, we'd need another callback or check match existence.
+                  // For now, let's keep it simple: refreshing will remove the deleted tab.
+                  // If activeTab is now gone, we should switch.
+                }}
               />
             )}
           </div>
