@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom"; // Keep useNavigate for potential future use or if it's implicitly used elsewhere
 import { Loader2 } from "lucide-react";
@@ -10,6 +10,9 @@ import SettingsTab from "@/components/admin/SettingsTab";
 import WinnerDraw from "@/components/admin/WinnerDraw";
 import LicenseManager from "@/components/admin/LicenseManager";
 import { useAuth } from "@/hooks/useAuth"; // Changed from useAdminAuth
+
+// Lazy load the hazardous component to isolate potential crashes
+const WinnersTab = lazy(() => import("@/components/admin/WinnersTab"));
 
 const Admin = () => {
   const { isAdmin, role, licenseExpired, loading } = useAuth();
@@ -146,6 +149,9 @@ const Admin = () => {
             <TabsTrigger value="winners" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               🏆 Sorteio
             </TabsTrigger>
+            <TabsTrigger value="history" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
+              📋 Ganhadores
+            </TabsTrigger>
             <TabsTrigger value="settings" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               ⚙️ Configurações
             </TabsTrigger>
@@ -156,6 +162,11 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="winners">
             <WinnerDraw matchId={selectedMatchId} />
+          </TabsContent>
+          <TabsContent value="history">
+            <Suspense fallback={<div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-[#1d244a]" /></div>}>
+              <WinnersTab />
+            </Suspense>
           </TabsContent>
           <TabsContent value="settings">
             <SettingsTab />
