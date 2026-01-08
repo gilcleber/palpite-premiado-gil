@@ -84,12 +84,41 @@ const PersonalInfoSection = ({ formData, handleChange }: PersonalInfoSectionProp
             name="phone"
             value={formData.phone}
             onChange={(e) => {
-              // Allow digits, spaces, parentheses, dashes and plus
-              let value = e.target.value.replace(/[^\d\s()\-+]/g, "");
-              e.target.value = value;
+              // Strict Brazilian phone format (11 digits: (XX) XXXXX-XXXX)
+              let value = e.target.value.replace(/\D/g, "");
+              if (value.length > 11) value = value.slice(0, 11);
+
+              if (value.length > 2) {
+                value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
+              }
+              if (value.length > 9) { // (XX) XXXXX-
+                value = `${value.slice(0, 10)}-${value.slice(10)}`;
+              } else if (value.length > 6) { // (XX) XXXX-
+                // Standard local legacy (obsolete but functional) or partial mobile
+                // Keeping simple logic: just add hyphen after 5th digit of the main part if long enough
+              }
+
+              // Better logic for 11 digits: (11) 91234-5678
+              // If it's already past 2, we formatted (XX). 
+              // Now we have up to 9 more digits. 
+              // We want (XX) XXXXX-XXXX
+
+              // Let's redo using a simpler replacer for 11 digits
+              const raw = e.target.value.replace(/\D/g, "");
+              let formatted = raw;
+
+              if (raw.length <= 11) {
+                formatted = raw
+                  .replace(/^(\d{2})(\d)/g, "($1) $2")
+                  .replace(/(\d{5})(\d{4})$/, "$1-$2");
+              }
+
+              e.target.value = formatted;
               handleChange(e);
             }}
-            label="Telefone"
+            label="Telefone (WhatsApp)"
+            placeholder="(DD) 9XXXX-XXXX"
+            maxLength={15}
             required
             className="touch-optimized"
           />

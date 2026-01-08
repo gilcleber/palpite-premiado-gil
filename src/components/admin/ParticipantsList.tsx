@@ -56,6 +56,23 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
     }
   }, [searchTerm, participants]);
 
+  /* New state for match details */
+  const [matchName, setMatchName] = useState("jogo");
+  const [teamNames, setTeamNames] = useState({ team1: "Time A", team2: "Time B" });
+
+  useEffect(() => {
+    const fetchMatchDetails = async () => {
+      if (!matchId) return;
+      const { data } = await supabase.from('matches' as any).select('team_a_name, team_b_name').eq('id', matchId).single();
+      if (data) {
+        const d = data as any;
+        setTeamNames({ team1: d.team_a_name, team2: d.team_b_name });
+        setMatchName(`${d.team_a_name}_vs_${d.team_b_name}`);
+      }
+    };
+    fetchMatchDetails();
+  }, [matchId]);
+
   const handleExportCSV = () => {
     if (filteredParticipants.length === 0) {
       alert("Não há dados para exportar.");
@@ -65,15 +82,16 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
     // Define columns
     const headers = [
       "Nome Completo",
+      "E-mail", // Added Email
       "Cidade",
       "Telefone",
       "CPF",
-      "Escolha",
+      "Time Escolhido", // Translated header
       "Placar A",
       "Placar B",
       "Data do Palpite",
       "Instagram",
-      "Total de Participações" // New column
+      "Total de Participações"
     ];
 
     // Calculate participation counts based on CPF for ALL participants (not just filtered)
@@ -89,21 +107,29 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
       const cpfKey = row.cpf.replace(/\D/g, "");
       const count = participationCounts.get(cpfKey) || 1;
 
+      // Translate choice
+      let escolhaTraduzida = row.escolha;
+      if (row.escolha === 'team1') escolhaTraduzida = teamNames.team1;
+      else if (row.escolha === 'team2') escolhaTraduzida = teamNames.team2;
+      else if (row.escolha === 'draw') escolhaTraduzida = 'Empate';
+
       // Clean data to avoid CSV breaks
       const clean = (text: string) => `"${(text || "").replace(/"/g, '""')}"`;
 
       return [
         clean(row.nome_completo),
+        // @ts-ignore - email might not be in interface yet but is in DB
+        clean(row.email || ""), // Add Email
         clean(row.cidade),
         clean(row.telefone),
         clean(row.cpf),
-        clean(row.escolha),
+        clean(escolhaTraduzida),
         row.placar_time_a,
         row.placar_time_b,
         clean(createdDate),
         // @ts-ignore - instagram might not be in interface yet but is in DB
         clean(row.instagram_handle || ""),
-        count // Add count column
+        count
       ].join(";");
     });
 
@@ -113,11 +139,12 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
     // Add Byte Order Mark for UTF-8 (fixes generic encoding issues in Excel)
     const blob = new Blob(["\ufeff" + csvString], { type: "text/csv;charset=utf-8;" });
 
-    // Create download link
+    // Create download link with dynamic filename
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `participantes_palpite_premiado_${new Date().toISOString().split('T')[0]}.csv`);
+    const sanitizedMatchName = matchName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    link.setAttribute("download", `participantes_${sanitizedMatchName}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

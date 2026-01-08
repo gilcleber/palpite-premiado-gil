@@ -196,8 +196,10 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
       return false;
     }
 
-    if (!formData.phone.trim() || formData.phone.replace(/\D/g, "").length < 10) {
-      toast.error("Por favor, insira um telefone válido");
+    // Validating for 10 or 11 digits (Landline or Mobile), but strictly numbers
+    const cleanPhone = formData.phone.replace(/\D/g, "");
+    if (!formData.phone.trim() || cleanPhone.length < 10) {
+      toast.error("Por favor, insira um telefone válido com DDD (mínimo 10 dígitos)");
       return false;
     }
 

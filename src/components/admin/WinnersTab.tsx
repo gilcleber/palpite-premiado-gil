@@ -182,6 +182,24 @@ const WinnersTab = () => {
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
+                                                    onClick={() => {
+                                                        const email = (winner.participant as any)?.email;
+                                                        if (email) {
+                                                            navigator.clipboard.writeText(email);
+                                                            toast({ title: "Email Copiado", description: email });
+                                                        } else {
+                                                            toast({ title: "Sem Email", description: "Email não encontrado", variant: "destructive" });
+                                                        }
+                                                    }}
+                                                    title="Copiar Email"
+                                                    className="h-8 w-8 p-0"
+                                                    disabled={!winner.participant}
+                                                >
+                                                    <span className="text-xs font-bold">@</span>
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
                                                     onClick={() => winner.participant && handleInstagramSearch(winner.participant.nome_completo, winner.participant.cidade)}
                                                     title="Buscar no Instagram"
                                                     className="h-8 w-8 p-0"
