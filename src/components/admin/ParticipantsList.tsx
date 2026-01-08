@@ -126,16 +126,32 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
   const loadParticipants = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+
+      // 1. Load all participants
+      const participantsQuery = supabase
         .from("palpites")
         .select("*")
         .eq("match_id", matchId)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      // 2. Load winners to exclude
+      const winnersQuery = supabase
+        .from('winners' as any)
+        .select('participant_id')
+        .eq('match_id', matchId);
 
-      setParticipants(data || []);
-      setFilteredParticipants(data || []);
+      const [participantsResult, winnersResult] = await Promise.all([participantsQuery, winnersQuery]);
+
+      if (participantsResult.error) throw participantsResult.error;
+
+      const allParticipants = participantsResult.data || [];
+      const winnerIds = (winnersResult.data || []).map((w: any) => w.participant_id);
+
+      // 3. Filter out winners
+      const nonWinners = allParticipants.filter(p => !winnerIds.includes(p.id));
+
+      setParticipants(nonWinners);
+      setFilteredParticipants(nonWinners);
     } catch (error) {
       console.error("Error loading participants:", error);
     } finally {
