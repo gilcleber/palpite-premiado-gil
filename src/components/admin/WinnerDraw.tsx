@@ -50,14 +50,54 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
     if (matchId) loadInitialData();
   }, [matchId]);
 
-  useEffect(() => {
-    filterParticipants();
-  }, [allParticipants, drawMode, officialResult]);
+  /* NEW: Load previous winners to filter them out */
+  const [previousWinnerIds, setPreviousWinnerIds] = useState<string[]>([]);
+
+  const loadPreviousWinners = async () => {
+    if (!matchId) return;
+    try {
+      const { data, error } = await supabase
+        .from('winners' as any)
+        .select('participant_id')
+        .eq('match_id', matchId);
+
+      if (error) throw error;
+
+      setPreviousWinnerIds(data.map((w: any) => w.participant_id));
+    } catch (err) {
+      console.error("Error loading previous winners:", err);
+    }
+  };
 
   const loadInitialData = async () => {
     setLoading(true);
-    await Promise.all([loadParticipants(), loadMatchSettings()]);
+    await Promise.all([loadParticipants(), loadMatchSettings(), loadPreviousWinners()]);
     setLoading(false);
+  };
+
+  /* NEW: Save winner to DB */
+  const saveWinnerToDB = async (winner: Participant) => {
+    if (!matchId) return;
+    try {
+      const { error } = await supabase
+        .from('winners' as any)
+        .insert({
+          match_id: matchId,
+          participant_id: winner.id,
+          prize_claimed: false
+        } as any);
+
+      if (error) throw error;
+
+      toast({ title: "Salvo!", description: "Ganhador registrado no histórico." });
+
+      // Update local exclusion list
+      setPreviousWinnerIds(prev => [...prev, winner.id]);
+
+    } catch (err) {
+      console.error("Error saving winner:", err);
+      toast({ title: "Erro", description: "Falha ao salvar ganhador no histórico.", variant: "destructive" });
+    }
   };
 
   const loadMatchSettings = async () => {
@@ -134,11 +174,18 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
     }
   };
 
+  useEffect(() => {
+    filterParticipants();
+  }, [allParticipants, drawMode, officialResult, previousWinnerIds]);
+
   const filterParticipants = () => {
     // First, filter by date if set
     let eligible = allParticipants;
 
-
+    // EXCLUDE PREVIOUS WINNERS
+    if (previousWinnerIds.length > 0) {
+      eligible = eligible.filter(p => !previousWinnerIds.includes(p.id));
+    }
 
     if (drawMode === 'all') {
       setCorrectGuesses(eligible);
@@ -186,8 +233,12 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
           description: `${correctGuesses[randomIndex].nome_completo} foi o vencedor do sorteio!`,
         });
 
-        // Store winner in localStorage
-        localStorage.setItem('winner', JSON.stringify(correctGuesses[randomIndex]));
+        const drawnWinner = correctGuesses[randomIndex];
+        // Save to DB immediately
+        saveWinnerToDB(drawnWinner);
+
+        // Store winner in localStorage (legacy support)
+        localStorage.setItem('winner', JSON.stringify(drawnWinner));
       }
     }, 100);
   };
