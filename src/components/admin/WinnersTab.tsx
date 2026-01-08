@@ -58,7 +58,7 @@ const WinnersTab = () => {
                 if (error) throw error;
 
                 if (mounted) {
-                    setWinners(data || []);
+                    setWinners((data as unknown as Winner[]) || []);
                 }
             } catch (error) {
                 console.error("Error fetching winners:", error);
