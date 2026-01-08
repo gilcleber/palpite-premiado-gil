@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Trash2, ExternalLink, Search } from "lucide-react";
+import { Loader2, Trash2, ExternalLink, Search, Eye, Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
 
 interface Winner {
@@ -24,6 +31,9 @@ interface Winner {
         nome_completo: string;
         cidade: string;
         telefone: string;
+        email: string; // Added
+        cpf: string; // Added
+        instagram: string; // Added
         escolha: string;
         placar_time_a: number;
         placar_time_b: number;
@@ -38,6 +48,7 @@ const WinnersTab = () => {
     const [winners, setWinners] = useState<Winner[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedWinner, setSelectedWinner] = useState<Winner | null>(null);
 
     useEffect(() => {
         let mounted = true;
@@ -46,6 +57,7 @@ const WinnersTab = () => {
             try {
                 setLoading(true);
                 // Use explicit type assertion for safety
+                // Fetching all fields from participants so email/cpf/instagram are included
                 const { data, error } = await supabase
                     .from('winners' as any)
                     .select(`
@@ -106,6 +118,12 @@ const WinnersTab = () => {
         toast({ title: "Copiado!", description: "Nome copiado. Abrindo busca..." });
 
         window.open(url, '_blank');
+    };
+
+    const copyToClipboard = (text: string, label: string) => {
+        if (!text) return;
+        navigator.clipboard.writeText(text);
+        toast({ title: "Copiado!", description: `${label} copiado.` });
     };
 
     const filteredWinners = winners.filter(w => {
@@ -182,15 +200,18 @@ const WinnersTab = () => {
                                                 <Button
                                                     variant="outline"
                                                     size="sm"
-                                                    onClick={() => {
-                                                        const email = (winner.participant as any)?.email;
-                                                        if (email) {
-                                                            navigator.clipboard.writeText(email);
-                                                            toast({ title: "Email Copiado", description: email });
-                                                        } else {
-                                                            toast({ title: "Sem Email", description: "Email não encontrado", variant: "destructive" });
-                                                        }
-                                                    }}
+                                                    onClick={() => setSelectedWinner(winner)}
+                                                    title="Ver Detalhes Completos"
+                                                    className="h-8 w-8 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                                    disabled={!winner.participant}
+                                                >
+                                                    <Eye className="h-4 w-4" />
+                                                </Button>
+
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => winner.participant && copyToClipboard(winner.participant.email, "Email")}
                                                     title="Copiar Email"
                                                     className="h-8 w-8 p-0"
                                                     disabled={!winner.participant}
@@ -224,6 +245,88 @@ const WinnersTab = () => {
                     </div>
                 )}
             </CardContent>
+
+            <Dialog open={!!selectedWinner} onOpenChange={(open) => !open && setSelectedWinner(null)}>
+                <DialogContent className="max-w-md bg-white">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl text-[#1d244a]">Detalhes do Ganhador</DialogTitle>
+                        <DialogDescription>
+                            Informações completas para retirada do prêmio.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {selectedWinner && selectedWinner.participant && (
+                        <div className="space-y-4">
+                            <div className="p-4 bg-gray-50 rounded-lg border space-y-3">
+                                <div className="grid grid-cols-3 gap-2 text-sm">
+                                    <span className="font-semibold text-gray-500">Nome:</span>
+                                    <span className="col-span-2 font-bold text-[#1d244a]">{selectedWinner.participant.nome_completo}</span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-sm items-center">
+                                    <span className="font-semibold text-gray-500">CPF:</span>
+                                    <div className="col-span-2 flex items-center gap-2">
+                                        <span>{selectedWinner.participant.cpf}</span>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(selectedWinner.participant!.cpf, "CPF")}>
+                                            <Copy className="h-3 w-3 text-gray-400" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-sm items-center">
+                                    <span className="font-semibold text-gray-500">Telefone:</span>
+                                    <div className="col-span-2 flex items-center gap-2">
+                                        <span>{selectedWinner.participant.telefone}</span>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => copyToClipboard(selectedWinner.participant!.telefone, "Telefone")}>
+                                            <Copy className="h-3 w-3 text-gray-400" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-sm items-center">
+                                    <span className="font-semibold text-gray-500">Email:</span>
+                                    <div className="col-span-2 flex items-center gap-2 overflow-hidden">
+                                        <span className="truncate" title={selectedWinner.participant.email}>{selectedWinner.participant.email}</span>
+                                        <Button variant="ghost" size="icon" className="h-5 w-5 shrink-0" onClick={() => copyToClipboard(selectedWinner.participant!.email, "Email")}>
+                                            <Copy className="h-3 w-3 text-gray-400" />
+                                        </Button>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-sm">
+                                    <span className="font-semibold text-gray-500">Instagram:</span>
+                                    <span className="col-span-2">{selectedWinner.participant.instagram}</span>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-sm">
+                                    <span className="font-semibold text-gray-500">Cidade:</span>
+                                    <span className="col-span-2">{selectedWinner.participant.cidade}</span>
+                                </div>
+                            </div>
+
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100 space-y-2">
+                                <h4 className="font-semibold text-[#1d244a] text-sm mb-2">Dados do Jogo</h4>
+                                {selectedWinner.match && (
+                                    <div className="text-sm">
+                                        <p className="font-medium text-[#1d244a]">{selectedWinner.match.team_a_name} x {selectedWinner.match.team_b_name}</p>
+                                    </div>
+                                )}
+                                <div className="text-sm flex gap-2">
+                                    <span className="text-gray-600">Palpite:</span>
+                                    <span className="font-bold text-green-700">
+                                        {selectedWinner.participant.placar_time_a} x {selectedWinner.participant.placar_time_b}
+                                    </span>
+                                </div>
+                                <div className="text-sm flex gap-2">
+                                    <span className="text-gray-600">Data do Sorteio:</span>
+                                    <span>{new Date(selectedWinner.drawn_at).toLocaleString("pt-BR")}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-end pt-2">
+                                <Button onClick={() => setSelectedWinner(null)}>
+                                    Fechar
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </Card>
     );
 };
