@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom"; // Keep useNavigate for potential future use or if it's implicitly used elsewhere
 import { Loader2 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ParticipantsList from "@/components/admin/ParticipantsList";
 import SettingsTab from "@/components/admin/SettingsTab";
@@ -89,6 +90,44 @@ const Admin = () => {
               ))}
               {matches.length === 0 && <option value="">Nenhum jogo criado</option>}
             </select>
+
+            {selectedMatchId && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={async () => {
+                  const match = matches.find(m => m.id === selectedMatchId);
+                  if (!match) return;
+
+                  const newVisible = !match.visible;
+                  // Optimistic update
+                  setMatches(matches.map(m => m.id === selectedMatchId ? { ...m, visible: newVisible } : m));
+
+                  const { error } = await supabase
+                    .from('matches' as any)
+                    .update({ visible: newVisible })
+                    .eq('id', selectedMatchId);
+
+                  if (error) {
+                    console.error("Error toggling visibility:", error);
+                    // Revert on error
+                    setMatches(matches.map(m => m.id === selectedMatchId ? { ...m, visible: match.visible } : m));
+                  }
+                }}
+                className={matches.find(m => m.id === selectedMatchId)?.visible ? "text-green-600" : "text-gray-400"}
+                title={matches.find(m => m.id === selectedMatchId)?.visible ? "Jogo Visível (Clique para ocultar)" : "Jogo Oculto (Clique para mostrar)"}
+              >
+                {matches.find(m => m.id === selectedMatchId)?.visible ? (
+                  <div className="flex items-center gap-2 px-2 py-1 bg-green-50 rounded-md border border-green-200">
+                    <span className="text-xs font-bold">ON</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-md border border-gray-200">
+                    <span className="text-xs font-bold">OFF</span>
+                  </div>
+                )}
+              </Button>
+            )}
           </div>
           {selectedMatchId && (
             <div className="text-xs text-gray-400">
