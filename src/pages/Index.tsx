@@ -40,6 +40,7 @@ const Index = () => {
       const { data } = await supabase
         .from('matches' as any)
         .select('*')
+        .eq('visible', true) // Only show visible matches
         .order('draw_date', { ascending: true });
 
       if (data) {
