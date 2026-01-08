@@ -146,6 +146,9 @@ const Admin = () => {
             <TabsTrigger value="winners" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               🏆 Sorteio
             </TabsTrigger>
+            <TabsTrigger value="history" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
+              📋 Ganhadores
+            </TabsTrigger>
             <TabsTrigger value="settings" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               ⚙️ Configurações
             </TabsTrigger>
@@ -156,6 +159,9 @@ const Admin = () => {
           </TabsContent>
           <TabsContent value="winners">
             <WinnerDraw matchId={selectedMatchId} />
+          </TabsContent>
+          <TabsContent value="history">
+            <WinnersHistory />
           </TabsContent>
           <TabsContent value="settings">
             <SettingsTab />
