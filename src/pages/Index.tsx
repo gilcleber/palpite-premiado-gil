@@ -104,7 +104,16 @@ const Index = () => {
                   onClick={() => navigate(`/game/${match.id}`)}
                 >
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-6">
-                    <div className="flex items-center justify-center gap-8 w-full">
+
+                    {match.championship_name && (
+                      <div className="absolute top-0 inset-x-0 bg-black/20 backdrop-blur-sm py-1.5 text-center">
+                        <span className="text-[#d19563] text-xs font-bold uppercase tracking-widest">
+                          {match.championship_name}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-center gap-8 w-full mt-4">
                       {/* Team A */}
                       <div className="flex flex-col items-center gap-2 flex-1">
                         <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full p-2 shadow-lg group-hover:scale-110 transition-transform">
