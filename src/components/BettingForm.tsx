@@ -102,11 +102,25 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
 
   const [matchId, setMatchId] = useState<string | null>(null);
 
+  const [matchDetails, setMatchDetails] = useState<{
+    team1Name: string;
+    team2Name: string;
+    team1Logo: string | null;
+    team2Logo: string | null;
+    drawDate?: string;
+    championship_name?: string; // Added
+  }>({
+    team1Name: "",
+    team2Name: "",
+    team1Logo: null,
+    team2Logo: null,
+  });
+
   useEffect(() => {
     const fetchSettings = async () => {
       try {
         // Fetch latest active match from the new table
-        let query = supabase.from("matches" as any).select("*");
+        let query = supabase.from("matches" as any).select("id, team_a_name, team_b_name, team_a_logo, team_b_logo, draw_date, championship_name");
 
         if (propMatchId) {
           query = query.eq('id', propMatchId);
@@ -133,6 +147,15 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
           setLogos({
             team1: typedData.team_a_logo,
             team2: typedData.team_b_logo,
+          });
+
+          setMatchDetails({
+            team1Name: typedData.team_a_name || "Time A",
+            team2Name: typedData.team_b_name || "Time B",
+            team1Logo: typedData.team_a_logo,
+            team2Logo: typedData.team_b_logo,
+            drawDate: typedData.draw_date,
+            championship_name: typedData.championship_name
           });
         }
       } catch (err) {
@@ -328,8 +351,13 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
             <Trophy className="h-8 w-8 text-[#d19563]" />
           </div>
           <h1 className="text-2xl font-bold text-white">PALPITE PREMIADO</h1>
-          <p className="text-gray-200 mt-1">
-            Preencha seus dados e escolha o cartaz para participar do sorteio
+          {matchDetails.championship_name && (
+            <div className="mt-2 inline-block px-3 py-1 bg-white/10 rounded-full text-blue-200 text-xs font-semibold uppercase tracking-wider border border-white/20">
+              {matchDetails.championship_name}
+            </div>
+          )}
+          <p className="text-gray-200 mt-2">
+            Preencha seus dados e escolha o placar para participar do sorteio
           </p>
         </div>
 

@@ -30,7 +30,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         prize_title: "",
         prize_description: "",
         prize_image_url: "",
-        prize_gallery: [] as string[]
+        prize_gallery: [] as string[],
+        championship_name: "" // Added
     });
 
     // Load Match Data
@@ -63,7 +64,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     prize_title: match.prize_title || "",
                     prize_description: match.prize_description || "",
                     prize_image_url: match.prize_image_url || "",
-                    prize_gallery: (match.prize_gallery as string[]) || []
+                    prize_gallery: (match.prize_gallery as string[]) || [],
+                    championship_name: match.championship_name || ""
                 });
             }
             setLoading(false);
@@ -83,7 +85,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 prize_title: "",
                 prize_description: "",
                 prize_image_url: "",
-                prize_gallery: []
+                prize_gallery: [],
+                championship_name: ""
             });
         }
     }, [matchId]);
@@ -115,7 +118,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 prize_title: formData.prize_title,
                 prize_description: formData.prize_description,
                 prize_image_url: formData.prize_image_url,
-                prize_gallery: formData.prize_gallery
+                prize_gallery: formData.prize_gallery,
+                championship_name: formData.championship_name
             };
 
             if (matchId) {
@@ -236,6 +240,19 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                                     onClear={() => handleChange("team_b_logo", "")}
                                 />
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Championship Name */}
+                    <div className="p-4 border rounded-lg bg-gray-50">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Nome do Campeonato</label>
+                            <Input
+                                value={formData.championship_name}
+                                onChange={e => handleChange("championship_name", e.target.value)}
+                                placeholder="Ex: Brasileirão Série B, Paulistão..."
+                                className="bg-white"
+                            />
                         </div>
                     </div>
 
