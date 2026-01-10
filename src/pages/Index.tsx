@@ -142,12 +142,17 @@ const Index = () => {
                     </div>
 
                     <div className="w-full pt-4 border-t border-white/10 space-y-3">
-                      {match.draw_date && (
+                      {match.game_date ? (
+                        <div className="bg-white/10 rounded-full px-4 py-1 text-sm text-blue-100 inline-flex items-center gap-2 mx-auto">
+                          <Calendar className="w-4 h-4 text-[#d19563]" />
+                          {new Date(match.game_date).toLocaleDateString('pt-BR')} às {new Date(match.game_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                      ) : (match.draw_date && (
                         <div className="bg-white/10 rounded-full px-4 py-1 text-sm text-blue-100 inline-flex items-center gap-2 mx-auto">
                           <Calendar className="w-4 h-4" />
-                          {new Date(match.draw_date).toLocaleDateString('pt-BR')} às {new Date(match.draw_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                          {new Date(match.draw_date).toLocaleDateString('pt-BR')} às {new Date(match.draw_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} (Sorteio)
                         </div>
-                      )}
+                      ))}
                       <p className="text-[#d19563] font-bold text-lg uppercase tracking-widest group-hover:text-white transition-colors">
                         Participe Agora
                       </p>

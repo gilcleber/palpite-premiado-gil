@@ -31,7 +31,9 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         prize_description: "",
         prize_image_url: "",
         prize_gallery: [] as string[],
-        championship_name: "" // Added
+        championship_name: "",
+        game_date: "", // Added
+        game_time: ""  // Added
     });
 
     // Load Match Data
@@ -65,7 +67,9 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     prize_description: match.prize_description || "",
                     prize_image_url: match.prize_image_url || "",
                     prize_gallery: (match.prize_gallery as string[]) || [],
-                    championship_name: match.championship_name || ""
+                    championship_name: match.championship_name || "",
+                    game_date: match.game_date ? new Date(match.game_date).toLocaleDateString('pt-BR').split('/').reverse().join('-') : "",
+                    game_time: match.game_date ? new Date(match.game_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ""
                 });
             }
             setLoading(false);
@@ -86,7 +90,9 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 prize_description: "",
                 prize_image_url: "",
                 prize_gallery: [],
-                championship_name: ""
+                championship_name: "",
+                game_date: "",
+                game_time: ""
             });
         }
     }, [matchId]);
@@ -109,12 +115,19 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 finalDate = new Date(`${formData.draw_date}T${formData.draw_time}`).toISOString();
             }
 
+            // Construct Game Timestamp
+            let gameDate = null;
+            if (formData.game_date && formData.game_time) {
+                gameDate = new Date(`${formData.game_date}T${formData.game_time}`).toISOString();
+            }
+
             const payload = {
                 team_a_name: formData.team_a_name,
                 team_b_name: formData.team_b_name,
                 team_a_logo: formData.team_a_logo,
                 team_b_logo: formData.team_b_logo,
                 draw_date: finalDate,
+                game_date: gameDate, // Added
                 prize_title: formData.prize_title,
                 prize_description: formData.prize_description,
                 prize_image_url: formData.prize_image_url,
@@ -265,6 +278,18 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                         <div className="space-y-2">
                             <label className="text-sm font-medium">Horário</label>
                             <Input type="time" value={formData.draw_time} onChange={e => handleChange("draw_time", e.target.value)} />
+                        </div>
+                    </div>
+
+                    {/* Game Date / Time */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Data do Jogo</label>
+                            <Input type="date" value={formData.game_date} onChange={e => handleChange("game_date", e.target.value)} />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Horário do Jogo</label>
+                            <Input type="time" value={formData.game_time} onChange={e => handleChange("game_time", e.target.value)} />
                         </div>
                     </div>
                 </CardContent>
