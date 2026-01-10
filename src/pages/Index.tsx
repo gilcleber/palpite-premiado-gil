@@ -191,7 +191,7 @@ const Index = () => {
 
         <div className="text-center space-y-6 animate-scale-in mt-12" style={{ animationDelay: '0.4s' }}>
           <p className="text-sm text-white/90 backdrop-blur-sm bg-white/15 rounded-full px-4 py-2 inline-block border border-white/20">
-            © 2025 Palpite Premiado. Todos os direitos reservados.
+            © {new Date().getFullYear()} Palpite Premiado. Todos os direitos reservados.
           </p>
 
           <div className="flex justify-center gap-4">
