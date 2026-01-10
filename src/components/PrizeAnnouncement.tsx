@@ -157,6 +157,11 @@ const PrizeAnnouncement = ({ matchId: propMatchId }: { matchId?: string }) => {
               </div>
             </div>
 
+            {/* Disclaimer */}
+            <p className="text-[10px] text-gray-400 mt-[-10px] italic z-10">
+              * Imagens meramente ilustrativas
+            </p>
+
             {/* Selected Image Modal/Overlay (Optional - simplified inline expansion if needed, but user just wanted them side by side) */}
             {/* Keeping it simple as requested: Just the grid view */}
 
