@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Download } from "lucide-react";
+import { Loader2, Search, Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -13,6 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { toast } from "sonner";
 
 interface Participant {
   id: string;
@@ -26,6 +27,8 @@ interface Participant {
   placar_time_a: number;
   placar_time_b: number;
   created_at: string;
+  email?: string;
+  instagram_handle?: string;
 }
 
 const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
@@ -72,6 +75,26 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
     };
     fetchMatchDetails();
   }, [matchId]);
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`Tem certeza que deseja excluir o participante ${name}? Essa ação não pode ser desfeita.`)) return;
+
+    try {
+      const { error } = await supabase
+        .from('palpites')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setParticipants(prev => prev.filter(p => p.id !== id));
+      // Re-filter handled by useEffect deps [participants]
+      toast.success("Participante excluído com sucesso.");
+    } catch (error) {
+      console.error("Error deleting participant:", error);
+      toast.error("Erro ao excluir participante.");
+    }
+  };
 
   const handleExportCSV = () => {
     if (filteredParticipants.length === 0) {
@@ -230,6 +253,7 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
                   <TableHead>Time Escolhido</TableHead>
                   <TableHead>Palpite</TableHead>
                   <TableHead>Data</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -255,11 +279,22 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
                       <TableCell>
                         {new Date(participant.created_at).toLocaleDateString("pt-BR")}
                       </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(participant.id, participant.nome_completo)}
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                          title="Excluir Participante"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-4">
+                    <TableCell colSpan={8} className="text-center py-4">
                       Nenhum participante encontrado
                     </TableCell>
                   </TableRow>
