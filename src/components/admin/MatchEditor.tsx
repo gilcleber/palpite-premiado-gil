@@ -200,11 +200,13 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
             {matchId && (
                 <div className="flex justify-end gap-2 bg-blue-50 p-2 rounded-lg border border-blue-100">
                     <span className="text-sm text-blue-800 flex items-center mr-auto px-2">
-                        <strong>ID:</strong>&nbsp;{matchId.slice(0, 8)}...
+                        <strong>Link:</strong>&nbsp;{formData.slug || matchId.slice(0, 8) + "..."}
                     </span>
                     <Button variant="outline" size="sm" onClick={() => {
                         const baseUrl = window.location.origin + window.location.pathname;
-                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${matchId}`;
+                        // Use slug if available, otherwise ID
+                        const identifier = formData.slug ? formData.slug : matchId;
+                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${identifier}`;
                         navigator.clipboard.writeText(finalUrl);
                         toast({ title: "Copiado", description: "Link da partida copiado!" });
                     }}>
@@ -212,7 +214,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
                         const baseUrl = window.location.origin + window.location.pathname;
-                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${matchId}`;
+                        const identifier = formData.slug ? formData.slug : matchId;
+                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${identifier}`;
                         window.open(finalUrl, '_blank');
                     }}>
                         <ExternalLink className="w-4 h-4 mr-2" /> Ver Página
