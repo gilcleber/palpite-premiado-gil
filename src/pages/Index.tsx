@@ -32,16 +32,35 @@ const Index = () => {
 
   useEffect(() => {
     const fetchMatches = async () => {
+      // 1. If we have a matchId (which could be a slug), try to find that specific match
       if (matchId) {
+        // Try UUID first
+        const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(matchId);
+
+        let query = supabase.from('matches' as any).select('*').eq('visible', true);
+
+        if (isUuid) {
+          query = query.eq('id', matchId);
+        } else {
+          query = query.eq('slug', matchId); // Search by slug
+        }
+
+        const { data } = await query.single();
+
+        if (data) {
+          setAvailableMatches([data]); // Only show this one
+        }
         setLoadingMatches(false);
         return;
       }
 
+      // 2. If no ID/Slug provided, fetch ALL matches (LOBBY MODE)
       const { data } = await supabase
         .from('matches' as any)
         .select('*')
-        .eq('visible', true) // Only show visible matches
-        .order('draw_date', { ascending: true });
+        .eq('visible', true)
+        .order('game_date', { ascending: true }) // Order by Game Date preferably
+        .order('draw_date', { ascending: true }); // Fallback
 
       if (data) {
         setAvailableMatches(data);
@@ -53,13 +72,10 @@ const Index = () => {
   }, [matchId]);
 
   // View Mode Logic
-  // 1. If matchId is present -> Show Specific Game
-  // 2. If !matchId but only 1 game -> Show Specific Game (Auto-select)
-  // 3. If !matchId and >1 games -> Show Lobby
-  // 4. If !matchId and 0 games -> Show Empty State
-
-  const showLobby = !matchId && availableMatches.length > 1;
-  const singleMatchId = matchId || (availableMatches.length === 1 ? availableMatches[0].id : null);
+  // Show Lobby if NO specific match is selected in URL (matchId is null)
+  // Show Game if matchId IS present and we found a match
+  const showLobby = !matchId;
+  const singleMatchId = matchId && availableMatches.length > 0 ? availableMatches[0].id : null;
   const showGame = !!singleMatchId;
 
   return (
@@ -101,7 +117,7 @@ const Index = () => {
                 <Card
                   key={match.id}
                   className="group relative overflow-hidden border-0 bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                  onClick={() => navigate(`/game/${match.id}`)}
+                  onClick={() => navigate(`/game/${match.slug || match.id}`)}
                 >
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-6">
 

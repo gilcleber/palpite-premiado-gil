@@ -32,8 +32,9 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         prize_image_url: "",
         prize_gallery: [] as string[],
         championship_name: "",
-        game_date: "", // Added
-        game_time: ""  // Added
+        slug: "", // Added
+        game_date: "",
+        game_time: ""
     });
 
     // Load Match Data
@@ -68,6 +69,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     prize_image_url: match.prize_image_url || "",
                     prize_gallery: (match.prize_gallery as string[]) || [],
                     championship_name: match.championship_name || "",
+                    slug: match.slug || "", // Added
                     game_date: match.game_date ? new Date(match.game_date).toLocaleDateString('pt-BR').split('/').reverse().join('-') : "",
                     game_time: match.game_date ? new Date(match.game_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ""
                 });
@@ -91,6 +93,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 prize_image_url: "",
                 prize_gallery: [],
                 championship_name: "",
+                slug: "", // Added
                 game_date: "",
                 game_time: ""
             });
@@ -98,6 +101,11 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
     }, [matchId]);
 
     const handleChange = (field: string, value: any) => {
+        // Auto-generate slug if title or team names change and slug is empty
+        if ((field === "team_a_name" || field === "team_b_name") && !formData.slug) {
+            // Logic handled in effect or simply let user type?
+            // Let's just update the field normally
+        }
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
@@ -141,7 +149,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 prize_description: formData.prize_description,
                 prize_image_url: formData.prize_image_url,
                 prize_gallery: formData.prize_gallery,
-                championship_name: formData.championship_name
+                championship_name: formData.championship_name,
+                slug: formData.slug || null // Added
             };
 
             if (matchId) {
@@ -267,14 +276,29 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
 
                     {/* Championship Name */}
                     <div className="p-4 border rounded-lg bg-gray-50">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Nome do Campeonato</label>
-                            <Input
-                                value={formData.championship_name}
-                                onChange={e => handleChange("championship_name", e.target.value)}
-                                placeholder="Ex: Brasileirão Série B, Paulistão..."
-                                className="bg-white"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Nome do Campeonato</label>
+                                <Input
+                                    value={formData.championship_name}
+                                    onChange={e => handleChange("championship_name", e.target.value)}
+                                    placeholder="Ex: Brasileirão Série B"
+                                    className="bg-white"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Link Personalizado (Slug)</label>
+                                <div className="flex items-center">
+                                    <span className="text-xs text-gray-500 mr-2">palpitepremiado.com/#/game/</span>
+                                    <Input
+                                        value={formData.slug}
+                                        onChange={e => handleChange("slug", e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}
+                                        placeholder="ex: guarani-x-ponte"
+                                        className="bg-white"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-400">Deixe em branco para usar o ID padrão.</p>
+                            </div>
                         </div>
                     </div>
 
