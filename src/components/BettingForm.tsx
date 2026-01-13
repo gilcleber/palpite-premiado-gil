@@ -28,7 +28,18 @@ export type FormData = {
   score: string | null;
 };
 
-export const SuccessModal = ({ open, onOpenChange }: { open: boolean, onOpenChange: (open: boolean) => void }) => {
+// Custom Success Modal Component
+export const SuccessModal = ({ open, onOpenChange, instagramHandle }: { open: boolean, onOpenChange: (open: boolean) => void, instagramHandle?: string }) => {
+  const handleFollow = () => {
+    // Try to open Instagram App, fallback to Web
+    const handle = instagramHandle?.replace('@', '') || "radiobandeirantescampinas";
+    const appUrl = `instagram://user?username=${handle}`;
+    const webUrl = `https://www.instagram.com/${handle}`;
+
+    // Simple heuristic: Try updated window location or just open standard link which usually handles both
+    window.open(webUrl, '_blank');
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-[#1d244a] to-[#2a3459] border-blue-400/30 text-white">
@@ -50,21 +61,29 @@ export const SuccessModal = ({ open, onOpenChange }: { open: boolean, onOpenChan
             <div className="space-y-1">
               <h4 className="font-bold text-pink-400">Atenção: Regra Obrigatória</h4>
               <p className="text-sm text-gray-300 leading-relaxed">
-                Para validar seu prêmio caso seja sorteado, você <strong>DEVE</strong> estar seguindo nosso perfil no Instagram.
+                Para validar seu prêmio, você <strong>DEVE</strong> estar seguindo nosso perfil no Instagram:
               </p>
-              <p className="text-xs text-gray-400 mt-2">
-                O ganhador que não estiver seguindo perderá o direito ao prêmio.
+              <p className="text-lg font-bold text-white mt-1">
+                {instagramHandle || "@radiobandeirantescampinas"}
               </p>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="flex-col sm:justify-center gap-2 mt-4">
+        <DialogFooter className="flex-col sm:justify-center gap-3 mt-4">
+          <button
+            onClick={handleFollow}
+            className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 uppercase tracking-wider flex items-center justify-center gap-2"
+          >
+            <Instagram className="w-5 h-5" />
+            Seguir no Instagram
+          </button>
+
           <button
             onClick={() => onOpenChange(false)}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg shadow-lg transition-all active:scale-95 uppercase tracking-wider"
+            className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-3 rounded-lg transition-all active:scale-95"
           >
-            Entendido, estou seguindo!
+            Já estou seguindo / Fechar
           </button>
         </DialogFooter>
       </DialogContent>
@@ -94,11 +113,23 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
   const [loading, setLoading] = useState(false);
   const [gameDate, setGameDate] = useState<string>("");
   const [showSuccess, setShowSuccess] = useState(false); // Success Modal State
+  const [instagramHandle, setInstagramHandle] = useState<string>("@radiobandeirantescampinas"); // Configured Handle
 
   const [logos, setLogos] = useState<{ team1: string | null; team2: string | null }>({
     team1: null,
     team2: null,
   });
+
+  // Load App Settings
+  useEffect(() => {
+    const fetchAppSettings = async () => {
+      const { data } = await supabase.from('app_settings').select('instagram_handle').single();
+      if (data && data.instagram_handle) {
+        setInstagramHandle(data.instagram_handle);
+      }
+    };
+    fetchAppSettings();
+  }, []);
 
   const [matchId, setMatchId] = useState<string | null>(null);
 
