@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Save, Trash2, Plus, Copy, ExternalLink } from "lucide-react";
+import { Loader2, Save, Trash2, Plus, Copy, ExternalLink, Search, Shield } from "lucide-react";
 import ImageUpload from "./ImageUpload";
 import { format } from "date-fns";
 
@@ -18,6 +19,11 @@ interface MatchEditorProps {
 const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+
+    // Team Library State
+    const [teams, setTeams] = useState<any[]>([]);
+    const [teamSelectorOpen, setTeamSelectorOpen] = useState<'A' | 'B' | null>(null);
+    const [teamSearch, setTeamSearch] = useState("");
 
     // Form State
     const [formData, setFormData] = useState({
@@ -36,6 +42,15 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         game_date: "",
         game_time: ""
     });
+
+    useEffect(() => {
+        // Fetch teams for the library
+        const fetchTeams = async () => {
+            const { data } = await supabase.from('teams' as any).select('*').order('name');
+            if (data) setTeams(data);
+        };
+        fetchTeams();
+    }, []);
 
     // Load Match Data
     useEffect(() => {
@@ -232,7 +247,17 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Team A */}
                         <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                            <h4 className="font-semibold text-[#1d244a]">Time A (Mandante)</h4>
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-semibold text-[#1d244a]">Time A (Mandante)</h4>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setTeamSelectorOpen('A')}
+                                    className="text-xs h-7"
+                                >
+                                    <Search className="w-3 h-3 mr-1" /> Selecionar
+                                </Button>
+                            </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Nome do Time</label>
                                 <Input
@@ -255,7 +280,17 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
 
                         {/* Team B */}
                         <div className="space-y-4 p-4 border rounded-lg bg-gray-50">
-                            <h4 className="font-semibold text-[#1d244a]">Time B (Visitante)</h4>
+                            <div className="flex justify-between items-center">
+                                <h4 className="font-semibold text-[#1d244a]">Time B (Visitante)</h4>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setTeamSelectorOpen('B')}
+                                    className="text-xs h-7"
+                                >
+                                    <Search className="w-3 h-3 mr-1" /> Selecionar
+                                </Button>
+                            </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Nome do Time</label>
                                 <Input
@@ -276,6 +311,54 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                             </div>
                         </div>
                     </div>
+
+                    {/* TEAM SELECTOR MODAL */}
+                    <Dialog open={!!teamSelectorOpen} onOpenChange={(open) => !open && setTeamSelectorOpen(null)}>
+                        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+                            <DialogHeader>
+                                <DialogTitle>Selecionar Time ({teamSelectorOpen === 'A' ? 'Mandante' : 'Visitante'})</DialogTitle>
+                            </DialogHeader>
+
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                <Input
+                                    placeholder="Buscar time..."
+                                    className="pl-10"
+                                    value={teamSearch}
+                                    onChange={e => setTeamSearch(e.target.value)}
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4 overflow-y-auto p-2">
+                                {teams
+                                    .filter(t => t.name.toLowerCase().includes(teamSearch.toLowerCase()))
+                                    .map(team => (
+                                        <button
+                                            key={team.id}
+                                            onClick={() => {
+                                                if (teamSelectorOpen === 'A') {
+                                                    setFormData(prev => ({ ...prev, team_a_name: team.name, team_a_logo: team.logo_url || "" }));
+                                                } else {
+                                                    setFormData(prev => ({ ...prev, team_b_name: team.name, team_b_logo: team.logo_url || "" }));
+                                                }
+                                                setTeamSelectorOpen(null);
+                                                setTeamSearch("");
+                                            }}
+                                            className="flex flex-col items-center gap-2 p-3 hover:bg-gray-100 rounded-lg border transition-all hover:scale-105"
+                                        >
+                                            <div className="w-12 h-12 bg-white rounded-full p-1 shadow-sm flex items-center justify-center border">
+                                                {team.logo_url ? (
+                                                    <img src={team.logo_url} className="w-full h-full object-contain" alt={team.name} />
+                                                ) : (
+                                                    <Shield className="w-6 h-6 text-gray-300" />
+                                                )}
+                                            </div>
+                                            <span className="text-xs text-center font-medium truncate w-full">{team.name}</span>
+                                        </button>
+                                    ))}
+                            </div>
+                        </DialogContent>
+                    </Dialog>
 
                     {/* Championship Name */}
                     <div className="p-4 border rounded-lg bg-gray-50">
