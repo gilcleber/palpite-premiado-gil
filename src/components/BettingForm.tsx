@@ -124,8 +124,11 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
   useEffect(() => {
     const fetchAppSettings = async () => {
       const { data } = await supabase.from('app_settings').select('instagram_handle').single();
-      if (data && data.instagram_handle) {
-        setInstagramHandle(data.instagram_handle);
+      if (data) {
+        const settings = data as any;
+        if (settings.instagram_handle) {
+          setInstagramHandle(settings.instagram_handle);
+        }
       }
     };
     fetchAppSettings();
