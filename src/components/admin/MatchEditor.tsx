@@ -101,6 +101,15 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
+    // Standard Description Template
+    const DEFAULT_DESCRIPTION = "3 Ouvintes que acertarem o placar exato ganham: [PRÊMIO AQUI].\n\nRegra: Caso haja menos de 3 acertadores, os prêmios restantes acumulam para o próximo jogo!";
+
+    useEffect(() => {
+        if (!matchId && !formData.prize_description) {
+            setFormData(prev => ({ ...prev, prize_description: DEFAULT_DESCRIPTION }));
+        }
+    }, [matchId]);
+
     const handleSave = async () => {
         if (!formData.team_a_name || !formData.team_b_name) {
             toast({ title: "Atenção", description: "Preencha os nomes dos times.", variant: "destructive" });
