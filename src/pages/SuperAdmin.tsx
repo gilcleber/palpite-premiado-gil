@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink, Crown, Calendar } from "lucide-react";
+import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink, Crown, Calendar, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import TeamApprovalQueue from "@/components/admin/TeamApprovalQueue";
 
@@ -204,6 +204,34 @@ const SuperAdmin = () => {
         } catch (error) {
             console.error("Error adding transaction:", error);
             toast.error("Erro ao adicionar lançamento.");
+        }
+    };
+
+    const handleEditTransaction = (transaction: FinancialTransaction) => {
+        // Populate form with transaction data for editing
+        setNewTransDesc(transaction.description);
+        setNewTransAmount(transaction.amount.toString());
+        setNewTransType(transaction.type);
+        // Delete the old one (we'll re-add it with new values)
+        handleDeleteTransaction(transaction.id);
+    };
+
+    const handleDeleteTransaction = async (id: string) => {
+        if (!confirm("Tem certeza que deseja excluir este lançamento?")) return;
+
+        try {
+            const { error } = await supabase
+                .from("saas_financials" as any)
+                .delete()
+                .eq("id", id);
+
+            if (error) throw error;
+
+            setTransactions(transactions.filter(t => t.id !== id));
+            toast.success("Lançamento excluído!");
+        } catch (error) {
+            console.error("Error deleting transaction:", error);
+            toast.error("Erro ao excluir lançamento.");
         }
     };
 
@@ -591,12 +619,13 @@ const SuperAdmin = () => {
                                     <TableHead>Descrição</TableHead>
                                     <TableHead>Tipo</TableHead>
                                     <TableHead className="text-right">Valor</TableHead>
+                                    <TableHead className="text-right">Ações</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {transactions.length === 0 && (
                                     <TableRow>
-                                        <TableCell colSpan={3} className="text-center py-4 text-muted-foreground">
+                                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
                                             Nenhum lançamento recente.
                                         </TableCell>
                                     </TableRow>
@@ -613,6 +642,26 @@ const SuperAdmin = () => {
                                         </TableCell>
                                         <TableCell className={`text-right font-mono font-bold ${t.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
                                             {t.type === 'expense' ? '-' : '+'} R$ {t.amount.toFixed(2)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <div className="flex justify-end gap-1">
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 p-0"
+                                                    onClick={() => handleEditTransaction(t)}
+                                                >
+                                                    <Settings className="w-3.5 h-3.5" />
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="ghost"
+                                                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                    onClick={() => handleDeleteTransaction(t.id)}
+                                                >
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))}
