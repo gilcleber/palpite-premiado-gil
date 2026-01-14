@@ -12,7 +12,6 @@ import LicenseManager from "@/components/admin/LicenseManager";
 import { useAuth } from "@/hooks/useAuth"; // Changed from useAdminAuth
 
 const TeamLibrary = lazy(() => import("@/components/admin/TeamLibrary"));
-const TeamLibrary = lazy(() => import("@/components/admin/TeamLibrary"));
 const WinnersTab = lazy(() => import("@/components/admin/WinnersTab"));
 
 const Admin = () => {
@@ -32,37 +31,7 @@ const Admin = () => {
       if (!selectedMatchId) setSelectedMatchId(allMatches[0].id);
     }
   };
-// ... (skip lines 35-144)
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-5 h-auto p-1 bg-white border shadow-sm rounded-xl">
-            <TabsTrigger value="participants" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
-              👥 Participantes
-            </TabsTrigger>
-            <TabsTrigger value="winners" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
-              🏆 Sorteio
-            </TabsTrigger>
-             <TabsTrigger value="teams" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
-              🛡️ Times
-            </TabsTrigger>
-            <TabsTrigger value="history" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
-              📋 Ganhadores
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
-              ⚙️ Configurações
-            </TabsTrigger>
-          </TabsList>
 
-          <TabsContent value="participants" className="outline-none">
-            <ParticipantsList matchId={selectedMatchId} />
-          </TabsContent>
-          <TabsContent value="winners">
-            <WinnerDraw matchId={selectedMatchId} />
-          </TabsContent>
-          <TabsContent value="teams">
-            <Suspense fallback={<div className="flex justify-center p-12"><Loader2 className="h-8 w-8 animate-spin text-[#1d244a]" /></div>}>
-              <TeamLibrary />
-            </Suspense>
-          </TabsContent>
-          <TabsContent value="history">
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1d244a] to-[#2a3459]">
@@ -173,7 +142,7 @@ const Admin = () => {
 
       <main className="container mx-auto py-8 px-4 animate-fade-in">
         <Tabs defaultValue="participants" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-4 h-auto p-1 bg-white border shadow-sm rounded-xl">
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:grid-cols-5 h-auto p-1 bg-white border shadow-sm rounded-xl">
             <TabsTrigger value="participants" className="py-3 data-[state=active]:bg-[#1d244a] data-[state=active]:text-white rounded-lg transition-all">
               👥 Participantes
             </TabsTrigger>
