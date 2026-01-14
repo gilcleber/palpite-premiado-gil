@@ -62,7 +62,15 @@ const SuperAdmin = () => {
                 .order("created_at", { ascending: false });
 
             if (error) throw error;
-            setTenants((data as any) || []);
+            if (error) throw error;
+
+            // Sanitize data (Defensive Programming)
+            const safeTenants = (data || []).map((t: any) => ({
+                ...t,
+                branding: t.branding || {}
+            }));
+
+            setTenants(safeTenants as Tenant[]);
         } catch (error) {
             console.error("Error fetching tenants:", error);
             toast.error("Erro ao carregar tenants.");
