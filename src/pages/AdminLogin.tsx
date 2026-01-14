@@ -62,7 +62,8 @@ const AdminLogin = () => {
           tenant_id: tenant.id,
           slug: tenant.slug,
           role: 'manager',
-          timestamp: Date.now()
+          timestamp: Date.now(),
+          pin: pin // STORED FOR SECURE ACTIONS
         };
         localStorage.setItem('palpite_manager_auth', JSON.stringify(sessionData));
 
