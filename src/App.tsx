@@ -33,27 +33,25 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
+                {/* Specific routes FIRST (before dynamic tenant routes) */}
                 <Route path="/" element={<Index />} />
-                <Route path="/game/:matchId" element={<Index />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/admin/login" element={<AdminLogin />} />
                 <Route path="/super" element={<SuperAdminLogin />} />
-
-                {/* PUBLIC POPUP ROUTE (Easier for OBS/vMix, no auth blocking) */}
                 <Route path="/live-draw" element={<LiveDrawPage />} />
 
                 {/* Admin routes with protected access */}
                 <Route element={<AdminProtectedRoute />}>
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
                   <Route path="/super-admin" element={<SuperAdmin />} />
                 </Route>
 
-                {/* Tenant-specific routes */}
+                {/* Tenant-specific routes (LAST - catch-all patterns) */}
                 <Route path="/:tenantSlug" element={<Index />} />
                 <Route path="/:tenantSlug/:gameSlug" element={<Index />} />
                 <Route path="/:tenantSlug/admin" element={<Admin />} />
 
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                {/* 404 - Must be last */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
