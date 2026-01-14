@@ -243,7 +243,12 @@ const Index = () => {
           </p>
 
           <div className="flex justify-center gap-4">
-            {/* Admin Link Removed for Public View */}
+            <Link
+              to={`/admin/login?tenant=${tenant?.slug || 'official'}`}
+              className="text-[10px] text-white/5 hover:text-white/20 transition-colors uppercase tracking-widest cursor-default select-none"
+            >
+              ADM
+            </Link>
           </div>
         </div>
       </div>
