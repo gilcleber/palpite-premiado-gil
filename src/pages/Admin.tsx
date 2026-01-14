@@ -21,11 +21,33 @@ const Admin = () => {
   const [matches, setMatches] = useState<any[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
+  // Check Manager Token (Silent Auth for PIN)
+  const isManager = (() => {
+    if (!tenant) return false;
+    try {
+      const stored = localStorage.getItem('palpite_manager_auth');
+      if (!stored) return false;
+      const data = JSON.parse(stored);
+      return data.tenant_id === tenant.id && data.role === 'manager';
+    } catch (e) { return false; }
+  })();
+
+  const isAuthorized = isAdmin || isManager;
+
   useEffect(() => {
     if (tenant) {
       fetchMatches();
     }
   }, [tenant]);
+
+  // If not authorized and fully loaded, redirect to login
+  useEffect(() => {
+    if (!isAuthorized && !authLoading && !tenantLoading) {
+      // We can't use navigation immediately inside render validation logic, so we do it here
+      // navigator logic to /admin/login handles this or we show Access Denied button
+    }
+  }, [isAuthorized, authLoading, tenantLoading]);
+
 
   const fetchMatches = async () => {
     if (!tenant) return;
@@ -38,7 +60,6 @@ const Admin = () => {
     if (data) {
       const allMatches = data as any[];
       setMatches(allMatches);
-      // Select first match if none selected or if selected is not in list (though hard to check here easily, simplicity first)
       if (data.length > 0 && !selectedMatchId) {
         setSelectedMatchId(allMatches[0].id);
       } else if (data.length === 0) {
@@ -56,11 +77,19 @@ const Admin = () => {
     );
   }
 
-  if (!isAdmin) {
-    return <div className="text-center mt-20 text-white text-xl">Acesso Negado</div>;
+  if (!isAuthorized) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen space-y-4">
+        <div className="text-center text-[#1d244a] text-xl font-bold">Acesso Negado</div>
+        <p className="text-gray-500">Você não tem permissão para gerenciar esta rádio.</p>
+        <Button onClick={() => window.location.href = `/?tenant=${tenant?.slug || ''}#/admin/login`}>
+          Ir para Login
+        </Button>
+      </div>
+    );
   }
 
-  if (licenseExpired) {
+  if (licenseExpired && !isAdmin) { // Admins can ignore expirations to fix them
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-100">
         <div className="bg-white p-8 rounded-lg shadow-xl text-center max-w-md">

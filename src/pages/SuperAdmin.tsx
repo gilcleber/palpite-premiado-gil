@@ -8,7 +8,8 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink, Crown, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Branding {
@@ -28,6 +29,7 @@ interface Tenant {
     created_at: string;
     subscription_price: number;
     manager_pin: string | null;
+    expires_at: string | null;
 }
 
 interface FinancialTransaction {
@@ -130,7 +132,12 @@ const SuperAdmin = () => {
 
             if (error) throw error;
 
-            const safeNewTenant = { ...data, branding: data.branding || {}, subscription_price: data.subscription_price || 99.90 };
+            const safeData = data as any;
+            const safeNewTenant = {
+                ...safeData,
+                branding: safeData.branding || {},
+                subscription_price: safeData.subscription_price || 99.90
+            };
             setTenants([safeNewTenant as any, ...tenants]);
 
             setNewTenantName("");
@@ -320,39 +327,61 @@ const SuperAdmin = () => {
                 <div className="space-y-6 md:col-span-1">
                     {/* OFFICIAL RADIO HIGHLIGHT */}
                     {officialTenant && (
-                        <Card className="bg-gradient-to-br from-[#1d244a] to-[#2a3459] text-white border-none shadow-lg">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-white">
-                                    <ShieldAlert className="w-5 h-5" /> Rádio Mestre (Oficial)
+                        <Card className="md:col-span-1 bg-gradient-to-br from-[#1d244a] via-[#1e293b] to-[#0f172a] text-white border-2 border-[#d19563]/50 shadow-2xl overflow-hidden relative group h-fit">
+                            {/* Decorative Glow */}
+                            <div className="absolute -top-20 -right-20 w-64 h-64 bg-[#d19563]/10 rounded-full blur-[80px] group-hover:bg-[#d19563]/20 transition-all duration-1000"></div>
+                            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-[60px]"></div>
+
+                            <CardHeader className="relative z-10 pb-4 border-b border-white/5">
+                                <CardTitle className="text-xl flex items-center gap-2 text-[#d19563] font-bold tracking-tight">
+                                    <Crown className="w-6 h-6 fill-current drop-shadow-lg" /> Rádio Mestre
                                 </CardTitle>
-                                <CardDescription className="text-blue-200">
-                                    A rádio modelo para demonstrações.
+                                <CardDescription className="text-blue-200/70 text-xs font-mono tracking-wider uppercase">
+                                    Matriz do Sistema • v5.0
                                 </CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-12 h-12 rounded bg-white/10 flex items-center justify-center overflow-hidden border border-white/20">
-                                        {officialTenant.branding?.logo_url ? <img src={officialTenant.branding.logo_url} className="w-full h-full object-cover" /> : <Globe className="w-6 h-6 text-blue-200" />}
+                            <CardContent className="relative z-10 pt-6">
+                                {officialTenant ? (
+                                    <div className="space-y-4">
+                                        <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors">
+                                            <div className="bg-gradient-to-br from-white to-gray-300 p-[2px] rounded-full shrink-0 shadow-lg">
+                                                <div className="bg-white rounded-full p-1 w-12 h-12 flex items-center justify-center overflow-hidden">
+                                                    {officialTenant.branding?.logo_url ? (
+                                                        <img src={officialTenant.branding.logo_url} className="w-full h-full object-contain" />
+                                                    ) : <Globe className="text-[#1d244a] w-6 h-6" />}
+                                                </div>
+                                            </div>
+                                            <div className="overflow-hidden">
+                                                <h3 className="font-bold truncate text-base text-white">{officialTenant.name}</h3>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#d19563] text-white">OFICIAL</span>
+                                                    <p className="text-xs text-blue-300 truncate font-mono">/{officialTenant.slug}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Button
+                                                variant="default"
+                                                className="w-full bg-[#d19563] hover:bg-[#b58053] text-white border-0 shadow-lg shadow-[#d19563]/20 font-bold"
+                                                onClick={() => window.open(`/#/?tenant=${officialTenant.slug}`, '_blank')}
+                                            >
+                                                <ExternalLink className="w-4 h-4 mr-2" /> Acessar
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full border-white/20 hover:bg-white/10 text-white hover:text-white"
+                                                onClick={() => openEdit(officialTenant)}
+                                            >
+                                                <Settings className="w-4 h-4 mr-2" /> Configurar
+                                            </Button>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-lg">{officialTenant.name}</p>
-                                        <p className="text-xs text-blue-300">/{officialTenant.slug}</p>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center py-8 text-gray-500 gap-2">
+                                        <Loader2 className="w-8 h-8 animate-spin opacity-50" />
+                                        <span className="text-xs uppercase tracking-widest">Carregando Matriz...</span>
                                     </div>
-                                </div>
-                                <div className="flex gap-2">
-                                    <Button
-                                        className="w-full bg-white/10 hover:bg-white/20 text-white"
-                                        onClick={() => window.open(getTenantUrl(officialTenant.slug), '_blank')}
-                                    >
-                                        <ExternalLink className="w-4 h-4 mr-2" /> Acessar
-                                    </Button>
-                                    <Button
-                                        className="w-full bg-white text-[#1d244a] hover:bg-gray-100"
-                                        onClick={() => openEdit(officialTenant)}
-                                    >
-                                        <Settings className="w-4 h-4 mr-2" /> Config
-                                    </Button>
-                                </div>
+                                )}
                             </CardContent>
                         </Card>
                     )}
@@ -400,83 +429,99 @@ const SuperAdmin = () => {
                 </div>
 
                 {/* RIGHT COL: TENANT LIST */}
-                <Card className="md:col-span-2 h-fit">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Users className="w-5 h-5 text-[#1d244a]" /> Gerenciar Clientes
-                        </CardTitle>
-                        <CardDescription>
-                            {activeCount} ativos, {suspendedCount} suspensos.
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {loading ? (
-                            <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
-                        ) : (
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Cliente</TableHead>
-                                        <TableHead>Mensalidade</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead>Ações</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {clientTenants.length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
-                                                Nenhum cliente cadastrado ainda.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                    {clientTenants.map(tenant => (
-                                        <TableRow key={tenant.id}>
-                                            <TableCell className="font-medium">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center overflow-hidden border">
-                                                        {tenant.branding?.logo_url ? <img src={tenant.branding.logo_url} className="w-full h-full object-cover" /> : <Globe className="w-4 h-4 text-gray-300" />}
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span>{tenant.name}</span>
-                                                        <span className="text-xs text-gray-400">/{tenant.slug}</span>
-                                                    </div>
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                R$ {Number(tenant.subscription_price).toFixed(2)}
-                                            </TableCell>
-                                            <TableCell>
-                                                <span className={`px-2 py-1 rounded text-xs font-bold ${tenant.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                                                    }`}>
-                                                    {tenant.status === 'active' ? 'ATIVO' : 'SUSPENSO'}
-                                                </span>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-1">
-                                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => window.open(getTenantUrl(tenant.slug), '_blank')} title="Abrir link">
-                                                        <ExternalLink className="w-4 h-4" />
-                                                    </Button>
-                                                    <Button size="sm" variant="outline" onClick={() => openEdit(tenant)}>
-                                                        <Settings className="w-3 h-3 mr-1" /> Gerenciar
-                                                    </Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        )}
-                    </CardContent>
-                </Card>
+                {/* RIGHT COL: TENANT LIST */}
+                <div className="md:col-span-2">
+                    <Tabs defaultValue="active" className="w-full">
+                        <div className="flex items-center justify-between mb-4">
+                            <TabsList className="bg-white border border-blue-100 shadow-sm">
+                                <TabsTrigger value="active" className="data-[state=active]:bg-[#1d244a] data-[state=active]:text-white">Ativos</TabsTrigger>
+                                <TabsTrigger value="suspended" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Suspensos</TabsTrigger>
+                                <TabsTrigger value="cancelled" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">Cancelados</TabsTrigger>
+                                <TabsTrigger value="all">Todos</TabsTrigger>
+                            </TabsList>
+                            <span className="text-xs text-muted-foreground font-medium">{tenants.length} rádios</span>
+                        </div>
+
+                        {['active', 'suspended', 'cancelled', 'all'].map((tab) => (
+                            <TabsContent value={tab} key={tab} className="mt-0">
+                                <Card className="border-blue-100 shadow-md">
+                                    <CardContent className="p-0">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="bg-gray-50 hover:bg-gray-50">
+                                                    <TableHead className="pl-4">Rádio</TableHead>
+                                                    <TableHead>Validade</TableHead>
+                                                    <TableHead>Status</TableHead>
+                                                    <TableHead className="text-right pr-4">Ações</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {tenants
+                                                    .filter(t => t.slug !== 'official')
+                                                    .filter(t => tab === 'all' ? true : t.status === tab)
+                                                    .map((tenant) => (
+                                                        <TableRow key={tenant.id}>
+                                                            <TableCell className="pl-4">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-10 h-10 rounded bg-gray-100 flex items-center justify-center overflow-hidden border">
+                                                                        {tenant.branding?.logo_url ? (
+                                                                            <img src={tenant.branding.logo_url} className="w-full h-full object-cover" />
+                                                                        ) : <Globe className="w-5 h-5 text-gray-400" />}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="font-bold text-sm text-[#1d244a]">{tenant.name}</div>
+                                                                        <div className="text-xs text-muted-foreground">/{tenant.slug}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {tenant.expires_at ? (
+                                                                    <div className="flex items-center text-xs gap-1 font-medium text-gray-700">
+                                                                        <Calendar className="w-3 h-3 text-gray-500" />
+                                                                        {new Date(tenant.expires_at).toLocaleDateString('pt-BR')}
+                                                                    </div>
+                                                                ) : <span className="text-xs text-gray-400 italic">Vitalício</span>}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {tenant.status === 'active' && <span className="px-2 py-0.5 rounded text-[10px] bg-green-100 text-green-700 font-bold border border-green-200">ATIVO</span>}
+                                                                {tenant.status === 'suspended' && <span className="px-2 py-0.5 rounded text-[10px] bg-orange-100 text-orange-700 font-bold border border-orange-200">SUSPENSO</span>}
+                                                                {tenant.status === 'cancelled' && <span className="px-2 py-0.5 rounded text-[10px] bg-red-100 text-red-700 font-bold border border-red-200">CANCELADO</span>}
+                                                            </TableCell>
+                                                            <TableCell className="text-right pr-4">
+                                                                <div className="flex justify-end gap-2">
+                                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => window.open(`/#/?tenant=${tenant.slug}`, '_blank')}>
+                                                                        <ExternalLink className="w-4 h-4 text-gray-500" />
+                                                                    </Button>
+                                                                    <Button size="sm" variant="outline" className="h-8 text-xs border-blue-200 text-blue-700 hover:bg-blue-50" onClick={() => openEdit(tenant)}>
+                                                                        <Settings className="w-3 h-3 mr-1" /> Gerenciar
+                                                                    </Button>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                {tenants.filter(t => t.slug !== 'official' && (tab === 'all' ? true : t.status === tab)).length === 0 && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={4} className="text-center py-12 text-muted-foreground text-sm">
+                                                            Nenhuma rádio encontrada em '{tab === 'active' ? 'Ativos' : tab === 'suspended' ? 'Suspensos' : tab === 'cancelled' ? 'Cancelados' : 'Todos'}'.
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </TableBody>
+                                        </Table>
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
+                        ))}
+                    </Tabs>
+                </div>
             </div>
 
             {/* FINANCE SECTION (BOTTOM) */}
-            <div className="grid md:grid-cols-3 gap-6">
-                <Card className="md:col-span-1">
+            <div className="grid md:grid-cols-3 gap-6 mt-6">
+                <Card className="md:col-span-1 border-t-4 border-slate-700 shadow bg-white">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
-                            <Wallet className="w-5 h-5" /> Lançar Finanças
+                            <Wallet className="w-5 h-5 text-slate-700" /> Lançar Finanças
                         </CardTitle>
                         <CardDescription>Adicione custos ou receitas extras.</CardDescription>
                     </CardHeader>
@@ -504,7 +549,7 @@ const SuperAdmin = () => {
                                 <div className="space-y-2">
                                     <Label>Tipo</Label>
                                     <select
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-black"
                                         value={newTransType}
                                         onChange={e => setNewTransType(e.target.value as any)}
                                     >
@@ -513,16 +558,18 @@ const SuperAdmin = () => {
                                     </select>
                                 </div>
                             </div>
-                            <Button type="submit" className="w-full bg-slate-800 hover:bg-slate-900">
+                            <Button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold">
                                 <Plus className="w-4 h-4 mr-2" /> Adicionar Lançamento
                             </Button>
                         </form>
                     </CardContent>
                 </Card>
 
-                <Card className="md:col-span-2">
+                <Card className="md:col-span-2 border-t-4 border-blue-500 shadow bg-white">
                     <CardHeader>
-                        <CardTitle className="text-lg">Extrato Recente (Balanço)</CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-blue-600" /> Extrato Recente (Balanço)
+                        </CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -543,7 +590,7 @@ const SuperAdmin = () => {
                                 )}
                                 {transactions.map(t => (
                                     <TableRow key={t.id}>
-                                        <TableCell>{t.description}</TableCell>
+                                        <TableCell className="font-medium">{t.description}</TableCell>
                                         <TableCell>
                                             {t.type === 'expense' ? (
                                                 <span className="flex items-center text-red-600 text-xs font-bold uppercase"><ArrowDownRight className="w-3 h-3 mr-1" /> Despesa</span>
@@ -551,7 +598,7 @@ const SuperAdmin = () => {
                                                 <span className="flex items-center text-green-600 text-xs font-bold uppercase"><ArrowUpRight className="w-3 h-3 mr-1" /> Receita</span>
                                             )}
                                         </TableCell>
-                                        <TableCell className={`text-right font-mono ${t.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
+                                        <TableCell className={`text-right font-mono font-bold ${t.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
                                             {t.type === 'expense' ? '-' : '+'} R$ {t.amount.toFixed(2)}
                                         </TableCell>
                                     </TableRow>
@@ -655,13 +702,13 @@ const SuperAdmin = () => {
                                     <div className="grid gap-2">
                                         <Label>Status</Label>
                                         <select
-                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                                            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-black"
                                             value={editForm.status}
                                             onChange={e => setEditForm({ ...editForm, status: e.target.value })}
                                         >
                                             <option value="active">ATIVO</option>
                                             <option value="suspended">SUSPENSO</option>
-                                            <option value="archived">CANCELADO</option>
+                                            <option value="cancelled">CANCELADO</option>
                                         </select>
                                     </div>
                                     <div className="grid gap-2">
@@ -671,6 +718,15 @@ const SuperAdmin = () => {
                                             value={editForm.subscription_price}
                                             onChange={e => setEditForm({ ...editForm, subscription_price: parseFloat(e.target.value) || 0 })}
                                         />
+                                    </div>
+                                    <div className="grid gap-2 col-span-2">
+                                        <Label>Validade do Plano (Expira em)</Label>
+                                        <Input
+                                            type="date"
+                                            value={editForm.expires_at ? new Date(editForm.expires_at).toISOString().split('T')[0] : ''}
+                                            onChange={e => setEditForm({ ...editForm, expires_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                                        />
+                                        <p className="text-[10px] text-gray-500">Deixe em branco para acesso vitalício/indefinido.</p>
                                     </div>
                                 </div>
                             </div>

@@ -6,179 +6,184 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/components/ui/use-toast";
-import { Eye, EyeOff, LogIn, Shield } from "lucide-react";
+import { Eye, EyeOff, LogIn, Shield, ShieldCheck, KeyRound } from "lucide-react";
+import { useTenant } from "@/hooks/useTenant";
 
 const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [pin, setPin] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [statusText, setStatusText] = useState("Carregando...");
   const [showPassword, setShowPassword] = useState(false);
 
-  // RECONNECTED Global Auth State
+  // Contexts
   const { signIn, user, isAdmin } = useAuth();
+  const { tenant } = useTenant();
   const navigate = useNavigate();
-  const VERSION = "v5.0 (Final Integration)";
-  const isSetupMode = window.location.href.includes('setup=true');
+
+  // Mode: 'super' (Email/Pass) or 'manager' (PIN)
+  const [mode, setMode] = useState<'super' | 'manager'>(tenant && tenant.slug !== 'official' ? 'manager' : 'super');
+
+  useEffect(() => {
+    if (tenant && tenant.slug !== 'official') {
+      setMode('manager');
+    } else {
+      setMode('super');
+    }
+  }, [tenant]);
 
   // CHECK: If already admin, go straight to dashboard
   useEffect(() => {
     if (user && isAdmin && !isLoading) {
-      console.log("Already admin, redirecting...", { user: user.email, isAdmin });
       navigate("/admin", { replace: true });
     }
   }, [user, isAdmin, isLoading, navigate]);
 
-  // Quick Health Check on Mount
-  useEffect(() => {
-    console.log(`🏥 AdminLogin ${VERSION} Mounted`);
-    supabase.from('app_settings').select('count', { count: 'exact', head: true })
-      .then(() => console.log("✅ DB Ping OK"))
-      .catch(err => console.warn("⚠️ DB Ping Fail:", err));
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleManagerLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!tenant || !pin) return;
+    setIsLoading(true);
 
     try {
-      setIsLoading(true);
+      // 1. Verify PIN via RPC
+      const { data: isValid, error } = await supabase.rpc('verify_tenant_pin' as any, {
+        t_slug: tenant.slug,
+        pin_attempt: pin
+      });
 
-      // 1. Connectivity Test
-      setStatusText("Testando conexão...");
-      const pingStart = Date.now();
-      const { error: pingError } = await supabase.from('admin_users').select('count', { count: 'exact', head: true });
-      console.log(`📡 Ping took ${Date.now() - pingStart}ms`);
+      if (error) throw error;
 
-      if (pingError) console.warn("Ping Warning:", pingError);
+      if (isValid) {
+        // 2. Set Local Session (The "Silent Login")
+        // Since we rely on RLS allowing Public Writes for Matches (per our simplified plan),
+        // we just need a frontend flag to say "I am the manager".
+        const sessionData = {
+          tenant_id: tenant.id,
+          slug: tenant.slug,
+          role: 'manager',
+          timestamp: Date.now()
+        };
+        localStorage.setItem('palpite_manager_auth', JSON.stringify(sessionData));
 
-      // 2. Global Login (Triggering Master Bypass if needed)
-      setStatusText("Autenticando...");
-      console.log("🔑 Authenticating via Global Hook...");
-
-      // Use the hook's signIn which handles everything
-      const result = await signIn(email, password, isSetupMode);
-
-      if (result.error) {
-        throw result.error;
+        toast({ title: "Bem-vindo!", description: `Gestor da ${tenant.name}` });
+        navigate("/admin", { replace: true });
+      } else {
+        toast({ title: "Acesso Negado", description: "PIN incorreto.", variant: "destructive" });
       }
 
-      setStatusText("Entrando...");
-      console.log("✅ Login Success!");
-      toast({ title: "Bem-vindo!", description: "Acesso autorizado." });
-
-      // 3. Navigation
-      // The useEffect above will likely catch the state change first, 
-      // but we force navigation here just in case.
-      navigate("/admin", { replace: true });
-
-    } catch (error: any) {
-      console.error("Login Fatal:", error);
-      let msg = error.message;
-      if (msg?.includes("Invalid login")) msg = "Senha ou email incorretos";
-
-      toast({
-        title: "Falha de Acesso",
-        description: msg,
-        variant: "destructive"
-      });
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: "Erro", description: "Falha na verificação.", variant: "destructive" });
     } finally {
       setIsLoading(false);
-      setStatusText("Entrar");
+    }
+  };
+
+  const handleSuperLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setIsLoading(true);
+
+    const result = await signIn(email, password, false);
+    setIsLoading(false);
+
+    if (result.error) {
+      toast({
+        title: "Falha de Acesso",
+        description: "Credenciais inválidas.",
+        variant: "destructive"
+      });
+    } else {
+      navigate("/admin", { replace: true });
     }
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1d244a] via-[#2a3459] to-[#1d244a] p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
+    <div className="flex min-h-screen items-center justify-center bg-gray-50 p-4 relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[#1d244a]/5"></div>
+      </div>
+
+      <Card className="w-full max-w-md shadow-2xl border-0 z-10 bg-white">
         <CardHeader className="space-y-1 bg-[#1d244a] text-white rounded-t-lg">
-          <div className="flex items-center justify-center mb-2">
-            <Shield className="h-8 w-8 text-[#d19563]" />
+          <div className="flex items-center justify-center mb-4 mt-2">
+            {mode === 'manager' && tenant?.branding?.logo_url ? (
+              <img src={tenant.branding.logo_url} className="h-16 object-contain bg-white rounded p-1" />
+            ) : (
+              <Shield className="h-10 w-10 text-[#d19563]" />
+            )}
           </div>
           <CardTitle className="text-2xl font-bold text-center">
-            Área Administrativa
+            {mode === 'manager' ? `Gestão: ${tenant?.name}` : "Super Administrador"}
           </CardTitle>
-          <CardDescription className="text-blue-100 text-center">
-            Acesso Restrito
+          <CardDescription className="text-blue-200 text-center">
+            {mode === 'manager' ? "Digite seu PIN de segurança" : "Acesso Mestre do Sistema"}
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-6 bg-white">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-[#1d244a]">
-                Email
-              </label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                className="border-gray-300"
-                placeholder="admin@exemplo.com"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-medium text-[#1d244a]">
-                Senha
-              </label>
-              <div className="relative">
+        <CardContent className="pt-8 pb-8 px-8 space-y-6">
+
+          {mode === 'manager' ? (
+            /* MANAGER PIN FORM */
+            <form onSubmit={handleManagerLogin} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <KeyRound className="w-4 h-4" /> PIN de Acesso (4-6 dígitos)
+                </label>
                 <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={isLoading}
-                  className="pr-10 border-gray-300"
-                  placeholder="******"
-                  required
+                  type="password"
+                  value={pin}
+                  onChange={(e) => setPin(e.target.value)}
+                  maxLength={8}
+                  placeholder="• • • •"
+                  className="text-center text-3xl tracking-[1em] font-bold h-16 border-2 focus:border-[#d19563] text-[#1d244a]"
+                  autoFocus
                 />
-                <button
-                  type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
-              <p className="text-xs text-right text-red-400 cursor-pointer hover:underline" onClick={() => {
-                if (confirm("Isso vai limpar a memória do navegador para corrigir problemas de acesso. Continuar?")) {
-                  localStorage.clear();
-                  sessionStorage.clear();
-                  window.location.reload();
-                }
-              }}>
-                Problemas de acesso? Clique aqui.
-              </p>
-            </div>
+              <Button type="submit" className="w-full h-12 bg-[#d19563] hover:bg-[#b58053] text-white text-lg font-bold shadow-lg transform transition active:scale-95" disabled={isLoading}>
+                {isLoading ? "Verificando..." : "ACESSAR PAINEL"}
+              </Button>
+            </form>
+          ) : (
+            /* SUPER ADMIN FORM */
+            <form onSubmit={handleSuperLogin} className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Email</label>
+                <Input value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@sistema.com" required />
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Senha</label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={e => setPassword(e.target.value)}
+                    placeholder="••••••"
+                    required
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+              <Button type="submit" className="w-full bg-[#1d244a] text-white" disabled={isLoading}>
+                {isLoading ? "Autenticando..." : "Entrar como Super Admin"}
+              </Button>
+            </form>
+          )}
 
-            <Button
-              type="submit"
-              className="w-full bg-[#1d244a] hover:bg-[#2a3459] text-white"
-              disabled={isLoading}
-            >
-              {isLoading ? statusText : (
-                <>
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Entrar
-                </>
-              )}
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center">
-            <Button
-              variant="outline"
-              onClick={() => navigate("/")}
-              className="text-[#1d244a] border-[#1d244a] hover:bg-[#1d244a] hover:text-white"
-            >
-              Voltar ao Site
-            </Button>
-          </div>
-
-          <div className="mt-4 text-center text-[10px] text-gray-300 opacity-50 hover:opacity-100 transition-opacity">
-            <p>{VERSION}</p>
+          <div className="pt-4 border-t text-center">
+            {mode === 'manager' ? (
+              <button onClick={() => setMode('super')} className="text-xs text-gray-400 hover:text-gray-600 underline">
+                Sou Super Admin (Acesso Mestre)
+              </button>
+            ) : (
+              tenant && tenant.slug !== 'official' && (
+                <button onClick={() => setMode('manager')} className="text-xs text-gray-400 hover:text-gray-600 underline">
+                  Voltar para Login de Gestor
+                </button>
+              )
+            )}
           </div>
         </CardContent>
       </Card>
