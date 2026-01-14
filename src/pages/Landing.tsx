@@ -427,11 +427,16 @@ const Landing = () => {
             <footer className="py-12 px-4 bg-black/30 border-t border-white/10">
                 <div className="max-w-6xl mx-auto text-center">
                     <p className="text-white/60 mb-4">© 2026 Palpite Premiado. Todos os direitos reservados.</p>
-                    <div className="flex justify-center gap-6 text-sm text-white/50">
+                    <div className="flex justify-center gap-6 text-sm text-white/50 mb-4">
                         <a href="#" className="hover:text-white/80">Sobre</a>
                         <a href="#" className="hover:text-white/80">Contato</a>
                         <a href="#" className="hover:text-white/80">Termos de Uso</a>
                         <a href="#" className="hover:text-white/80">Privacidade</a>
+                    </div>
+                    <div className="pt-4 border-t border-white/10">
+                        <a href="/super" className="text-xs text-white/30 hover:text-white/60 transition-colors">
+                            Já é cliente? Acesse seu painel →
+                        </a>
                     </div>
                 </div>
             </footer>

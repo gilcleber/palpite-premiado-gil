@@ -35,8 +35,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 {/* Specific routes FIRST (before dynamic tenant routes) */}
-                <Route path="/" element={<Index />} />
-                <Route path="/landing" element={<Landing />} />
+                <Route path="/" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/super" element={<SuperAdminLogin />} />
                 <Route path="/live-draw" element={<LiveDrawPage />} />
