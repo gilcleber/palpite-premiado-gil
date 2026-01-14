@@ -11,6 +11,7 @@ import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
+import SuperAdmin from "./pages/SuperAdmin";
 import LiveDrawPage from "./pages/LiveDrawPage";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
@@ -42,6 +43,7 @@ const App = () => {
                 {/* Admin routes with protected access */}
                 <Route element={<AdminProtectedRoute />}>
                   <Route path="/admin" element={<Admin />} />
+                  <Route path="/super-admin" element={<SuperAdmin />} />
                 </Route>
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
