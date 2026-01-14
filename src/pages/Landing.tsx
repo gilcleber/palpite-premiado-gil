@@ -140,7 +140,7 @@ const Landing = () => {
                             size="lg"
                             variant="outline"
                             className="border-white text-white hover:bg-white/10 text-lg px-8 py-6"
-                            onClick={() => window.open('https://wa.me/5519999999999', '_blank')}
+                            onClick={() => window.open('https://wa.me/5519991511288', '_blank')}
                         >
                             <MessageCircle className="mr-2" /> Falar no WhatsApp
                         </Button>
@@ -438,7 +438,7 @@ const Landing = () => {
 
             {/* WhatsApp Floating Button */}
             <a
-                href="https://wa.me/5519999999999"
+                href="https://wa.me/5519991511288"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-2xl z-50 transition-transform hover:scale-110"
