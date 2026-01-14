@@ -225,19 +225,16 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                         <strong>Link:</strong>&nbsp;{formData.slug || matchId.slice(0, 8) + "..."}
                     </span>
                     <Button variant="outline" size="sm" onClick={() => {
-                        const baseUrl = window.location.origin + window.location.pathname;
-                        // Use slug if available, otherwise ID
                         const identifier = formData.slug ? formData.slug : matchId;
-                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${identifier}`;
+                        const finalUrl = `${window.location.origin}/${tenant?.slug || 'official'}/${identifier}`;
                         navigator.clipboard.writeText(finalUrl);
                         toast({ title: "Copiado", description: "Link da partida copiado!" });
                     }}>
                         <Copy className="w-4 h-4 mr-2" /> Copiar Link
                     </Button>
                     <Button variant="outline" size="sm" onClick={() => {
-                        const baseUrl = window.location.origin + window.location.pathname;
                         const identifier = formData.slug ? formData.slug : matchId;
-                        const finalUrl = baseUrl + (baseUrl.endsWith('/') ? '' : '/') + `#/game/${identifier}`;
+                        const finalUrl = `${window.location.origin}/${tenant?.slug || 'official'}/${identifier}`;
                         window.open(finalUrl, '_blank');
                     }}>
                         <ExternalLink className="w-4 h-4 mr-2" /> Ver Página
