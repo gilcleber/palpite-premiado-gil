@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
 import Admin from "./pages/Admin";
 import SuperAdmin from "./pages/SuperAdmin";
+import SuperAdminLogin from "./pages/SuperAdminLogin";
 import LiveDrawPage from "./pages/LiveDrawPage";
 import AdminProtectedRoute from "./components/AdminProtectedRoute";
 
@@ -36,6 +37,7 @@ const App = () => {
                 <Route path="/game/:matchId" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/admin/login" element={<AdminLogin />} />
+                <Route path="/super" element={<SuperAdminLogin />} />
 
                 {/* PUBLIC POPUP ROUTE (Easier for OBS/vMix, no auth blocking) */}
                 <Route path="/live-draw" element={<LiveDrawPage />} />
