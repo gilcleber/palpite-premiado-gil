@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { TenantProvider } from "@/hooks/useTenant";
 import Index from "./pages/Index";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import AdminLogin from "./pages/AdminLogin";
@@ -35,6 +36,7 @@ const App = () => {
               <Routes>
                 {/* Specific routes FIRST (before dynamic tenant routes) */}
                 <Route path="/" element={<Index />} />
+                <Route path="/landing" element={<Landing />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/super" element={<SuperAdminLogin />} />
                 <Route path="/live-draw" element={<LiveDrawPage />} />
