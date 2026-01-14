@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, wallet } from "lucide-react";
+import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Branding {
@@ -89,8 +89,8 @@ const SuperAdmin = () => {
                 subscription_price: t.subscription_price || 0
             }));
 
-            setTenants(safeTenants as Tenant[]);
-            setTransactions(financeData as FinancialTransaction[] || []);
+            setTenants(safeTenants as unknown as Tenant[]);
+            setTransactions(financeData as unknown as FinancialTransaction[] || []);
 
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -211,6 +211,10 @@ const SuperAdmin = () => {
         setIsSheetOpen(true);
     };
 
+    const getTenantUrl = (slug: string) => {
+        return `${window.location.origin}/?tenant=${slug}`;
+    };
+
     // --- CALCULATIONS ---
 
     const officialTenant = tenants.find(t => t.slug === 'official');
@@ -254,7 +258,7 @@ const SuperAdmin = () => {
                     {officialTenant && (
                         <Button
                             className="bg-[#1d244a] hover:bg-[#2a3459]"
-                            onClick={() => window.open(`/?tenant=${officialTenant.slug}`, '_blank')}
+                            onClick={() => window.open(getTenantUrl(officialTenant.slug), '_blank')}
                         >
                             <Globe className="w-4 h-4 mr-2" /> Acessar Rádio Oficial
                         </Button>
@@ -334,12 +338,20 @@ const SuperAdmin = () => {
                                         <p className="text-xs text-blue-300">/{officialTenant.slug}</p>
                                     </div>
                                 </div>
-                                <Button
-                                    className="w-full bg-white text-[#1d244a] hover:bg-gray-100"
-                                    onClick={() => openEdit(officialTenant)}
-                                >
-                                    <Settings className="w-4 h-4 mr-2" /> Configurar Oficial
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button
+                                        className="w-full bg-white/10 hover:bg-white/20 text-white"
+                                        onClick={() => window.open(getTenantUrl(officialTenant.slug), '_blank')}
+                                    >
+                                        <ExternalLink className="w-4 h-4 mr-2" /> Acessar
+                                    </Button>
+                                    <Button
+                                        className="w-full bg-white text-[#1d244a] hover:bg-gray-100"
+                                        onClick={() => openEdit(officialTenant)}
+                                    >
+                                        <Settings className="w-4 h-4 mr-2" /> Config
+                                    </Button>
+                                </div>
                             </CardContent>
                         </Card>
                     )}
@@ -374,6 +386,9 @@ const SuperAdmin = () => {
                                             onChange={e => setNewTenantSlug(e.target.value)}
                                         />
                                     </div>
+                                    <p className="text-xs text-gray-500">
+                                        Link: {window.location.host}/?tenant={newTenantSlug || '...'}
+                                    </p>
                                 </div>
                                 <Button type="submit" className="w-full bg-[#1d244a] hover:bg-[#2a3459]">
                                     Criar Rádio
@@ -437,9 +452,14 @@ const SuperAdmin = () => {
                                                 </span>
                                             </TableCell>
                                             <TableCell>
-                                                <Button size="sm" variant="outline" onClick={() => openEdit(tenant)}>
-                                                    <Settings className="w-3 h-3 mr-1" /> Gerenciar
-                                                </Button>
+                                                <div className="flex gap-1">
+                                                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => window.open(getTenantUrl(tenant.slug), '_blank')} title="Abrir link">
+                                                        <ExternalLink className="w-4 h-4" />
+                                                    </Button>
+                                                    <Button size="sm" variant="outline" onClick={() => openEdit(tenant)}>
+                                                        <Settings className="w-3 h-3 mr-1" /> Gerenciar
+                                                    </Button>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     ))}
@@ -455,7 +475,7 @@ const SuperAdmin = () => {
                 <Card className="md:col-span-1">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2">
-                            <wallet className="w-5 h-5" /> Lançar Finanças
+                            <Wallet className="w-5 h-5" /> Lançar Finanças
                         </CardTitle>
                         <CardDescription>Adicione custos ou receitas extras.</CardDescription>
                     </CardHeader>
@@ -560,13 +580,14 @@ const SuperAdmin = () => {
                                     <Users className="w-4 h-4" /> Acesso do Gestor
                                 </h3>
                                 <div className="flex gap-2">
-                                    <Input disabled value={`https://palpitepremiado.com.br/?tenant=${editForm.slug || 'slug'}`} className="bg-white text-xs" />
+                                    <Input disabled value={getTenantUrl(editForm.slug || 'slug')} className="bg-white text-xs" />
                                     <Button size="sm" variant="secondary" onClick={() => {
-                                        navigator.clipboard.writeText(`https://palpitepremiado.com.br/?tenant=${editForm.slug || 'slug'}`);
+                                        navigator.clipboard.writeText(getTenantUrl(editForm.slug || 'slug'));
                                         toast.success("Link copiado!");
                                     }}>Copiar</Button>
                                 </div>
                             </div>
+
 
                             {/* BASIC INFO */}
                             <div className="space-y-4 border-b pb-4">
