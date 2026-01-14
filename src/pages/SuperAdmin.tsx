@@ -43,10 +43,13 @@ const SuperAdmin = () => {
     const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     // Stats
+    const activeCount = tenants.filter(t => t.status === 'active').length;
+    const suspendedCount = tenants.filter(t => t.status !== 'active').length;
     const stats = {
         totalTenants: tenants.length,
-        activeTenants: tenants.filter(t => t.status === 'active').length,
-        totalRevenue: tenants.length * 99.90, // MOCK: Assume R$ 99,90 plan
+        activeTenants: activeCount,
+        suspendedTenants: suspendedCount,
+        totalRevenue: activeCount * 99.90, // MOCK: Assume R$ 99,90 plan
     };
 
     useEffect(() => {
@@ -61,7 +64,6 @@ const SuperAdmin = () => {
                 .select("*")
                 .order("created_at", { ascending: false });
 
-            if (error) throw error;
             if (error) throw error;
 
             // Sanitize data (Defensive Programming)
@@ -90,6 +92,7 @@ const SuperAdmin = () => {
                     {
                         name: newTenantName,
                         slug: newTenantSlug.toLowerCase().replace(/\s+/g, '-'),
+                        status: 'active',
                         branding: {
                             primary_color: "#1d244a",
                             secondary_color: "#ffffff",
@@ -104,7 +107,10 @@ const SuperAdmin = () => {
 
             if (error) throw error;
 
-            setTenants([data as any, ...tenants]);
+            // Type-safe update
+            const safeNewTenant = { ...data, branding: data.branding || {} };
+            setTenants([safeNewTenant as any, ...tenants]);
+
             setNewTenantName("");
             setNewTenantSlug("");
             toast.success("Rádio criada com sucesso!");
@@ -174,12 +180,12 @@ const SuperAdmin = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total de Rádios</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
                         <Globe className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{stats.totalTenants}</div>
-                        <p className="text-xs text-muted-foreground">+2 novos essa semana (Simulado)</p>
+                        <p className="text-xs text-muted-foreground">Rádios registradas na plataforma</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -188,18 +194,20 @@ const SuperAdmin = () => {
                         <BarChart3 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{stats.activeTenants}</div>
-                        <p className="text-xs text-muted-foreground">1 bloqueada / suspensa</p>
+                        <div className="text-2xl font-bold text-green-600">{stats.activeTenants}</div>
+                        <p className="text-xs text-muted-foreground">
+                            {stats.suspendedTenants} com pendências / bloqueadas
+                        </p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Receita Mensal (MRR)</CardTitle>
+                        <CardTitle className="text-sm font-medium">Receita Mensal (Estimada)</CardTitle>
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">R$ {stats.totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Estimada (Planos de R$ 99,90)</p>
+                        <p className="text-xs text-muted-foreground">Baseado em 39,90/mês</p>
                     </CardContent>
                 </Card>
             </div>
@@ -216,7 +224,7 @@ const SuperAdmin = () => {
                     <CardContent className="p-6">
                         <form onSubmit={handleCreateTenant} className="space-y-4">
                             <div className="space-y-2">
-                                <Label>Nome da Rádio/Empresa</Label>
+                                <Label>Nome Fantasia</Label>
                                 <Input
                                     placeholder="Ex: Rádio Mix FM"
                                     value={newTenantName}
@@ -224,10 +232,10 @@ const SuperAdmin = () => {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label>Slug (Subdomínio)</Label>
+                                <Label>Slug (Link do Site)</Label>
                                 <div className="flex">
                                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                                        https://
+                                        /
                                     </span>
                                     <Input
                                         className="rounded-l-none"
@@ -237,7 +245,7 @@ const SuperAdmin = () => {
                                     />
                                 </div>
                                 <p className="text-xs text-gray-500">
-                                    Final: {newTenantSlug || 'radio'}.palpitepremiado.com
+                                    Link: {newTenantSlug}.palpitepremiado.com
                                 </p>
                             </div>
                             <Button type="submit" className="w-full bg-[#1d244a] hover:bg-[#2a3459]">
@@ -261,8 +269,8 @@ const SuperAdmin = () => {
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Nome</TableHead>
-                                        <TableHead>Link (Slug)</TableHead>
+                                        <TableHead>Cliente</TableHead>
+                                        <TableHead>Link</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead>Ações</TableHead>
                                     </TableRow>
@@ -286,7 +294,7 @@ const SuperAdmin = () => {
                                             <TableCell>
                                                 <span className={`px-2 py-1 rounded text-xs font-bold ${tenant.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                                                     }`}>
-                                                    {tenant.status.toUpperCase()}
+                                                    {tenant.status === 'active' ? 'ATIVO' : 'SUSPENSO'}
                                                 </span>
                                             </TableCell>
                                             <TableCell>
@@ -307,45 +315,63 @@ const SuperAdmin = () => {
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
                 <SheetContent className="overflow-y-auto w-[400px] sm:w-[540px]">
                     <SheetHeader>
-                        <SheetTitle>Gerenciar Rádio</SheetTitle>
+                        <SheetTitle>Painel do Cliente</SheetTitle>
                         <SheetDescription>
-                            Edite as informações e a aparência da rádio {editingTenant?.name}.
+                            Configurações da rádio <strong>{editingTenant?.name}</strong>.
                         </SheetDescription>
                     </SheetHeader>
 
                     {editingTenant && (
                         <div className="space-y-6 py-6">
 
+                            {/* Acesso do Gestor */}
+                            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100 space-y-2">
+                                <h3 className="font-semibold text-sm text-blue-900 flex items-center gap-2">
+                                    <Users className="w-4 h-4" /> Acesso do Gestor (Em Breve)
+                                </h3>
+                                <p className="text-xs text-blue-700">
+                                    Para entregar a rádio ao cliente:
+                                </p>
+                                <div className="flex gap-2">
+                                    <Input disabled value={`https://palpitepremiado.com.br/?tenant=${editForm.slug || 'slug'}`} className="bg-white text-xs" />
+                                    <Button size="sm" variant="secondary">Copiar</Button>
+                                </div>
+                            </div>
+
                             {/* BASIC INFO */}
                             <div className="space-y-4 border-b pb-4">
                                 <h3 className="font-semibold text-sm text-gray-900 flex items-center gap-2">
-                                    <Settings className="w-4 h-4" /> Configurações Básicas
+                                    <Settings className="w-4 h-4" /> Dados da Empresa
                                 </h3>
                                 <div className="grid gap-2">
-                                    <Label>Nome da Rádio</Label>
+                                    <Label>Nome Fantasia</Label>
                                     <Input
                                         value={editForm.name}
                                         onChange={e => setEditForm({ ...editForm, name: e.target.value })}
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Slug (Proibido alterar em prod)</Label>
+                                    <div className="flex justify-between">
+                                        <Label>Slug (Link Personalizado)</Label>
+                                        <span className="text-xs text-orange-600 font-bold">⚠ Cuidado ao alterar</span>
+                                    </div>
                                     <Input
                                         value={editForm.slug}
-                                        disabled
-                                        className="bg-gray-100"
+                                        onChange={e => setEditForm({ ...editForm, slug: e.target.value })}
+                                        className="font-mono bg-orange-50/50"
                                     />
+                                    <p className="text-xs text-gray-500">Se mudar isso, o link antigo vai parar de funcionar.</p>
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Status</Label>
+                                    <Label>Status do Contrato</Label>
                                     <select
                                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                                         value={editForm.status}
                                         onChange={e => setEditForm({ ...editForm, status: e.target.value })}
                                     >
-                                        <option value="active">Ativo (Pagamento em Dia)</option>
-                                        <option value="suspended">Suspenso (Bloqueado)</option>
-                                        <option value="archived">Arquivado</option>
+                                        <option value="active">ATIVO (Liberado)</option>
+                                        <option value="suspended">SUSPENSO (Bloqueado)</option>
+                                        <option value="archived">CANCELADO</option>
                                     </select>
                                 </div>
                             </div>
@@ -353,11 +379,11 @@ const SuperAdmin = () => {
                             {/* BRANDING */}
                             <div className="space-y-4">
                                 <h3 className="font-semibold text-sm text-gray-900 flex items-center gap-2">
-                                    <Palette className="w-4 h-4" /> Personalização (White-Label)
+                                    <Palette className="w-4 h-4" /> Personalização (App do Cliente)
                                 </h3>
 
                                 <div className="grid gap-2">
-                                    <Label>Título do Site</Label>
+                                    <Label>Título no Navegador</Label>
                                     <Input
                                         value={editForm.branding?.site_title || ''}
                                         onChange={e => setEditForm({
@@ -369,7 +395,7 @@ const SuperAdmin = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="grid gap-2">
-                                        <Label>Cor Primária</Label>
+                                        <Label>Cor Principal</Label>
                                         <div className="flex gap-2">
                                             <div
                                                 className="w-10 h-10 rounded border shadow-sm"
@@ -403,7 +429,7 @@ const SuperAdmin = () => {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label>URL do Logo</Label>
+                                    <Label>Logo (URL)</Label>
                                     <Input
                                         placeholder="https://..."
                                         value={editForm.branding?.logo_url || ''}
@@ -420,7 +446,7 @@ const SuperAdmin = () => {
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label>URL do Banner (Topo)</Label>
+                                    <Label>Banner do Topo (URL)</Label>
                                     <Input
                                         placeholder="https://..."
                                         value={editForm.branding?.banner_url || ''}
