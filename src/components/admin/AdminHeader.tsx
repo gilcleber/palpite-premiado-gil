@@ -1,6 +1,7 @@
 
 import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTenant } from "@/hooks/useTenant";
 
 interface AdminHeaderProps {
   activeTab: 'settings' | 'participants' | 'winners' | 'live';
@@ -10,6 +11,7 @@ interface AdminHeaderProps {
 }
 
 const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: AdminHeaderProps) => {
+  const { tenant } = useTenant();
   return (
     <header className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
       <div className="flex items-center">
@@ -51,7 +53,7 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: Adm
 
         <Button
           variant="outline"
-          onClick={() => window.open(window.location.origin + window.location.pathname, '_blank')}
+          onClick={() => window.open(`${window.location.origin}/?tenant=${tenant?.slug || 'official'}`, '_blank')}
           className="border-blue-300 text-blue-300 bg-transparent hover:bg-blue-300 hover:text-[#1d244a]"
         >
           <Home className="h-4 w-4 mr-2" />
