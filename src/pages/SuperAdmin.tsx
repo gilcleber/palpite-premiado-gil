@@ -8,7 +8,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette } from "lucide-react";
+import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Branding {
@@ -272,10 +272,9 @@ const SuperAdmin = () => {
                                         <TableRow key={tenant.id}>
                                             <TableCell className="font-medium">
                                                 <div className="flex items-center gap-2">
-                                                    {/* LOGO TEMPORARILY DISABLED FOR DEBUGGING */}
-                                                    {/* <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center overflow-hidden border">
-                                                     {tenant.branding?.logo_url ? <img src={tenant.branding.logo_url} className="w-full h-full object-cover"/> : <Globe className="w-4 h-4 text-gray-300"/>}
-                                                </div> */}
+                                                    <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center overflow-hidden border">
+                                                        {tenant.branding?.logo_url ? <img src={tenant.branding.logo_url} className="w-full h-full object-cover" /> : <Globe className="w-4 h-4 text-gray-300" />}
+                                                    </div>
                                                     {tenant.name}
                                                 </div>
                                             </TableCell>
