@@ -156,14 +156,6 @@ const TeamLibrary = () => {
                     {filteredTeams.map(team => (
                         <Card key={team.id} className="group relative overflow-hidden hover:shadow-lg transition-all border-0 bg-white/50">
                             <CardContent className="p-4 flex flex-col items-center gap-3">
-                                {/* Pending Approval Badge */}
-                                {!team.approved && team.tenant_id === tenant?.id && (
-                                    <div className="absolute top-2 right-2 bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 z-10">
-                                        <Clock className="w-3 h-3" />
-                                        Pendente
-                                    </div>
-                                )}
-
                                 <div className="w-16 h-16 bg-white rounded-full p-2 shadow-sm flex items-center justify-center">
                                     {team.logo_url ? (
                                         <img src={team.logo_url} className="w-full h-full object-contain" alt={team.name} />

@@ -139,10 +139,9 @@ const TeamApprovalQueue = () => {
                     <Table>
                         <TableHeader>
                             <TableRow className="bg-gray-50">
-                                <TableHead>Logo</TableHead>
-                                <TableHead>Nome do Time</TableHead>
-                                <TableHead>Criado Por</TableHead>
-                                <TableHead>Data</TableHead>
+                                <TableHead>Time</TableHead>
+                                <TableHead>Nome</TableHead>
+                                <TableHead>Data de Criação</TableHead>
                                 <TableHead className="text-right">Ações</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -150,23 +149,28 @@ const TeamApprovalQueue = () => {
                             {pendingTeams.map(team => (
                                 <TableRow key={team.id}>
                                     <TableCell>
-                                        <div className="w-12 h-12 bg-white rounded-full p-1 border flex items-center justify-center">
-                                            {team.logo_url ? (
-                                                <img src={team.logo_url} className="w-full h-full object-contain" alt={team.name} />
-                                            ) : (
-                                                <span className="text-xs text-gray-300">Logo</span>
-                                            )}
+                                        <div className="flex flex-col items-center gap-2">
+                                            <div className="w-16 h-16 bg-white rounded-full p-2 border-2 border-orange-200 flex items-center justify-center">
+                                                {team.logo_url ? (
+                                                    <img src={team.logo_url} className="w-full h-full object-contain" alt={team.name} />
+                                                ) : (
+                                                    <span className="text-xs text-gray-300">Logo</span>
+                                                )}
+                                            </div>
+                                            <div className="text-center">
+                                                <div className="text-[10px] text-gray-500 uppercase tracking-wide">Criado por</div>
+                                                <div className="text-xs font-bold text-orange-700">{team.tenant?.name || "Desconhecido"}</div>
+                                                <div className="text-[10px] text-gray-400">/{team.tenant?.slug}</div>
+                                            </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-bold text-[#1d244a]">{team.name}</TableCell>
-                                    <TableCell>
-                                        <div>
-                                            <div className="font-medium">{team.tenant?.name || "Desconhecido"}</div>
-                                            <div className="text-xs text-gray-500">/{team.tenant?.slug}</div>
-                                        </div>
-                                    </TableCell>
+                                    <TableCell className="font-bold text-lg text-[#1d244a]">{team.name}</TableCell>
                                     <TableCell className="text-sm text-gray-600">
-                                        {new Date(team.created_at).toLocaleDateString('pt-BR')}
+                                        {new Date(team.created_at).toLocaleDateString('pt-BR', {
+                                            day: '2-digit',
+                                            month: 'short',
+                                            year: 'numeric'
+                                        })}
                                     </TableCell>
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-2">
