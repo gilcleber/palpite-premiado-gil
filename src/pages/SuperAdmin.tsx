@@ -752,32 +752,48 @@ const SuperAdmin = () => {
                                     <div className="grid gap-2">
                                         <Label>Cor Primária</Label>
                                         <div className="flex gap-2">
-                                            <div
-                                                className="w-10 h-10 rounded border shadow-sm"
-                                                style={{ backgroundColor: editForm.branding?.primary_color || '#1d244a' }}
-                                            />
+                                            <div className="relative w-10 h-10 rounded border shadow-sm overflow-hidden shrink-0">
+                                                <input
+                                                    type="color"
+                                                    className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer p-0 border-0"
+                                                    value={editForm.branding?.primary_color || '#1d244a'}
+                                                    onChange={e => setEditForm({
+                                                        ...editForm,
+                                                        branding: { ...editForm.branding, primary_color: e.target.value }
+                                                    })}
+                                                />
+                                            </div>
                                             <Input
                                                 value={editForm.branding?.primary_color || ''}
                                                 onChange={e => setEditForm({
                                                     ...editForm,
                                                     branding: { ...editForm.branding, primary_color: e.target.value }
                                                 })}
+                                                placeholder="#000000"
                                             />
                                         </div>
                                     </div>
                                     <div className="grid gap-2">
                                         <Label>Cor Secundária</Label>
                                         <div className="flex gap-2">
-                                            <div
-                                                className="w-10 h-10 rounded border shadow-sm"
-                                                style={{ backgroundColor: editForm.branding?.secondary_color || '#ffffff' }}
-                                            />
+                                            <div className="relative w-10 h-10 rounded border shadow-sm overflow-hidden shrink-0">
+                                                <input
+                                                    type="color"
+                                                    className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer p-0 border-0"
+                                                    value={editForm.branding?.secondary_color || '#ffffff'}
+                                                    onChange={e => setEditForm({
+                                                        ...editForm,
+                                                        branding: { ...editForm.branding, secondary_color: e.target.value }
+                                                    })}
+                                                />
+                                            </div>
                                             <Input
                                                 value={editForm.branding?.secondary_color || ''}
                                                 onChange={e => setEditForm({
                                                     ...editForm,
                                                     branding: { ...editForm.branding, secondary_color: e.target.value }
                                                 })}
+                                                placeholder="#ffffff"
                                             />
                                         </div>
                                     </div>

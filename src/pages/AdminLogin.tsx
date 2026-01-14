@@ -46,7 +46,8 @@ const AdminLogin = () => {
 
     try {
       // 1. Verify PIN via RPC
-      const { data: isValid, error } = await supabase.rpc('verify_tenant_pin' as any, {
+      // @ts-ignore
+      const { data: isValid, error } = await supabase.rpc('verify_tenant_pin', {
         t_slug: tenant.slug,
         pin_attempt: pin
       });
