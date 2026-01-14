@@ -15,6 +15,7 @@ export interface Tenant {
     name: string;
     slug: string;
     branding: Branding;
+    manager_pin?: string;
 }
 
 interface TenantContextType {

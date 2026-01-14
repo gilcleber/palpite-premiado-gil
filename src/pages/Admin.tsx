@@ -11,6 +11,7 @@ import WinnerDraw from "@/components/admin/WinnerDraw";
 import LicenseManager from "@/components/admin/LicenseManager";
 import { useAuth } from "@/hooks/useAuth";
 import { useTenant } from "@/hooks/useTenant";
+import ChangePinModal from "@/components/admin/ChangePinModal";
 
 const TeamLibrary = lazy(() => import("@/components/admin/TeamLibrary"));
 const WinnersTab = lazy(() => import("@/components/admin/WinnersTab"));
@@ -225,6 +226,14 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {isManager && tenant?.manager_pin === '1234' && (
+        <ChangePinModal
+          tenantSlug={tenant.slug}
+          currentPin="1234"
+          onSuccess={() => window.location.reload()}
+        />
+      )}
     </div>
   );
 };

@@ -40,6 +40,20 @@ const AdminProtectedRoute = () => {
     return <Outlet />;
   }
 
+  // Check for Manager Silent Auth (PIN Access)
+  const managerAuth = localStorage.getItem('palpite_manager_auth');
+  if (managerAuth) {
+    try {
+      const parsed = JSON.parse(managerAuth);
+      if (parsed.role === 'manager' && parsed.slug) {
+        console.log("Manager access granted via Token");
+        return <Outlet />;
+      }
+    } catch (e) {
+      console.error("Invalid token", e);
+    }
+  }
+
   // Se está logado e é admin, permitir acesso
   if (user && isAdmin) {
     console.log("Admin access granted");
