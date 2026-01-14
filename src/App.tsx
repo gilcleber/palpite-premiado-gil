@@ -21,6 +21,7 @@ const App = () => {
   // REMOVED AGGRESSIVE RELOAD LOGIC that forces loop in normal browser.
   // We trust the browser cache or user to Ctrl+F5.
 
+  // TRIGGER DEPLOY 
   return (
     <QueryClientProvider client={queryClient}>
       <TenantProvider>
