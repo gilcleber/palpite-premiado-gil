@@ -43,7 +43,7 @@ const App = () => {
                 <Route element={<AdminProtectedRoute />}>
                   <Route path="/admin" element={<Admin />} />
                   <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/super-admin" element={<SuperAdmin />} />
+                  <Route path="/admin/super" element={<SuperAdmin />} />
                 </Route>
 
                 {/* Tenant-specific routes (LAST - catch-all patterns) */}
