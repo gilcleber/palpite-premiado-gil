@@ -265,7 +265,7 @@ const SuperAdmin = () => {
                                             <TableCell className="font-medium">
                                                 <div className="flex items-center gap-2">
                                                     <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center overflow-hidden border">
-                                                        {tenant.branding.logo_url ? <img src={tenant.branding.logo_url} className="w-full h-full object-cover" /> : <Globe className="w-4 h-4 text-gray-300" />}
+                                                        {tenant.branding?.logo_url ? <img src={tenant.branding.logo_url} className="w-full h-full object-cover" /> : <Globe className="w-4 h-4 text-gray-300" />}
                                                     </div>
                                                     {tenant.name}
                                                 </div>
