@@ -491,7 +491,7 @@ const SuperAdmin = () => {
                                                             </TableCell>
                                                             <TableCell className="text-right pr-4">
                                                                 <div className="flex justify-end gap-2">
-                                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => window.open(`/#/?tenant=${tenant.slug}`, '_blank')}>
+                                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => window.open(`${window.location.origin}/?tenant=${tenant.slug}`, '_blank')}>
                                                                         <ExternalLink className="w-4 h-4 text-gray-500" />
                                                                     </Button>
                                                                     <Button size="sm" variant="outline" className="h-8 text-xs border-blue-200 text-blue-700 hover:bg-blue-50" onClick={() => openEdit(tenant)}>
