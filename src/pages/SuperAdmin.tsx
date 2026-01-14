@@ -323,10 +323,10 @@ const SuperAdmin = () => {
                 </Card>
             </div>
 
-            {/* MAIN CONTENT GRID */}
-            <div className="grid md:grid-cols-3 gap-6">
+            {/* MAIN CONTENT - TWO COLUMN LAYOUT */}
+            <div className="grid md:grid-cols-4 gap-6">
 
-                {/* LEFT COL: CREATE & OFFICIAL */}
+                {/* LEFT COLUMN: OFFICIAL RADIO + CREATE FORM */}
                 <div className="space-y-6 md:col-span-1">
                     {/* OFFICIAL RADIO HIGHLIGHT */}
                     {officialTenant && (
@@ -431,9 +431,8 @@ const SuperAdmin = () => {
                     </Card>
                 </div>
 
-                {/* RIGHT COL: TENANT LIST */}
-                {/* RIGHT COL: TENANT LIST */}
-                <div className="md:col-span-2">
+                {/* RIGHT COLUMN: TENANT LIST */}
+                <div className="md:col-span-3">
                     <Tabs defaultValue="active" className="w-full">
                         <div className="flex items-center justify-between mb-4">
                             <TabsList className="bg-white border border-blue-100 shadow-sm">
@@ -519,10 +518,16 @@ const SuperAdmin = () => {
                 </div>
             </div>
 
+            {/* DIVIDER */}
+            <div className="border-t border-gray-200 my-8"></div>
+
             {/* TEAM APPROVAL QUEUE SECTION */}
-            <div className="mt-6">
+            <div>
                 <TeamApprovalQueue />
             </div>
+
+            {/* DIVIDER */}
+            <div className="border-t border-gray-200 my-8"></div>
 
             {/* FINANCE SECTION (BOTTOM) */}
             <div className="grid md:grid-cols-3 gap-6 mt-6">
