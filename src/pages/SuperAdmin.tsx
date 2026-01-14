@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink, Crown, Calendar, Trash2 } from "lucide-react";
+import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Pencil, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink, Crown, Calendar, Trash2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import TeamApprovalQueue from "@/components/admin/TeamApprovalQueue";
 
@@ -651,7 +651,7 @@ const SuperAdmin = () => {
                                                     className="h-7 w-7 p-0"
                                                     onClick={() => handleEditTransaction(t)}
                                                 >
-                                                    <Settings className="w-3.5 h-3.5" />
+                                                    <Pencil className="w-3.5 h-3.5" />
                                                 </Button>
                                                 <Button
                                                     size="sm"

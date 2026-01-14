@@ -149,23 +149,22 @@ const TeamApprovalQueue = () => {
                             {pendingTeams.map(team => (
                                 <TableRow key={team.id}>
                                     <TableCell>
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="w-16 h-16 bg-white rounded-full p-2 border-2 border-orange-200 flex items-center justify-center">
+                                        <div className="flex flex-col items-center gap-1">
+                                            <div className="w-12 h-12 bg-white rounded-full p-1.5 border border-orange-200 flex items-center justify-center">
                                                 {team.logo_url ? (
                                                     <img src={team.logo_url} className="w-full h-full object-contain" alt={team.name} />
                                                 ) : (
-                                                    <span className="text-xs text-gray-300">Logo</span>
+                                                    <span className="text-[10px] text-gray-300">Logo</span>
                                                 )}
                                             </div>
                                             <div className="text-center">
-                                                <div className="text-[10px] text-gray-500 uppercase tracking-wide">Criado por</div>
-                                                <div className="text-xs font-bold text-orange-700">{team.tenant?.name || "Desconhecido"}</div>
-                                                <div className="text-[10px] text-gray-400">/{team.tenant?.slug}</div>
+                                                <div className="text-[9px] text-gray-500 uppercase tracking-wide">Criado por</div>
+                                                <div className="text-[11px] font-bold text-orange-700">{team.tenant?.name || "Desconhecido"}</div>
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-bold text-lg text-[#1d244a]">{team.name}</TableCell>
-                                    <TableCell className="text-sm text-gray-600">
+                                    <TableCell className="font-bold text-base text-[#1d244a]">{team.name}</TableCell>
+                                    <TableCell className="text-xs text-gray-600">
                                         {new Date(team.created_at).toLocaleDateString('pt-BR', {
                                             day: '2-digit',
                                             month: 'short',
