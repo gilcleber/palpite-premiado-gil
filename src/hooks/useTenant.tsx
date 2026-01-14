@@ -30,23 +30,24 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const detectTenant = async () => {
-            // 1. Get Hostname
+            // 1. Get Hostname & Query Params
             const hostname = window.location.hostname;
+            const searchParams = new URLSearchParams(window.location.search);
+            const queryTenant = searchParams.get('tenant');
 
             // 2. Determine Slug logic
-            // Localhost usually doesn't have subdomains, so we default to 'official' or null
-            // In production, we assume 'subdomain.domain.com'
             let slug = 'official';
 
-            if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-                // For development, we force 'official'. 
-                // FUTURE: we could read a ?tenant=xyz param here for testing
-                console.log("Localhost detected, defaulting to 'official' tenant.");
+            if (queryTenant) {
+                // Priority 1: Query Param (?tenant=slug)
+                slug = queryTenant;
+                console.log("Tenant detected via Query Param:", slug);
+            } else if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
+                // Priority 2: Localhost (Default to official if no query)
+                console.log("Localhost detected without query param, defaulting to 'official'.");
                 slug = 'official';
             } else {
-                // Logic for Vercel/Production
-                // If using subdomains: client.palpite.com -> slug = client
-                // If using main domain: www.palpite.com -> slug = official
+                // Priority 3: Subdomain (client.domain.com)
                 const parts = hostname.split('.');
                 if (parts.length > 2 && parts[0] !== 'www') {
                     slug = parts[0];
@@ -55,7 +56,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
                 }
             }
 
-            console.log("Detecting tenant for slug:", slug);
+            console.log("Final detected slug:", slug);
 
             // 3. Fetch Tenant from DB
             const { data, error } = await supabase
