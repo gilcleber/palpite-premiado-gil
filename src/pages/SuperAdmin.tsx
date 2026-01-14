@@ -220,7 +220,7 @@ const SuperAdmin = () => {
     };
 
     const getTenantUrl = (slug: string) => {
-        return `${window.location.origin}/?tenant=${slug}`;
+        return `${window.location.origin}/admin?tenant=${slug}`;
     };
 
     // --- CALCULATIONS ---
@@ -630,9 +630,9 @@ const SuperAdmin = () => {
                                 <div className="space-y-2">
                                     <Label className="text-blue-900 text-xs uppercase font-bold">Link de Acesso</Label>
                                     <div className="flex gap-2">
-                                        <Input disabled value={getTenantUrl(`${editForm.slug || 'slug'}/admin`)} className="bg-white text-xs" />
+                                        <Input disabled value={getTenantUrl(editForm.slug || 'slug')} className="bg-white text-xs" />
                                         <Button size="sm" variant="secondary" onClick={() => {
-                                            navigator.clipboard.writeText(getTenantUrl(`${editForm.slug || 'slug'}/admin`));
+                                            navigator.clipboard.writeText(getTenantUrl(editForm.slug || 'slug'));
                                             toast.success("Link copiado!");
                                         }}>Copiar</Button>
                                     </div>
