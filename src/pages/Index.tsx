@@ -143,7 +143,7 @@ const Index = () => {
               {availableMatches.map((match) => (
                 <Card
                   key={match.id}
-                  className="group relative overflow-hidden border-0 bg-white/10 backdrop-blur-md hover:bg-white/20 transition-all cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-1"
+                  className="group relative overflow-hidden border-0 bg-black/20 backdrop-blur-md hover:bg-black/30 transition-all cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-1"
                   onClick={() => navigate(`/game/${match.slug || match.id}`)}
                 >
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-6">
@@ -243,12 +243,7 @@ const Index = () => {
           </p>
 
           <div className="flex justify-center gap-4">
-            <Link
-              to="/admin/login"
-              className="text-[10px] text-white/10 hover:text-white/50 transition-colors uppercase tracking-widest"
-            >
-              ADM
-            </Link>
+            {/* Admin Link Removed for Public View */}
           </div>
         </div>
       </div>
