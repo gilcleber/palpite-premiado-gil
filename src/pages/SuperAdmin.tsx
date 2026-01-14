@@ -207,13 +207,21 @@ const SuperAdmin = () => {
         }
     };
 
-    const handleEditTransaction = (transaction: FinancialTransaction) => {
+    const handleEditTransaction = async (transaction: FinancialTransaction) => {
         // Populate form with transaction data for editing
         setNewTransDesc(transaction.description);
         setNewTransAmount(transaction.amount.toString());
         setNewTransType(transaction.type);
-        // Delete the old one (we'll re-add it with new values)
-        handleDeleteTransaction(transaction.id);
+        // Silently delete the old one (no confirmation needed for edit)
+        try {
+            await supabase
+                .from("saas_financials" as any)
+                .delete()
+                .eq("id", transaction.id);
+            setTransactions(transactions.filter(t => t.id !== transaction.id));
+        } catch (error) {
+            console.error("Error removing old transaction:", error);
+        }
     };
 
     const handleDeleteTransaction = async (id: string) => {
