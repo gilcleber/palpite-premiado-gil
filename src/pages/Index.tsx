@@ -108,7 +108,7 @@ const Index = () => {
   return (
     <div className="min-h-screen w-full relative overflow-x-hidden safe-area-inset-top safe-area-inset-bottom">
       {/* Background with blue gradient */}
-      <div className="fixed inset-0 bg-[#1d244a]">
+      <div className="fixed inset-0 transition-colors duration-500" style={{ backgroundColor: tenant?.branding?.primary_color || '#1d244a' }}>
         <div
           className="absolute inset-0 opacity-20"
           style={{
@@ -169,7 +169,7 @@ const Index = () => {
                         <span className="text-white font-bold text-lg md:text-xl truncate max-w-[120px]">{match.team_a_name}</span>
                       </div>
 
-                      <span className="text-2xl font-black text-[#d19563]">X</span>
+                      <span className="text-2xl font-black" style={{ color: tenant?.branding?.secondary_color || '#d19563' }}>X</span>
 
                       {/* Team B */}
                       <div className="flex flex-col items-center gap-2 flex-1">
@@ -196,7 +196,7 @@ const Index = () => {
                           {new Date(match.draw_date).toLocaleDateString('pt-BR')} às {new Date(match.draw_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} (Sorteio)
                         </div>
                       ))}
-                      <p className="text-[#d19563] font-bold text-lg uppercase tracking-widest group-hover:text-white transition-colors">
+                      <p className="font-bold text-lg uppercase tracking-widest group-hover:text-white transition-colors" style={{ color: tenant?.branding?.secondary_color || '#d19563' }}>
                         Participe Agora
                       </p>
                     </div>
