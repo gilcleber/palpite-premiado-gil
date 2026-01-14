@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Plus, Globe, BarChart3, Users, DollarSign, Settings, Palette, ShieldAlert, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownRight, Wallet, ExternalLink, Crown, Calendar } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import TeamApprovalQueue from "@/components/admin/TeamApprovalQueue";
 
 interface Branding {
     primary_color: string;
@@ -516,6 +517,11 @@ const SuperAdmin = () => {
                         ))}
                     </Tabs>
                 </div>
+            </div>
+
+            {/* TEAM APPROVAL QUEUE SECTION */}
+            <div className="mt-6">
+                <TeamApprovalQueue />
             </div>
 
             {/* FINANCE SECTION (BOTTOM) */}

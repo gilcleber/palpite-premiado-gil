@@ -5,16 +5,20 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Plus, Pencil, Trash2, Search } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Search, Clock } from "lucide-react";
 import ImageUpload from "./ImageUpload";
+import { useTenant } from "@/hooks/useTenant";
 
 interface Team {
     id: string;
     name: string;
     logo_url: string | null;
+    tenant_id: string | null;
+    approved: boolean;
 }
 
 const TeamLibrary = () => {
+    const { tenant } = useTenant();
     const [teams, setTeams] = useState<Team[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -26,10 +30,14 @@ const TeamLibrary = () => {
     const [saving, setSaving] = useState(false);
 
     const fetchTeams = async () => {
+        if (!tenant) return;
         setLoading(true);
+
+        // Fetch approved teams OR teams created by this tenant
         const { data, error } = await supabase
             .from("teams" as any)
             .select("*")
+            .or(`approved.eq.true,tenant_id.eq.${tenant.id}`)
             .order("name", { ascending: true });
 
         if (error) {
@@ -42,7 +50,7 @@ const TeamLibrary = () => {
 
     useEffect(() => {
         fetchTeams();
-    }, []);
+    }, [tenant]);
 
     const handleEdit = (team: Team) => {
         setEditingTeam(team);
@@ -62,6 +70,11 @@ const TeamLibrary = () => {
             return;
         }
 
+        if (!tenant) {
+            toast({ title: "Erro", description: "Tenant não identificado.", variant: "destructive" });
+            return;
+        }
+
         setSaving(true);
         try {
             if (editingTeam) {
@@ -73,12 +86,21 @@ const TeamLibrary = () => {
                 if (error) throw error;
                 toast({ title: "Sucesso", description: "Time atualizado!" });
             } else {
-                // Create
+                // Create - Auto-assign tenant_id and set approved = false
                 const { error } = await supabase
                     .from("teams" as any)
-                    .insert({ name: formData.name, logo_url: formData.logo_url });
+                    .insert({
+                        name: formData.name,
+                        logo_url: formData.logo_url,
+                        tenant_id: tenant.id,
+                        approved: false
+                    });
                 if (error) throw error;
-                toast({ title: "Sucesso", description: "Time criado!" });
+                toast({
+                    title: "Sucesso",
+                    description: "Time criado! Aguardando aprovação do Master Admin para aparecer em todas as rádios.",
+                    duration: 5000
+                });
             }
             setIsModalOpen(false);
             fetchTeams();
@@ -134,6 +156,14 @@ const TeamLibrary = () => {
                     {filteredTeams.map(team => (
                         <Card key={team.id} className="group relative overflow-hidden hover:shadow-lg transition-all border-0 bg-white/50">
                             <CardContent className="p-4 flex flex-col items-center gap-3">
+                                {/* Pending Approval Badge */}
+                                {!team.approved && team.tenant_id === tenant?.id && (
+                                    <div className="absolute top-2 right-2 bg-orange-100 text-orange-700 text-[10px] font-bold px-2 py-1 rounded-full flex items-center gap-1 z-10">
+                                        <Clock className="w-3 h-3" />
+                                        Pendente
+                                    </div>
+                                )}
+
                                 <div className="w-16 h-16 bg-white rounded-full p-2 shadow-sm flex items-center justify-center">
                                     {team.logo_url ? (
                                         <img src={team.logo_url} className="w-full h-full object-contain" alt={team.name} />
