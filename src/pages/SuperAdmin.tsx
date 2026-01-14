@@ -160,7 +160,8 @@ const SuperAdmin = () => {
                     slug: editForm.slug,
                     status: editForm.status,
                     subscription_price: editForm.subscription_price,
-                    branding: editForm.branding
+                    branding: editForm.branding,
+                    manager_pin: editForm.manager_pin
                 })
                 .eq('id', editingTenant.id);
 
@@ -214,7 +215,8 @@ const SuperAdmin = () => {
             slug: tenant.slug,
             status: tenant.status,
             subscription_price: tenant.subscription_price,
-            branding: { ...tenant.branding }
+            branding: { ...tenant.branding },
+            manager_pin: tenant.manager_pin
         });
         setIsSheetOpen(true);
     };
@@ -640,39 +642,21 @@ const SuperAdmin = () => {
                                 </div>
                                 <div className="space-y-2 pt-2 border-t border-blue-200">
                                     <Label className="text-blue-900 text-xs uppercase font-bold">Segurança (PIN)</Label>
-                                    <div className="flex items-center justify-between bg-white p-3 rounded border border-blue-100">
-                                        <div>
-                                            {editingTenant.manager_pin ? (
-                                                <span className="flex items-center text-green-600 font-bold text-xs gap-1">
-                                                    <ShieldAlert className="w-3 h-3" /> PIN Definido
-                                                </span>
-                                            ) : (
-                                                <span className="flex items-center text-orange-500 font-bold text-xs gap-1">
-                                                    <ShieldAlert className="w-3 h-3" /> Aguardando Definição
-                                                </span>
-                                            )}
+                                    <div className="p-3 bg-white rounded border border-blue-100 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <ShieldAlert className="w-4 h-4 text-blue-900" />
+                                            <Input
+                                                type="text"
+                                                value={editForm.manager_pin || ''}
+                                                onChange={e => setEditForm({ ...editForm, manager_pin: e.target.value })}
+                                                placeholder={editingTenant.manager_pin ? "PIN Definido (Digite para alterar)" : "Definir novo PIN"}
+                                                maxLength={6}
+                                                className="h-8 text-sm"
+                                            />
                                         </div>
-                                        {editingTenant.manager_pin && (
-                                            <Button
-                                                size="sm"
-                                                variant="destructive"
-                                                className="h-7 text-xs"
-                                                onClick={async () => {
-                                                    if (!confirm("Resetar o PIN deste gestor? Ele precisará criar um novo ao acessar.")) return;
-
-                                                    const { error } = await supabase.from('tenants' as any).update({ manager_pin: null }).eq('id', editingTenant.id);
-                                                    if (error) {
-                                                        toast.error("Erro ao resetar PIN");
-                                                    } else {
-                                                        toast.success("PIN Resetado!");
-                                                        setEditingTenant({ ...editingTenant, manager_pin: null } as any);
-                                                        setTenants(prev => prev.map(t => t.id === editingTenant.id ? { ...t, manager_pin: null } as any : t));
-                                                    }
-                                                }}
-                                            >
-                                                Resetar PIN
-                                            </Button>
-                                        )}
+                                        <p className="text-[10px] text-gray-500 pl-6">
+                                            Defina um PIN de 4 a 6 dígitos para o gestor acessar o painel.
+                                        </p>
                                     </div>
                                 </div>
                             </div>

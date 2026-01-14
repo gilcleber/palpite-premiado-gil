@@ -107,7 +107,7 @@ const AdminLogin = () => {
       </div>
 
       <Card className="w-full max-w-md shadow-2xl border-0 z-10 bg-white">
-        <CardHeader className="space-y-1 bg-[#1d244a] text-white rounded-t-lg">
+        <CardHeader className="space-y-1 text-white rounded-t-lg transition-colors" style={{ backgroundColor: tenant?.branding?.primary_color || '#1d244a' }}>
           <div className="flex items-center justify-center mb-4 mt-2">
             {mode === 'manager' && tenant?.branding?.logo_url ? (
               <img src={tenant.branding.logo_url} className="h-16 object-contain bg-white rounded p-1" />
@@ -137,11 +137,12 @@ const AdminLogin = () => {
                   onChange={(e) => setPin(e.target.value)}
                   maxLength={8}
                   placeholder="• • • •"
-                  className="text-center text-3xl tracking-[1em] font-bold h-16 border-2 focus:border-[#d19563] text-[#1d244a]"
+                  className="text-center text-3xl tracking-[1em] font-bold h-16 border-2 text-gray-900 focus-visible:ring-0"
+                  style={{ borderColor: tenant?.branding?.secondary_color || '#d19563' }}
                   autoFocus
                 />
               </div>
-              <Button type="submit" className="w-full h-12 bg-[#d19563] hover:bg-[#b58053] text-white text-lg font-bold shadow-lg transform transition active:scale-95" disabled={isLoading}>
+              <Button type="submit" className="w-full h-12 text-white text-lg font-bold shadow-lg transform transition active:scale-95 hover:opacity-90" disabled={isLoading} style={{ backgroundColor: tenant?.branding?.secondary_color || '#d19563' }}>
                 {isLoading ? "Verificando..." : "ACESSAR PAINEL"}
               </Button>
             </form>
