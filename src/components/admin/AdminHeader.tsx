@@ -53,7 +53,7 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: Adm
 
         <Button
           variant="outline"
-          onClick={() => window.open(`${window.location.origin}/?tenant=${tenant?.slug || 'official'}`, '_blank')}
+          onClick={() => window.open(`${window.location.origin}/${tenant?.slug || 'official'}`, '_blank')}
           className="border-blue-300 text-blue-300 bg-transparent hover:bg-blue-300 hover:text-[#1d244a]"
         >
           <Home className="h-4 w-4 mr-2" />

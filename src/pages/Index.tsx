@@ -245,7 +245,7 @@ const Index = () => {
 
           <div className="flex justify-center gap-4">
             <Link
-              to={`/admin/login?tenant=${tenant?.slug || 'official'}`}
+              to={`/${tenant?.slug || 'official'}/admin`}
               className="text-[10px] text-white/5 hover:text-white/20 transition-colors uppercase tracking-widest cursor-default select-none"
             >
               ADM

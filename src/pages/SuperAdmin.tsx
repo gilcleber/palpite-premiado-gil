@@ -251,7 +251,7 @@ const SuperAdmin = () => {
     };
 
     const getTenantUrl = (slug: string) => {
-        return `${window.location.origin}/admin?tenant=${slug}`;
+        return `${window.location.origin}/${slug}`;
     };
 
     // --- CALCULATIONS ---
@@ -394,7 +394,7 @@ const SuperAdmin = () => {
                                             <Button
                                                 variant="default"
                                                 className="w-full bg-[#d19563] hover:bg-[#b58053] text-white border-0 shadow-lg shadow-[#d19563]/20 font-bold"
-                                                onClick={() => window.open(`/#/?tenant=${officialTenant.slug}`, '_blank')}
+                                                onClick={() => window.open(`/${officialTenant.slug}`, '_blank')}
                                             >
                                                 <ExternalLink className="w-4 h-4 mr-2" /> Acessar
                                             </Button>
@@ -448,7 +448,7 @@ const SuperAdmin = () => {
                                         />
                                     </div>
                                     <p className="text-xs text-gray-500">
-                                        Link: {window.location.host}/?tenant={newTenantSlug || '...'}
+                                        Link: {window.location.host}/{newTenantSlug || '...'}
                                     </p>
                                 </div>
                                 <Button type="submit" className="w-full bg-[#1d244a] hover:bg-[#2a3459]">
@@ -519,7 +519,7 @@ const SuperAdmin = () => {
                                                             </TableCell>
                                                             <TableCell className="text-right pr-4">
                                                                 <div className="flex justify-end gap-2">
-                                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => window.open(`${window.location.origin}/?tenant=${tenant.slug}`, '_blank')}>
+                                                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => window.open(`${window.location.origin}/${tenant.slug}`, '_blank')}>
                                                                         <ExternalLink className="w-4 h-4 text-gray-500" />
                                                                     </Button>
                                                                     <Button size="sm" variant="outline" className="h-8 text-xs border-blue-200 text-blue-700 hover:bg-blue-50" onClick={() => openEdit(tenant)}>
