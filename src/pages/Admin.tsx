@@ -1,6 +1,6 @@
 import { useState, useEffect, Suspense, lazy } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useNavigate } from "react-router-dom"; // Keep useNavigate for potential future use or if it's implicitly used elsewhere
+import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { Button } from "@/components/ui/button";
@@ -9,34 +9,49 @@ import ParticipantsList from "@/components/admin/ParticipantsList";
 import SettingsTab from "@/components/admin/SettingsTab";
 import WinnerDraw from "@/components/admin/WinnerDraw";
 import LicenseManager from "@/components/admin/LicenseManager";
-import { useAuth } from "@/hooks/useAuth"; // Changed from useAdminAuth
+import { useAuth } from "@/hooks/useAuth";
+import { useTenant } from "@/hooks/useTenant";
 
 const TeamLibrary = lazy(() => import("@/components/admin/TeamLibrary"));
 const WinnersTab = lazy(() => import("@/components/admin/WinnersTab"));
 
 const Admin = () => {
-  const { isAdmin, role, licenseExpired, loading } = useAuth();
+  const { isAdmin, role, licenseExpired, loading: authLoading } = useAuth();
+  const { tenant, loading: tenantLoading } = useTenant();
   const [matches, setMatches] = useState<any[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchMatches();
-  }, []);
+    if (tenant) {
+      fetchMatches();
+    }
+  }, [tenant]);
 
   const fetchMatches = async () => {
-    const { data } = await supabase.from("matches" as any).select("*").order("created_at", { ascending: false });
-    if (data && data.length > 0) {
+    if (!tenant) return;
+    const { data } = await supabase
+      .from("matches" as any)
+      .select("*")
+      .eq("tenant_id", tenant.id)
+      .order("created_at", { ascending: false });
+
+    if (data) {
       const allMatches = data as any[];
       setMatches(allMatches);
-      if (!selectedMatchId) setSelectedMatchId(allMatches[0].id);
+      // Select first match if none selected or if selected is not in list (though hard to check here easily, simplicity first)
+      if (data.length > 0 && !selectedMatchId) {
+        setSelectedMatchId(allMatches[0].id);
+      } else if (data.length === 0) {
+        setSelectedMatchId(null);
+      }
     }
   };
 
-  if (loading) {
+  if (authLoading || tenantLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-[#1d244a] to-[#2a3459]">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
-        <span className="ml-2 text-white">Verificando permissões...</span>
+        <span className="ml-2 text-white">Carregando painel...</span>
       </div>
     );
   }

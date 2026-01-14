@@ -9,6 +9,7 @@ import MatchEditor from "./MatchEditor";
 import ImageUpload from "./ImageUpload";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Save } from "lucide-react";
+import { useTenant } from "@/hooks/useTenant";
 
 interface MatchSimple {
   id: string;
@@ -17,6 +18,7 @@ interface MatchSimple {
 }
 
 const SettingsTab = () => {
+  const { tenant } = useTenant();
   const [matches, setMatches] = useState<MatchSimple[]>([]);
   const [activeTab, setActiveTab] = useState<string>("new");
   const [loading, setLoading] = useState(true);
@@ -26,15 +28,32 @@ const SettingsTab = () => {
   const [savingGlobal, setSavingGlobal] = useState(false);
 
   const fetchEverything = async () => {
+    if (!tenant) return;
     setLoading(true);
     // 1. Fetch Matches
-    const { data: matchesData } = await supabase.from("matches" as any).select("id, team_a_name, team_b_name").order("created_at", { ascending: true });
+    const { data: matchesData } = await supabase
+      .from("matches" as any)
+      .select("id, team_a_name, team_b_name")
+      .eq("tenant_id", tenant.id)
+      .order("created_at", { ascending: true });
 
-    // 2. Fetch Global Settings
-    const { data: appData } = await supabase.from("app_settings").select("id, radio_logo_url, radio_slogan").single();
+    // 2. Fetch Global Settings (Tenant Identity)
+    // We assume app_settings is also tenant scoped or linked. 
+    // If not, we might need to create it.
+    const { data: appData, error } = await supabase
+      .from("app_settings")
+      .select("id, radio_logo_url, radio_slogan, tenant_id")
+      .eq("tenant_id", tenant.id)
+      .single();
 
     if (matchesData) setMatches(matchesData as unknown as MatchSimple[]);
-    if (appData) setGlobalSettings(appData as any);
+
+    if (appData) {
+      setGlobalSettings(appData as any);
+    } else {
+      // If no settings found for this tenant, we might leave it null or allow creating.
+      // For now, let's just leave it null.
+    }
 
     // Auto-select first match if exists and we are in "loading" phase
     if (matchesData && matchesData.length > 0 && activeTab === 'new' && loading) {
@@ -45,21 +64,40 @@ const SettingsTab = () => {
   };
 
   useEffect(() => {
-    fetchEverything();
-  }, []);
+    if (tenant) {
+      fetchEverything();
+    }
+  }, [tenant]);
 
   const saveGlobalSettings = async () => {
-    if (!globalSettings) return;
+    if (!tenant) return;
     setSavingGlobal(true);
-    const { error } = await supabase.from("app_settings").update({
-      radio_logo_url: globalSettings.radio_logo_url,
-      radio_slogan: globalSettings.radio_slogan,
-      updated_at: new Date().toISOString()
-    }).eq("id", globalSettings.id);
 
+    if (globalSettings?.id) {
+      // Update existing
+      const { error } = await supabase.from("app_settings").update({
+        radio_logo_url: globalSettings.radio_logo_url,
+        radio_slogan: globalSettings.radio_slogan,
+        updated_at: new Date().toISOString()
+      }).eq("id", globalSettings.id);
+
+      if (!error) toast({ title: "Salvo", description: "Identidade da Rádio atualizada." });
+      else toast({ title: "Erro", description: "Falha ao salvar." });
+    } else {
+      // Create new
+      const { error } = await supabase.from("app_settings").insert({
+        tenant_id: tenant.id,
+        radio_logo_url: globalSettings?.radio_logo_url || "",
+        radio_slogan: globalSettings?.radio_slogan || "",
+      });
+
+      if (!error) {
+        toast({ title: "Criado", description: "Identidade inicializada." });
+        fetchEverything();
+      }
+      else toast({ title: "Erro", description: "Falha ao criar configurações." });
+    }
     setSavingGlobal(false);
-    if (!error) toast({ title: "Salvo", description: "Identidade Global atualizada." });
-    else toast({ title: "Erro", description: "Falha ao salvar identidade." });
   };
 
   return (

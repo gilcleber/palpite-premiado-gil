@@ -9,6 +9,7 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, Save, Trash2, Plus, Copy, ExternalLink, Search, Shield } from "lucide-react";
 import ImageUpload from "./ImageUpload";
 import { format } from "date-fns";
+import { useTenant } from "@/hooks/useTenant";
 
 interface MatchEditorProps {
     matchId: string | null; // If null, we are creating a new one
@@ -17,8 +18,11 @@ interface MatchEditorProps {
 }
 
 const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => {
+    const { tenant } = useTenant();
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+
+    // ... (rest of state)
 
     // Team Library State
     const [teams, setTeams] = useState<any[]>([]);
@@ -38,7 +42,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         prize_image_url: "",
         prize_gallery: [] as string[],
         championship_name: "",
-        slug: "", // Added
+        slug: "",
         game_date: "",
         game_time: ""
     });
@@ -58,6 +62,8 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
             if (!matchId) return; // New mode
             setLoading(true);
 
+            // Ensure we only fetch if we own it (not strictly necessary since ID is unique, but good practice)
+            // Actually, for loading by ID, we assume the parent passed a valid ID.
             const { data, error } = await supabase.from("matches" as any).select("*").eq("id", matchId).single();
             if (error) {
                 toast({ title: "Erro", description: "Falha ao carregar jogo.", variant: "destructive" });
@@ -84,7 +90,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     prize_image_url: match.prize_image_url || "",
                     prize_gallery: (match.prize_gallery as string[]) || [],
                     championship_name: match.championship_name || "",
-                    slug: match.slug || "", // Added
+                    slug: match.slug || "",
                     game_date: match.game_date ? new Date(match.game_date).toLocaleDateString('pt-BR').split('/').reverse().join('-') : "",
                     game_time: match.game_date ? new Date(match.game_date).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ""
                 });
@@ -108,7 +114,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 prize_image_url: "",
                 prize_gallery: [],
                 championship_name: "",
-                slug: "", // Added
+                slug: "",
                 game_date: "",
                 game_time: ""
             });
@@ -116,15 +122,11 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
     }, [matchId]);
 
     const handleChange = (field: string, value: any) => {
-        // Auto-generate slug if title or team names change and slug is empty
         if ((field === "team_a_name" || field === "team_b_name") && !formData.slug) {
-            // Logic handled in effect or simply let user type?
-            // Let's just update the field normally
         }
         setFormData(prev => ({ ...prev, [field]: value }));
     };
 
-    // Standard Description Template
     const DEFAULT_DESCRIPTION = "3 Ouvintes que acertarem o placar exato ganham: [PRÊMIO AQUI].\n\nRegra: Caso haja menos de 3 acertadores, os prêmios restantes acumulam para o próximo jogo!";
 
     useEffect(() => {
@@ -134,6 +136,10 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
     }, [matchId]);
 
     const handleSave = async () => {
+        if (!tenant) {
+            toast({ title: "Erro", description: "Sessão inválida (Tenant missing).", variant: "destructive" });
+            return;
+        }
         if (!formData.team_a_name || !formData.team_b_name) {
             toast({ title: "Atenção", description: "Preencha os nomes dos times.", variant: "destructive" });
             return;
@@ -159,13 +165,14 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                 team_a_logo: formData.team_a_logo,
                 team_b_logo: formData.team_b_logo,
                 draw_date: finalDate,
-                game_date: gameDate, // Added
+                game_date: gameDate,
                 prize_title: formData.prize_title,
                 prize_description: formData.prize_description,
                 prize_image_url: formData.prize_image_url,
                 prize_gallery: formData.prize_gallery,
                 championship_name: formData.championship_name,
-                slug: formData.slug || null // Added
+                slug: formData.slug || null,
+                tenant_id: tenant.id // Critical fix
             };
 
             if (matchId) {

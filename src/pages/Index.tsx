@@ -7,12 +7,14 @@ import PrizeAnnouncement from "@/components/PrizeAnnouncement";
 import { Button } from "@/components/ui/button";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { Settings, Calendar } from "lucide-react";
+import { Settings, Calendar, Loader2 } from "lucide-react";
+import { useTenant } from "@/hooks/useTenant";
 
 const Index = () => {
   const navigate = useNavigate();
   const { matchId } = useParams<{ matchId: string }>();
-  const { isAdmin } = useAuth();
+  // const { isAdmin } = useAuth(); // Unused here
+  const { tenant, loading: tenantLoading } = useTenant();
 
   const [radioLogo, setRadioLogo] = useState<string>("./radio_logo.png");
   const [radioSlogan, setRadioSlogan] = useState<string | null>(null);
@@ -21,23 +23,45 @@ const Index = () => {
 
   useEffect(() => {
     const fetchBranding = async () => {
-      const { data } = await supabase.from('app_settings').select('radio_logo_url, radio_slogan').single();
+      // If we don't have a tenant yet, wait.
+      if (!tenant) return;
+
+      const { data } = await supabase
+        .from('app_settings')
+        .select('radio_logo_url, radio_slogan')
+        .eq('tenant_id', tenant.id)
+        .single();
+
       if (data) {
         if (data.radio_logo_url) setRadioLogo(data.radio_logo_url);
         if (data.radio_slogan) setRadioSlogan(data.radio_slogan);
+      } else {
+        // Fallback to Tenant Branding if app_settings is empty (New feature alignment)
+        if (tenant.branding) {
+          if (tenant.branding.logo_url) setRadioLogo(tenant.branding.logo_url);
+          if (tenant.branding.site_title) setRadioSlogan(tenant.branding.site_title);
+        }
       }
     };
-    fetchBranding();
-  }, []);
+    if (!tenantLoading) fetchBranding();
+  }, [tenant, tenantLoading]);
 
   useEffect(() => {
     const fetchMatches = async () => {
+      if (!tenant) {
+        if (!tenantLoading) setLoadingMatches(false);
+        return;
+      }
+
       // 1. If we have a matchId (which could be a slug), try to find that specific match
       if (matchId) {
         // Try UUID first
         const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(matchId);
 
-        let query = supabase.from('matches' as any).select('*').eq('visible', true);
+        let query = supabase.from('matches' as any)
+          .select('*')
+          .eq('tenant_id', tenant.id) // Security: Match must belong to tenant
+          .eq('visible', true);
 
         if (isUuid) {
           query = query.eq('id', matchId);
@@ -58,6 +82,7 @@ const Index = () => {
       const { data } = await supabase
         .from('matches' as any)
         .select('*')
+        .eq('tenant_id', tenant.id)
         .eq('visible', true)
         .order('game_date', { ascending: true }) // Order by Game Date preferably
         .order('draw_date', { ascending: true }); // Fallback
@@ -68,8 +93,10 @@ const Index = () => {
       setLoadingMatches(false);
     };
 
-    fetchMatches();
-  }, [matchId]);
+    if (!tenantLoading) fetchMatches();
+  }, [matchId, tenant, tenantLoading]);
+
+  if (tenantLoading) return <div className="h-screen flex items-center justify-center bg-[#1d244a]"><Loader2 className="animate-spin text-white" /></div>;
 
   // View Mode Logic
   // Show Lobby if NO specific match is selected in URL (matchId is null)
