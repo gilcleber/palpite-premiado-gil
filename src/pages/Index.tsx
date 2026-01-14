@@ -12,7 +12,8 @@ import { useTenant } from "@/hooks/useTenant";
 
 const Index = () => {
   const navigate = useNavigate();
-  const { matchId } = useParams<{ matchId: string }>();
+  const { gameSlug } = useParams<{ gameSlug: string }>();
+  const matchId = gameSlug; // Keep matchId variable for backward compatibility with rest of code
   // const { isAdmin } = useAuth(); // Unused here
   const { tenant, loading: tenantLoading } = useTenant();
 
