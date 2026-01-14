@@ -144,7 +144,7 @@ const Index = () => {
                 <Card
                   key={match.id}
                   className="group relative overflow-hidden border-0 bg-black/20 backdrop-blur-md hover:bg-black/30 transition-all cursor-pointer shadow-xl hover:shadow-2xl hover:-translate-y-1"
-                  onClick={() => navigate(`/game/${match.slug || match.id}`)}
+                  onClick={() => navigate(`/${tenant?.slug || 'official'}/${match.slug || match.id}`)}
                 >
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-6">
 
