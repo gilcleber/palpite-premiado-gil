@@ -31,30 +31,37 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         const detectTenant = async () => {
-            // 1. Get Hostname & Query Params
+            // 1. Get Hostname, Path, & Query Params
             const hostname = window.location.hostname;
+            const pathname = window.location.pathname;
             const searchParams = new URLSearchParams(window.location.search);
             const queryTenant = searchParams.get('tenant');
 
             // 2. Determine Slug logic
             let slug = 'official';
 
-            if (queryTenant) {
-                // Priority 1: Query Param (?tenant=slug)
+            // Priority 1: URL Path (e.g., /educadora or /educadora/jogo)
+            const pathSegments = pathname.split('/').filter(Boolean);
+            if (pathSegments.length > 0 && !['admin', 'super', 'login', 'live-draw', 'game'].includes(pathSegments[0])) {
+                slug = pathSegments[0];
+                console.log("Tenant detected via URL Path:", slug);
+            }
+            // Priority 2: Query Param (?tenant=slug) - Backward compatibility
+            else if (queryTenant) {
                 slug = queryTenant;
                 console.log("Tenant detected via Query Param:", slug);
-            } else if (hostname.includes('localhost') || hostname.includes('127.0.0.1')) {
-                // Priority 2: Localhost (Default to official if no query)
-                console.log("Localhost detected without query param, defaulting to 'official'.");
-                slug = 'official';
-            } else {
-                // Priority 3: Subdomain (client.domain.com)
+            }
+            // Priority 3: Subdomain (client.domain.com)
+            else if (!(hostname.includes('localhost') || hostname.includes('127.0.0.1'))) {
                 const parts = hostname.split('.');
                 if (parts.length > 2 && parts[0] !== 'www') {
                     slug = parts[0];
-                } else {
-                    slug = 'official';
+                    console.log("Tenant detected via Subdomain:", slug);
                 }
+            }
+            // Priority 4: Default to 'official'
+            else {
+                console.log("No tenant detected, defaulting to 'official'.");
             }
 
             console.log("Final detected slug:", slug);

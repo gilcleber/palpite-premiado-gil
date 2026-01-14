@@ -382,7 +382,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                             <div className="space-y-2">
                                 <label className="text-sm font-medium">Link Personalizado (Slug)</label>
                                 <div className="flex items-center">
-                                    <span className="text-xs text-gray-500 mr-2">palpitepremiado.com/#/game/</span>
+                                    <span className="text-xs text-gray-500 mr-2">palpitepremiado.com/{tenant?.slug || '...'}/</span>
                                     <Input
                                         value={formData.slug}
                                         onChange={e => handleChange("slug", e.target.value.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''))}
