@@ -22,7 +22,8 @@ import {
     Building2,
     Bot,
     X,
-    Send
+    Send,
+    Loader2
 } from "lucide-react";
 
 const Landing = () => {
@@ -34,10 +35,13 @@ const Landing = () => {
     });
     const [loading, setLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+
+    // AI Chat State
     const [showAiChat, setShowAiChat] = useState(false);
     const [aiMessage, setAiMessage] = useState("");
+    const [isAiTyping, setIsAiTyping] = useState(false);
     const [chatHistory, setChatHistory] = useState([
-        { role: 'assistant', content: 'Olá! Sou a IA do Palpite Premiado. Como posso ajudar você a engajar seu público hoje?' }
+        { role: 'assistant', content: 'Olá! Sou a IA do Palpite Premiado. Posso tirar dúvidas sobre planos, regras ou como criar sua liga. Como posso ajudar?' }
     ]);
 
     useEffect(() => {
@@ -84,18 +88,75 @@ const Landing = () => {
         }
     };
 
-    const handleAiSubmit = (e: React.FormEvent) => {
+    // --- Lógica do Robô ---
+    const generateResponse = async (userText: string) => {
+        const lowerText = userText.toLowerCase();
+
+        // 1. Tentar usar API Key se existir (Adicione VITE_OPENAI_API_KEY no seu .env)
+        const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+        if (apiKey) {
+            try {
+                const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [
+                            { role: "system", content: "Você é um assistente virtual especialista no sistema Palpite Premiado. O sistema é uma plataforma de engajamento para rádios e empresas criarem ligas de palpites gratuitas. Planos: Starter (49,90/mês anual), Pro (69,90/mês semestral), Business (89,90/mês mensal). Responda de forma curta e prestativa." },
+                            ...chatHistory.map(m => ({ role: m.role, content: m.content })),
+                            { role: "user", content: userText }
+                        ]
+                    })
+                });
+                const data = await response.json();
+                if (data.choices && data.choices[0]) {
+                    return data.choices[0].message.content;
+                }
+            } catch (error) {
+                console.error("Erro na API da IA:", error);
+            }
+        }
+
+        // 2. Fallback Inteligente (Se não tiver chave ou der erro)
+        // Isso resolve o problema de "respostas sem sentido" imediato
+        if (lowerText.includes("preço") || lowerText.includes("valor") || lowerText.includes("quanto")) {
+            return "Temos planos a partir de R$ 49,90/mês no plano anual. O plano Pro custa R$ 69,90 (semestral) e o Business R$ 89,90 (mensal). Qual se encaixa melhor para você?";
+        }
+        if (lowerText.includes("pagar") || lowerText.includes("cobrar") || lowerText.includes("dinheiro")) {
+            return "Não! Para os participantes (quem dá o palpite), é totalmente gratuito. O sistema é focado em engajamento e diversão, não é casa de apostas.";
+        }
+        if (lowerText.includes("criar") || lowerText.includes("fazer") || lowerText.includes("liga")) {
+            return "Criar é fácil! Você escolhe o plano, personaliza com sua marca e envia o link para o pessoal. O sistema gerencia os pontos automaticamente.";
+        }
+        if (lowerText.includes("teste") || lowerText.includes("grátis") || lowerText.includes("testar")) {
+            return "Sim! Você tem 7 dias grátis para testar qualquer plano sem compromisso.";
+        }
+        if (lowerText.includes("olá") || lowerText.includes("oi") || lowerText.includes("tudo bem")) {
+            return "Olá! Tudo ótimo. Como posso ajudar você hoje?";
+        }
+
+        return "Entendi sua pergunta. Para essa questão mais específica, recomendo falar com nosso consultor no WhatsApp clicando no botão verde!";
+    };
+
+    const handleAiSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!aiMessage.trim()) return;
 
-        const newHistory = [...chatHistory, { role: 'user', content: aiMessage }];
-        setChatHistory(newHistory);
+        const userMsg = aiMessage;
         setAiMessage("");
+        setChatHistory(prev => [...prev, { role: 'user', content: userMsg }]);
+        setIsAiTyping(true);
 
-        // Mock AI response
-        setTimeout(() => {
-            setChatHistory([...newHistory, { role: 'assistant', content: 'Isso é interessante! Nossa plataforma pode automatizar isso para você. Quer ver uma demonstração?' }]);
-        }, 1000);
+        // Simular "pensando" ou chamar API
+        setTimeout(async () => {
+            const response = await generateResponse(userMsg);
+            setChatHistory(prev => [...prev, { role: 'assistant', content: response }]);
+            setIsAiTyping(false);
+        }, 1500);
     };
 
     const features = [
@@ -114,7 +175,8 @@ const Landing = () => {
             name: "Starter",
             price: "R$ 49,90",
             period: "/mês",
-            totalYear: "Total de R$ 598,80/ano",
+            totalYear: "Fidelidade 12 meses",
+            subtext: "Cobrança única de R$ 598,80/ano",
             desc: "Ideal para começar",
             features: [
                 "Até 2 jogos simultâneos",
@@ -130,7 +192,8 @@ const Landing = () => {
             name: "Pro",
             price: "R$ 69,90",
             period: "/mês",
-            totalYear: "Total de R$ 838,80/ano",
+            totalYear: "Fidelidade 6 meses",
+            subtext: "Cobrança única de R$ 419,40/semestre",
             desc: "O favorito dos clientes",
             features: [
                 "Jogos ilimitados",
@@ -146,7 +209,8 @@ const Landing = () => {
             name: "Business",
             price: "R$ 89,90",
             period: "/mês",
-            totalYear: "Total de R$ 1.078,80/ano",
+            totalYear: "Pagamento Mensal",
+            subtext: "Sem fidelidade (Cancele quando quiser)",
             desc: "Para máxima performance",
             features: [
                 "Tudo do plano Pro",
@@ -320,9 +384,14 @@ const Landing = () => {
                                     <span className="text-5xl font-bold text-white">{plan.price}</span>
                                     <span className="text-slate-400 ml-2 text-sm">{plan.period}</span>
                                 </div>
-                                <div className="mb-6 text-xs text-slate-400 font-medium bg-black/20 inline-block px-2 py-1 rounded">
+
+                                <div className="mb-2 text-sm font-semibold text-purple-300">
                                     {plan.totalYear}
                                 </div>
+                                <div className="mb-6 text-xs text-slate-500">
+                                    {plan.subtext}
+                                </div>
+
                                 <ul className="space-y-4 mb-8 flex-grow">
                                     {plan.features.map((f, j) => (
                                         <li key={j} className="flex items-start gap-3 text-slate-300 text-sm">
@@ -472,26 +541,33 @@ const Landing = () => {
                                 <X size={18} />
                             </button>
                         </div>
-                        <div className="h-64 p-4 overflow-y-auto space-y-3">
+                        <div className="h-64 p-4 overflow-y-auto space-y-3 bg-[#0f172a]/50">
                             {chatHistory.map((msg, idx) => (
                                 <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                                     <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user'
                                         ? 'bg-purple-600 text-white rounded-br-none'
-                                        : 'bg-white/10 text-slate-200 rounded-bl-none'
+                                        : 'bg-[#1e293b] text-slate-200 border border-white/5 rounded-bl-none'
                                         }`}>
                                         {msg.content}
                                     </div>
                                 </div>
                             ))}
+                            {isAiTyping && (
+                                <div className="flex justify-start">
+                                    <div className="bg-[#1e293b] p-3 rounded-2xl rounded-bl-none border border-white/5">
+                                        <Loader2 className="w-4 h-4 animate-spin text-purple-400" />
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        <form onSubmit={handleAiSubmit} className="p-3 border-t border-white/10 flex gap-2">
+                        <form onSubmit={handleAiSubmit} className="p-3 bg-[#1e293b] border-t border-white/10 flex gap-2">
                             <Input
                                 value={aiMessage}
                                 onChange={(e) => setAiMessage(e.target.value)}
                                 placeholder="Digite sua dúvida..."
-                                className="bg-black/20 border-0 focus-visible:ring-1 focus-visible:ring-purple-500 text-white h-10"
+                                className="bg-black/20 border-white/5 focus-visible:ring-1 focus-visible:ring-purple-500 text-white h-10 placeholder:text-slate-500"
                             />
-                            <Button size="icon" className="bg-purple-600 hover:bg-purple-700 h-10 w-10 shrink-0">
+                            <Button type="submit" size="icon" className="bg-purple-600 hover:bg-purple-700 h-10 w-10 shrink-0">
                                 <Send size={18} />
                             </Button>
                         </form>
@@ -499,9 +575,13 @@ const Landing = () => {
                 )}
                 <button
                     onClick={() => setShowAiChat(!showAiChat)}
-                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-xl transition-all hover:scale-110"
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-xl transition-all hover:scale-110 relative group"
                 >
                     <Bot size={28} />
+                    <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
                 </button>
             </div>
 
