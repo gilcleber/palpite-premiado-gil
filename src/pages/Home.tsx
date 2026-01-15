@@ -1,42 +1,54 @@
 import { useNavigate } from "react-router-dom";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 
 const Home = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#1d244a] via-[#2a3459] to-[#1d244a] flex items-center justify-center p-4">
-            <div className="text-center">
-                {/* Logo/Title */}
-                <h1 className="text-8xl md:text-9xl font-bold text-white mb-8 tracking-tight">
-                    PALPITE
-                    <br />
-                    <span className="text-[#d19563]">PREMIADO</span>
-                </h1>
+        <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 relative overflow-hidden">
+            {/* Background Gradients from Landing */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl -z-10 animate-pulse"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl -z-10 animate-pulse delay-1000"></div>
+
+            <div className="text-center relative z-10 max-w-2xl mx-auto">
+                <div className="inline-block mb-8 p-3 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10 shadow-2xl">
+                    {/* Logo/Title */}
+                    <h1 className="text-6xl md:text-8xl font-black mb-2 tracking-tighter">
+                        <span className="text-white">PALPITE</span>
+                        <br />
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+                            PREMIADO
+                        </span>
+                    </h1>
+                </div>
 
                 {/* Subtitle */}
-                <p className="text-xl md:text-2xl text-white/60 mb-12">
-                    Sistema de Palpites Esportivos
+                <p className="text-xl md:text-2xl text-slate-400 mb-12 font-light">
+                    Transformando a paixão pelo esporte em <br />
+                    <strong className="text-white font-semibold">engajamento real.</strong>
                 </p>
 
                 {/* Quick Access Links */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <button
                         onClick={() => navigate('/super')}
-                        className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all border border-white/20"
+                        className="group flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10 w-full sm:w-auto"
                     >
-                        Acesso Admin
+                        <ShieldCheck size={20} className="text-slate-400 group-hover:text-white transition-colors" />
+                        <span>Acesso Admin</span>
                     </button>
                     <button
                         onClick={() => navigate('/lp')}
-                        className="px-6 py-3 bg-[#d19563] hover:bg-[#b8804f] text-white rounded-lg transition-all"
+                        className="group flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-xl transition-all shadow-lg shadow-purple-500/20 w-full sm:w-auto hover:scale-105"
                     >
-                        Saiba Mais
+                        <span>Conhecer a Plataforma</span>
+                        <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
 
                 {/* Footer */}
-                <div className="mt-16 text-white/30 text-sm">
-                    © 2026 Palpite Premiado
+                <div className="mt-20 text-slate-600 text-sm">
+                    © 2026 Palpite Premiado • Todos os direitos reservados
                 </div>
             </div>
         </div>

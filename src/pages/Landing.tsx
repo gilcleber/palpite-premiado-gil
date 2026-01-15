@@ -20,7 +20,9 @@ import {
     ArrowRight,
     MessageCircle,
     Building2,
-    CalendarCheck
+    Bot,
+    X,
+    Send
 } from "lucide-react";
 
 const Landing = () => {
@@ -32,6 +34,11 @@ const Landing = () => {
     });
     const [loading, setLoading] = useState(false);
     const [isVisible, setIsVisible] = useState(false);
+    const [showAiChat, setShowAiChat] = useState(false);
+    const [aiMessage, setAiMessage] = useState("");
+    const [chatHistory, setChatHistory] = useState([
+        { role: 'assistant', content: 'Olá! Sou a IA do Palpite Premiado. Como posso ajudar você a engajar seu público hoje?' }
+    ]);
 
     useEffect(() => {
         setIsVisible(true);
@@ -77,6 +84,20 @@ const Landing = () => {
         }
     };
 
+    const handleAiSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!aiMessage.trim()) return;
+
+        const newHistory = [...chatHistory, { role: 'user', content: aiMessage }];
+        setChatHistory(newHistory);
+        setAiMessage("");
+
+        // Mock AI response
+        setTimeout(() => {
+            setChatHistory([...newHistory, { role: 'assistant', content: 'Isso é interessante! Nossa plataforma pode automatizar isso para você. Quer ver uma demonstração?' }]);
+        }, 1000);
+    };
+
     const features = [
         { icon: Trophy, title: "Gestão Completa", desc: "Crie ligas e palpites em segundos" },
         { icon: Users, title: "Base de Times", desc: "Milhares de escudos e times prontos" },
@@ -91,32 +112,54 @@ const Landing = () => {
     const plans = [
         {
             name: "Starter",
-            price: "R$ 598,80",
-            period: "/ano",
+            price: "R$ 49,90",
+            period: "/mês",
+            totalYear: "Total de R$ 598,80/ano",
             desc: "Ideal para começar",
-            features: ["Até 2 jogos simultâneos", "Personalização básica", "Suporte por email"],
+            features: [
+                "Até 2 jogos simultâneos",
+                "Até 2 prêmios por jogo",
+                "Personalização de Campeonatos",
+                "Edição de regras e datas",
+                "Sem exportação de dados",
+                "Sorteio Interno (sem animação)"
+            ],
             highlight: false
         },
         {
             name: "Pro",
-            price: "R$ 838,80",
-            period: "/ano",
+            price: "R$ 69,90",
+            period: "/mês",
+            totalYear: "Total de R$ 838,80/ano",
             desc: "O favorito dos clientes",
-            features: ["Jogos ilimitados", "Personalização total", "Suporte prioritário", "Consultoria de engajamento"],
+            features: [
+                "Jogos ilimitados",
+                "Prêmios ilimitados",
+                "Exportação Excel de Palpiteiros",
+                "Sorteio com Live Popup Animado",
+                "Personalização Total",
+                "Suporte Prioritário"
+            ],
             highlight: true
         },
         {
             name: "Business",
-            price: "Sob Consulta",
-            period: "",
-            desc: "Para grandes volumes",
-            features: ["Múltiplos administradores", "Treinamento dedicado", "Suporte VIP 24/7"],
+            price: "R$ 89,90",
+            period: "/mês",
+            totalYear: "Total de R$ 1.078,80/ano",
+            desc: "Para máxima performance",
+            features: [
+                "Tudo do plano Pro",
+                "Suporte IA 24/7 Exclusivo",
+                "Prioridade Máxima no Atendimento",
+                "Consultoria de Engajamento"
+            ],
             highlight: false
         }
     ];
 
     return (
-        <div className="min-h-screen bg-[#0f172a] text-white selection:bg-purple-500 selection:text-white">
+        <div className="min-h-screen bg-[#0f172a] text-white selection:bg-purple-500 selection:text-white relative">
             {/* Navbar */}
             <nav className="fixed top-0 w-full z-50 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/10">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -190,7 +233,7 @@ const Landing = () => {
                         </div>
                         <div>
                             <div className="text-3xl font-bold text-white mb-1">24/7</div>
-                            <div className="text-sm text-slate-500 uppercase tracking-wider">Suporte</div>
+                            <div className="text-sm text-slate-500 uppercase tracking-wider">Suporte IA</div>
                         </div>
                     </div>
                 </div>
@@ -273,9 +316,12 @@ const Landing = () => {
                                 )}
                                 <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
                                 <p className="text-slate-400 text-sm mb-6">{plan.desc}</p>
-                                <div className="mb-6 flex items-baseline">
-                                    <span className="text-4xl font-bold text-white">{plan.price}</span>
+                                <div className="mb-2 flex items-baseline">
+                                    <span className="text-5xl font-bold text-white">{plan.price}</span>
                                     <span className="text-slate-400 ml-2 text-sm">{plan.period}</span>
+                                </div>
+                                <div className="mb-6 text-xs text-slate-400 font-medium bg-black/20 inline-block px-2 py-1 rounded">
+                                    {plan.totalYear}
                                 </div>
                                 <ul className="space-y-4 mb-8 flex-grow">
                                     {plan.features.map((f, j) => (
@@ -413,7 +459,53 @@ const Landing = () => {
                 </div>
             </footer>
 
-            {/* Floating Action Button */}
+            {/* AI Widget */}
+            <div className="fixed bottom-24 right-6 z-50">
+                {showAiChat && (
+                    <div className="mb-4 w-80 bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-5">
+                        <div className="bg-purple-600 p-4 flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Bot className="text-white w-5 h-5" />
+                                <span className="font-bold text-white">Suporte IA</span>
+                            </div>
+                            <button onClick={() => setShowAiChat(false)} className="text-white/80 hover:text-white">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="h-64 p-4 overflow-y-auto space-y-3">
+                            {chatHistory.map((msg, idx) => (
+                                <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[85%] p-3 rounded-2xl text-sm ${msg.role === 'user'
+                                        ? 'bg-purple-600 text-white rounded-br-none'
+                                        : 'bg-white/10 text-slate-200 rounded-bl-none'
+                                        }`}>
+                                        {msg.content}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <form onSubmit={handleAiSubmit} className="p-3 border-t border-white/10 flex gap-2">
+                            <Input
+                                value={aiMessage}
+                                onChange={(e) => setAiMessage(e.target.value)}
+                                placeholder="Digite sua dúvida..."
+                                className="bg-black/20 border-0 focus-visible:ring-1 focus-visible:ring-purple-500 text-white h-10"
+                            />
+                            <Button size="icon" className="bg-purple-600 hover:bg-purple-700 h-10 w-10 shrink-0">
+                                <Send size={18} />
+                            </Button>
+                        </form>
+                    </div>
+                )}
+                <button
+                    onClick={() => setShowAiChat(!showAiChat)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white rounded-full p-4 shadow-xl transition-all hover:scale-110"
+                >
+                    <Bot size={28} />
+                </button>
+            </div>
+
+            {/* WhatsApp FAB */}
             <a
                 href="https://wa.me/5519991511288"
                 target="_blank"
