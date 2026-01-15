@@ -1,8 +1,30 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, UserCircle } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const Home = () => {
     const navigate = useNavigate();
+    const [clickCount, setClickCount] = useState(0);
+
+    // Reset clicks if user stops clicking for 2 seconds
+    useEffect(() => {
+        if (clickCount === 0) return;
+
+        const timer = setTimeout(() => {
+            setClickCount(0);
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [clickCount]);
+
+    const handleSecretAccess = () => {
+        const newCount = clickCount + 1;
+        setClickCount(newCount);
+
+        if (newCount >= 3) {
+            navigate('/super');
+        }
+    };
 
     return (
         <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4 relative overflow-hidden">
@@ -11,7 +33,11 @@ const Home = () => {
             <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-600/10 rounded-full blur-3xl -z-10 animate-pulse delay-1000"></div>
 
             <div className="text-center relative z-10 max-w-2xl mx-auto">
-                <div className="inline-block mb-8 p-3 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10 shadow-2xl">
+                <div
+                    className="inline-block mb-8 p-3 bg-white/5 rounded-2xl backdrop-blur-sm border border-white/10 shadow-2xl cursor-pointer select-none active:scale-95 transition-transform"
+                    onClick={handleSecretAccess}
+                    title="Palpite Premiado"
+                >
                     {/* Logo/Title */}
                     <h1 className="text-6xl md:text-8xl font-black mb-2 tracking-tighter">
                         <span className="text-white">PALPITE</span>
@@ -31,11 +57,11 @@ const Home = () => {
                 {/* Quick Access Links */}
                 <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                     <button
-                        onClick={() => navigate('/super')}
-                        className="group flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10 w-full sm:w-auto"
+                        onClick={() => navigate('/login')}
+                        className="group flex items-center justify-center gap-2 px-8 py-4 bg-white/5 hover:bg-white/10 text-white rounded-xl transition-all border border-white/10 w-full sm:w-auto hover:border-purple-500/50"
                     >
-                        <ShieldCheck size={20} className="text-slate-400 group-hover:text-white transition-colors" />
-                        <span>Acesso Admin</span>
+                        <UserCircle size={20} className="text-slate-400 group-hover:text-purple-400 transition-colors" />
+                        <span>Área do Assinante</span>
                     </button>
                     <button
                         onClick={() => navigate('/lp')}
