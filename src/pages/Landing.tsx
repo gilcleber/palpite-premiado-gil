@@ -225,21 +225,6 @@ const Landing = () => {
                             </CardContent>
                         </Card>
 
-                        {/* Creators */}
-                        <Card className="bg-[#1e293b] border-white/5 hover:border-pink-500/50 transition-all hover:-translate-y-1 group">
-                            <CardContent className="p-8">
-                                <div className="w-12 h-12 bg-pink-500/10 rounded-lg flex items-center justify-center mb-6 text-pink-400 group-hover:text-pink-300">
-                                    <Mic size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white mb-3">Podcasts & Influencers</h3>
-                                <p className="text-slate-400 mb-4">Engaje sua comunidade. Crie ligas exclusivas para seus seguidores ou membros de canais VIP.</p>
-                                <ul className="text-sm text-slate-500 space-y-2">
-                                    <li className="flex items-center gap-2">✓ Gamificação da audiência</li>
-                                    <li className="flex items-center gap-2">✓ Monetização com sponsors</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
                         {/* Bares */}
                         <Card className="bg-[#1e293b] border-white/5 hover:border-yellow-500/50 transition-all hover:-translate-y-1 group">
                             <CardContent className="p-8">
@@ -269,36 +254,6 @@ const Landing = () => {
                                 </ul>
                             </CardContent>
                         </Card>
-
-                        {/* Portais */}
-                        <Card className="bg-[#1e293b] border-white/5 hover:border-green-500/50 transition-all hover:-translate-y-1 group">
-                            <CardContent className="p-8">
-                                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-6 text-green-400 group-hover:text-green-300">
-                                    <Newspaper size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white mb-3">Portais de Notícias</h3>
-                                <p className="text-slate-400 mb-4">Aumente o tempo de página e recorrência. Widgets de palpites direto nas matérias esportivas.</p>
-                                <ul className="text-sm text-slate-500 space-y-2">
-                                    <li className="flex items-center gap-2">✓ Novos inventários de anúncio</li>
-                                    <li className="flex items-center gap-2">✓ Coleta de dados (First-party)</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-
-                        {/* Times Amadores */}
-                        <Card className="bg-[#1e293b] border-white/5 hover:border-red-500/50 transition-all hover:-translate-y-1 group">
-                            <CardContent className="p-8">
-                                <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-6 text-red-400 group-hover:text-red-300">
-                                    <Gamepad2 size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-white mb-3">Várzea & Amador</h3>
-                                <p className="text-slate-400 mb-4">Engaje a torcida do bairro. Ação entre amigos digital e profissionalizada.</p>
-                                <ul className="text-sm text-slate-500 space-y-2">
-                                    <li className="flex items-center gap-2">✓ Arrecadação de fundos</li>
-                                    <li className="flex items-center gap-2">✓ Comunidade ativa</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
                     </div>
                 </div>
             </section>
@@ -313,8 +268,8 @@ const Landing = () => {
                     <div className="grid md:grid-cols-3 gap-8 reveal opacity-0 translate-y-4">
                         {plans.map((plan, i) => (
                             <div key={i} className={`relative rounded-2xl p-8 backdrop-blur-md border transition-all duration-300 hover:-translate-y-2 ${plan.highlight
-                                    ? 'bg-white/10 border-purple-500 shadow-2xl shadow-purple-900/40'
-                                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                                ? 'bg-white/10 border-purple-500 shadow-2xl shadow-purple-900/40'
+                                : 'bg-white/5 border-white/10 hover:border-white/20'
                                 }`}>
                                 {plan.highlight && (
                                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
@@ -337,8 +292,8 @@ const Landing = () => {
                                 </ul>
                                 <Button
                                     className={`w-full h-12 rounded-xl text-base font-medium transition-all ${plan.highlight
-                                            ? 'bg-white text-purple-900 hover:bg-slate-100'
-                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                        ? 'bg-white text-purple-900 hover:bg-slate-100'
+                                        : 'bg-white/10 text-white hover:bg-white/20'
                                         }`}
                                     onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
                                 >
