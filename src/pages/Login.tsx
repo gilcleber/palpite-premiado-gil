@@ -27,22 +27,28 @@ const Login = () => {
 
     try {
       setIsLoading(true);
+      const cleanSlug = slug.toLowerCase().trim();
+
+      console.log("Tentando login com:", { cleanSlug, pin });
 
       // 1. Verify PIN via RPC
       // @ts-ignore
       const { data: isValid, error } = await supabase.rpc('verify_tenant_pin', {
-        t_slug: slug.toLowerCase(),
+        t_slug: cleanSlug,
         pin_attempt: pin
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("RPC Error:", error);
+        throw new Error(`Erro de verificação: ${error.message}`);
+      }
 
       if (isValid) {
         // 2. Fetch basic tenant info for session
         const { data: tenant, error: tError } = await supabase
           .from('tenants')
           .select('id, name, slug, branding')
-          .eq('slug', slug.toLowerCase())
+          .eq('slug', cleanSlug)
           .single();
 
         if (tError || !tenant) throw new Error("Erro ao carregar dados da rádio");
@@ -68,7 +74,7 @@ const Login = () => {
       } else {
         toast({
           title: "Acesso Negado",
-          description: "ID da Rádio ou PIN incorretos.",
+          description: `Rádio "${cleanSlug}" não encontrada ou PIN incorreto.`,
           variant: "destructive",
         });
         setPin(""); // Clear pin on error
@@ -77,8 +83,8 @@ const Login = () => {
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
-        title: "Erro no sistema",
-        description: "Tente novamente mais tarde.",
+        title: "Erro no Login",
+        description: error.message || "Tente novamente mais tarde.",
         variant: "destructive",
       });
     } finally {
