@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,12 +19,14 @@ import {
     Beer,
     Instagram,
     ArrowRight,
-    MessageCircle
+    MessageCircle,
+    Mic,
+    Newspaper,
+    Building2,
+    Gamepad2
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 const Landing = () => {
-    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -32,6 +34,25 @@ const Landing = () => {
         type: ""
     });
     const [loading, setLoading] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        setIsVisible(true);
+
+        // Simple intersection observer for scroll animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-in', 'fade-in', 'slide-in-from-bottom-4', 'duration-700');
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        return () => observer.disconnect();
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -61,394 +82,399 @@ const Landing = () => {
     };
 
     const features = [
-        { icon: Trophy, title: "Gestão de Jogos", desc: "Crie e gerencie palpites de forma simples" },
-        { icon: Users, title: "Biblioteca de Times", desc: "Times pré-cadastrados e personalizáveis" },
-        { icon: Zap, title: "Sorteio Automático", desc: "Sistema inteligente de sorteio" },
-        { icon: BarChart3, title: "Painel Administrativo", desc: "Controle total em tempo real" },
-        { icon: Smartphone, title: "Exportação Excel", desc: "Dados de participantes exportáveis" },
-        { icon: MessageCircle, title: "Link Compartilhável", desc: "WhatsApp e Instagram integrados" },
-        { icon: Palette, title: "Personalização Total", desc: "Sua marca, suas cores" },
-        { icon: Shield, title: "Suporte Dedicado", desc: "Ajuda quando você precisar" }
+        { icon: Trophy, title: "Gestão Completa", desc: "Crie bolões e palpites em segundos" },
+        { icon: Users, title: "Base de Times", desc: "Milhares de escudos e times prontos" },
+        { icon: Zap, title: "Sorteio Automático", desc: "IA define os vencedores sem erro" },
+        { icon: BarChart3, title: "Dashboard Real", desc: "Acompanhe engajamento ao vivo" },
+        { icon: Smartphone, title: "Mobile First", desc: "Perfeito em qualquer celular" },
+        { icon: MessageCircle, title: "Viralização", desc: "Integração nativa com WhatsApp" },
+        { icon: Palette, title: "White Label", desc: "Sua marca, suas cores, seu domínio" },
+        { icon: Shield, title: "Segurança", desc: "Proteção total dos dados" }
     ];
 
     const plans = [
         {
-            name: "Anual",
+            name: "Starter",
             price: "R$ 49,90",
             period: "à vista",
-            features: ["Economia de 44%", "Todos os recursos", "Suporte prioritário"],
+            desc: "Ideal para começar",
+            features: ["Até 2 jogos simultâneos", "Personalização básica", "Suporte por email"],
+            highlight: false
+        },
+        {
+            name: "Pro",
+            price: "R$ 69,90",
+            period: "à vista",
+            desc: "O favorito dos criadores",
+            features: ["Jogos ilimitados", "Personalização total", "Suporte prioritário", "Remoção de branding"],
             highlight: true
         },
         {
-            name: "Semestral",
-            price: "R$ 69,90",
-            period: "à vista",
-            features: ["Economia de 22%", "Todos os recursos", "Suporte por email"]
-        },
-        {
-            name: "Mensal",
+            name: "Business",
             price: "R$ 89,90",
             period: "/mês",
-            features: ["Sem compromisso", "Todos os recursos", "Cancele quando quiser"]
-        }
-    ];
-
-    const faqs = [
-        {
-            q: "Como funciona o teste grátis?",
-            a: "Você pode testar a plataforma por 7 dias sem compromisso. Não pedimos cartão de crédito."
-        },
-        {
-            q: "Preciso de conhecimento técnico?",
-            a: "Não! A plataforma é intuitiva e você configura tudo em minutos. Oferecemos suporte completo."
-        },
-        {
-            q: "Posso cancelar a qualquer momento?",
-            a: "Sim! Não há fidelidade. Você pode cancelar quando quiser."
-        },
-        {
-            q: "Como personalizo minha marca?",
-            a: "No painel administrativo você pode alterar logo, cores, nome e criar sua URL exclusiva."
-        },
-        {
-            q: "Posso usar para outros esportes além de futebol?",
-            a: "Sim! A plataforma funciona para qualquer esporte com times (basquete, vôlei, etc)."
+            desc: "Para máxima escala",
+            features: ["Tudo do Pro", "API de integração", "Gerente de conta", "Múltiplos usuários"],
+            highlight: false
         }
     ];
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-[#1d244a] via-[#2a3459] to-[#1d244a]">
+        <div className="min-h-screen bg-[#0f172a] text-white selection:bg-purple-500 selection:text-white">
+            {/* Navbar flutuante simples */}
+            <nav className="fixed top-0 w-full z-50 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/10">
+                <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                    <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                        PALPITE PREMIADO
+                    </span>
+                    <Button
+                        size="sm"
+                        className="bg-purple-600 hover:bg-purple-700"
+                        onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                    >
+                        Começar Agora
+                    </Button>
+                </div>
+            </nav>
+
             {/* Hero Section */}
-            <section className="relative overflow-hidden py-20 px-4">
-                <div className="max-w-6xl mx-auto text-center">
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-                        Engaje Seu Público com<br />
-                        <span className="text-[#d19563]">Palpites Premiados</span>
+            <section className="relative pt-32 pb-20 px-4 overflow-hidden">
+                {/* Background Gradients */}
+                <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl -z-10 animate-pulse"></div>
+                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-600/20 rounded-full blur-3xl -z-10 animate-pulse delay-1000"></div>
+
+                <div className="max-w-6xl mx-auto text-center reveal opacity-0 translate-y-4">
+                    <div className="inline-block mb-4 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm text-sm font-medium text-purple-300">
+                        🚀 A plataforma #1 de engajamento esportivo
+                    </div>
+                    <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight tracking-tight">
+                        Transforme Torcedores em<br />
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500">
+                            Clientes Fiéis
+                        </span>
                     </h1>
-                    <p className="text-xl md:text-2xl text-white/80 mb-8 max-w-3xl mx-auto">
-                        Plataforma completa para rádios e bares criarem promoções de palpites esportivos
+                    <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                        A ferramenta definitiva para Rádios, Influencers e Empresas criarem bolões interativos e capturarem leads qualificados.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <Button
                             size="lg"
-                            className="bg-[#d19563] hover:bg-[#b8804f] text-white text-lg px-8 py-6"
+                            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg px-8 py-6 h-auto shadow-lg shadow-purple-500/25 transition-all hover:scale-105"
                             onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
                         >
-                            Solicitar Demonstração <ArrowRight className="ml-2" />
+                            Criar Meu Bolão <ArrowRight className="ml-2 w-5 h-5" />
                         </Button>
                         <Button
                             size="lg"
                             variant="outline"
-                            className="border-white text-white hover:bg-white/10 text-lg px-8 py-6"
+                            className="border-white/20 text-white hover:bg-white/5 text-lg px-8 py-6 h-auto backdrop-blur-sm"
                             onClick={() => window.open('https://wa.me/5519991511288', '_blank')}
                         >
-                            <MessageCircle className="mr-2" /> Falar no WhatsApp
+                            <MessageCircle className="mr-2 w-5 h-5 text-green-400" /> Falar com Consultor
                         </Button>
                     </div>
-                    <p className="text-white/60 text-sm">✨ Já usado por diversas rádios e bares pelo Brasil</p>
                 </div>
             </section>
 
-            {/* Problem/Solution */}
-            <section className="py-16 px-4 bg-white/5 backdrop-blur-sm">
-                <div className="max-w-6xl mx-auto">
-                    <div className="grid md:grid-cols-2 gap-12">
+            {/* Stats/Social Proof */}
+            <section className="py-10 border-y border-white/5 bg-white/[0.02]">
+                <div className="max-w-6xl mx-auto px-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center reveal opacity-0 translate-y-4">
                         <div>
-                            <h3 className="text-2xl font-bold text-[#d19563] mb-4">Difícil engajar seu público?</h3>
-                            <ul className="space-y-3 text-white/80">
-                                <li className="flex items-start gap-2">
-                                    <span className="text-red-400 mt-1">✗</span>
-                                    <span>Ouvintes/clientes desinteressados</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-red-400 mt-1">✗</span>
-                                    <span>Promoções complicadas de gerenciar</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <span className="text-red-400 mt-1">✗</span>
-                                    <span>Falta de ferramentas profissionais</span>
-                                </li>
-                            </ul>
+                            <div className="text-3xl font-bold text-white mb-1">10k+</div>
+                            <div className="text-sm text-slate-500 uppercase tracking-wider">Palpites/Mês</div>
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold text-[#d19563] mb-4">Sistema pronto, fácil e sem complicação!</h3>
-                            <ul className="space-y-3 text-white/80">
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle className="text-green-400 mt-1 flex-shrink-0" size={20} />
-                                    <span>Configure em minutos, sem programador</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle className="text-green-400 mt-1 flex-shrink-0" size={20} />
-                                    <span>Sorteios automáticos e transparentes</span>
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <CheckCircle className="text-green-400 mt-1 flex-shrink-0" size={20} />
-                                    <span>Sua marca, suas regras</span>
-                                </li>
-                            </ul>
+                            <div className="text-3xl font-bold text-white mb-1">500+</div>
+                            <div className="text-sm text-slate-500 uppercase tracking-wider">Prêmios Entregues</div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-white mb-1">98%</div>
+                            <div className="text-sm text-slate-500 uppercase tracking-wider">Satisfação</div>
+                        </div>
+                        <div>
+                            <div className="text-3xl font-bold text-white mb-1">24/7</div>
+                            <div className="text-sm text-slate-500 uppercase tracking-wider">Suporte</div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Benefits */}
-            <section className="py-20 px-4">
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center text-white mb-12">Por Que Escolher o Palpite Premiado?</h2>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <Card className="bg-white/10 border-[#d19563]/30 backdrop-blur-sm">
-                            <CardContent className="p-8 text-center">
-                                <Trophy className="w-16 h-16 text-[#d19563] mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-3">Engajamento Garantido</h3>
-                                <p className="text-white/70">Palpites interativos, prêmios personalizados e sorteios automáticos que mantêm seu público conectado.</p>
-                            </CardContent>
-                        </Card>
-                        <Card className="bg-white/10 border-[#d19563]/30 backdrop-blur-sm">
-                            <CardContent className="p-8 text-center">
-                                <Zap className="w-16 h-16 text-[#d19563] mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-3">Fácil de Usar</h3>
-                                <p className="text-white/70">Sem necessidade de programador. Configure em minutos com nosso painel intuitivo e suporte incluído.</p>
-                            </CardContent>
-                        </Card>
-                        <Card className="bg-white/10 border-[#d19563]/30 backdrop-blur-sm">
-                            <CardContent className="p-8 text-center">
-                                <Palette className="w-16 h-16 text-[#d19563] mx-auto mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-3">White Label</h3>
-                                <p className="text-white/70">Logo da sua marca, cores personalizadas e URL exclusiva. O sistema é 100% seu!</p>
-                            </CardContent>
-                        </Card>
+            {/* Use Cases - Expandido */}
+            <section className="py-24 px-4 bg-[#0f172a]">
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16 reveal opacity-0 translate-y-4">
+                        <h2 className="text-3xl md:text-5xl font-bold mb-4">Para quem é o Palpite Premiado?</h2>
+                        <p className="text-slate-400">Soluções personalizadas para cada tipo de negócio</p>
                     </div>
-                </div>
-            </section>
 
-            {/* How It Works */}
-            <section className="py-20 px-4 bg-white/5 backdrop-blur-sm">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center text-white mb-12">Como Funciona</h2>
-                    <div className="space-y-6">
-                        {[
-                            { step: "1", title: "Cadastre-se", desc: "Crie sua conta em menos de 2 minutos" },
-                            { step: "2", title: "Personalize", desc: "Adicione seu logo, cores e informações" },
-                            { step: "3", title: "Crie Jogos", desc: "Configure palpites e prêmios" },
-                            { step: "4", title: "Compartilhe", desc: "Envie o link para seu público (WhatsApp/Instagram)" },
-                            { step: "5", title: "Sorteie", desc: "Sistema sorteia automaticamente os vencedores" }
-                        ].map((item, i) => (
-                            <div key={i} className="flex items-start gap-4 bg-white/5 p-6 rounded-lg">
-                                <div className="w-12 h-12 rounded-full bg-[#d19563] flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                                    {item.step}
+                    <div className="grid md:grid-cols-3 gap-6 reveal opacity-0 translate-y-4">
+                        {/* Rádios & Mídia */}
+                        <Card className="bg-[#1e293b] border-white/5 hover:border-purple-500/50 transition-all hover:-translate-y-1 group">
+                            <CardContent className="p-8">
+                                <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center mb-6 text-purple-400 group-hover:text-purple-300">
+                                    <Radio size={24} />
                                 </div>
-                                <div>
-                                    <h4 className="text-xl font-bold text-white mb-1">{item.title}</h4>
-                                    <p className="text-white/70">{item.desc}</p>
+                                <h3 className="text-xl font-bold text-white mb-3">Rádios & Canais de TV</h3>
+                                <p className="text-slate-400 mb-4">Mantenha a audiência sintonizada. Crie palpites sobre os jogos da rodada e sorteie prêmios ao vivo.</p>
+                                <ul className="text-sm text-slate-500 space-y-2">
+                                    <li className="flex items-center gap-2">✓ Aumento de retenção</li>
+                                    <li className="flex items-center gap-2">✓ Merchandising digital</li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+
+                        {/* Creators */}
+                        <Card className="bg-[#1e293b] border-white/5 hover:border-pink-500/50 transition-all hover:-translate-y-1 group">
+                            <CardContent className="p-8">
+                                <div className="w-12 h-12 bg-pink-500/10 rounded-lg flex items-center justify-center mb-6 text-pink-400 group-hover:text-pink-300">
+                                    <Mic size={24} />
                                 </div>
-                            </div>
-                        ))}
+                                <h3 className="text-xl font-bold text-white mb-3">Podcasts & Influencers</h3>
+                                <p className="text-slate-400 mb-4">Engaje sua comunidade. Crie ligas exclusivas para seus seguidores ou membros de canais VIP.</p>
+                                <ul className="text-sm text-slate-500 space-y-2">
+                                    <li className="flex items-center gap-2">✓ Gamificação da audiência</li>
+                                    <li className="flex items-center gap-2">✓ Monetização com sponsors</li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+
+                        {/* Bares */}
+                        <Card className="bg-[#1e293b] border-white/5 hover:border-yellow-500/50 transition-all hover:-translate-y-1 group">
+                            <CardContent className="p-8">
+                                <div className="w-12 h-12 bg-yellow-500/10 rounded-lg flex items-center justify-center mb-6 text-yellow-400 group-hover:text-yellow-300">
+                                    <Beer size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">Sports Bars & Pubs</h3>
+                                <p className="text-slate-400 mb-4">Lote a casa em dias de jogo. Quem acerta o placar ganha um chopp ou desconto na conta.</p>
+                                <ul className="text-sm text-slate-500 space-y-2">
+                                    <li className="flex items-center gap-2">✓ Casa cheia quarta e domingo</li>
+                                    <li className="flex items-center gap-2">✓ Fidelização de clientes</li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+
+                        {/* Empresas */}
+                        <Card className="bg-[#1e293b] border-white/5 hover:border-blue-500/50 transition-all hover:-translate-y-1 group">
+                            <CardContent className="p-8">
+                                <div className="w-12 h-12 bg-blue-500/10 rounded-lg flex items-center justify-center mb-6 text-blue-400 group-hover:text-blue-300">
+                                    <Building2 size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">Endomarketing</h3>
+                                <p className="text-slate-400 mb-4">Bolão da firma profissional. Melhore o clima organizacional e integração entre equipes.</p>
+                                <ul className="text-sm text-slate-500 space-y-2">
+                                    <li className="flex items-center gap-2">✓ Team building divertido</li>
+                                    <li className="flex items-center gap-2">✓ Baixo custo de implementação</li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+
+                        {/* Portais */}
+                        <Card className="bg-[#1e293b] border-white/5 hover:border-green-500/50 transition-all hover:-translate-y-1 group">
+                            <CardContent className="p-8">
+                                <div className="w-12 h-12 bg-green-500/10 rounded-lg flex items-center justify-center mb-6 text-green-400 group-hover:text-green-300">
+                                    <Newspaper size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">Portais de Notícias</h3>
+                                <p className="text-slate-400 mb-4">Aumente o tempo de página e recorrência. Widgets de palpites direto nas matérias esportivas.</p>
+                                <ul className="text-sm text-slate-500 space-y-2">
+                                    <li className="flex items-center gap-2">✓ Novos inventários de anúncio</li>
+                                    <li className="flex items-center gap-2">✓ Coleta de dados (First-party)</li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+
+                        {/* Times Amadores */}
+                        <Card className="bg-[#1e293b] border-white/5 hover:border-red-500/50 transition-all hover:-translate-y-1 group">
+                            <CardContent className="p-8">
+                                <div className="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-6 text-red-400 group-hover:text-red-300">
+                                    <Gamepad2 size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-3">Várzea & Amador</h3>
+                                <p className="text-slate-400 mb-4">Engaje a torcida do bairro. Ação entre amigos digital e profissionalizada.</p>
+                                <ul className="text-sm text-slate-500 space-y-2">
+                                    <li className="flex items-center gap-2">✓ Arrecadação de fundos</li>
+                                    <li className="flex items-center gap-2">✓ Comunidade ativa</li>
+                                </ul>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </section>
 
-            {/* Use Cases */}
-            <section className="py-20 px-4">
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center text-white mb-12">Perfeito Para</h2>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        <Card className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 border-blue-400/30">
-                            <CardContent className="p-8">
-                                <Radio className="w-12 h-12 text-blue-400 mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-4">Rádios</h3>
-                                <ul className="space-y-2 text-white/80">
-                                    <li>• Promoções durante programas esportivos</li>
-                                    <li>• Engajamento nas redes sociais</li>
-                                    <li>• Captação de leads (WhatsApp)</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-                        <Card className="bg-gradient-to-br from-orange-600/20 to-orange-800/20 border-orange-400/30">
-                            <CardContent className="p-8">
-                                <Beer className="w-12 h-12 text-orange-400 mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-4">Bares</h3>
-                                <ul className="space-y-2 text-white/80">
-                                    <li>• Atrair clientes nos dias de jogo</li>
-                                    <li>• Fidelização com prêmios</li>
-                                    <li>• Divulgação nas redes</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-                        <Card className="bg-gradient-to-br from-pink-600/20 to-pink-800/20 border-pink-400/30">
-                            <CardContent className="p-8">
-                                <Instagram className="w-12 h-12 text-pink-400 mb-4" />
-                                <h3 className="text-2xl font-bold text-white mb-4">Instagram</h3>
-                                <ul className="space-y-2 text-white/80">
-                                    <li>• Engajamento de seguidores</li>
-                                    <li>• Promoções interativas</li>
-                                    <li>• Crescimento orgânico</li>
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </section>
+            {/* Pricing - Design Moderno com Cartões Glassmorphism */}
+            <section className="py-24 px-4 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070')] bg-cover bg-fixed bg-center relative group">
+                <div className="absolute inset-0 bg-[#0f172a]/90 backdrop-blur-sm"></div>
+                <div className="max-w-6xl mx-auto relative z-10">
+                    <h2 className="text-4xl font-bold text-center text-white mb-4 reveal opacity-0 translate-y-4">Planos Flexíveis</h2>
+                    <p className="text-center text-slate-300 mb-12 reveal opacity-0 translate-y-4">Escolha a melhor opção para o seu momento</p>
 
-            {/* Features Grid */}
-            <section className="py-20 px-4 bg-white/5 backdrop-blur-sm">
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center text-white mb-12">Recursos Inclusos</h2>
-                    <div className="grid md:grid-cols-4 gap-6">
-                        {features.map((feature, i) => (
-                            <div key={i} className="text-center">
-                                <feature.icon className="w-12 h-12 text-[#d19563] mx-auto mb-3" />
-                                <h4 className="font-bold text-white mb-2">{feature.title}</h4>
-                                <p className="text-sm text-white/60">{feature.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Pricing */}
-            <section className="py-20 px-4">
-                <div className="max-w-6xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center text-white mb-4">Planos e Preços</h2>
-                    <p className="text-center text-white/70 mb-12">Parcelamento em até 3x sem juros no cartão</p>
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8 reveal opacity-0 translate-y-4">
                         {plans.map((plan, i) => (
-                            <Card key={i} className={`${plan.highlight ? 'border-[#d19563] border-2 scale-105' : 'border-white/20'} bg-white/10 backdrop-blur-sm`}>
-                                <CardContent className="p-8">
-                                    {plan.highlight && (
-                                        <div className="bg-[#d19563] text-white text-xs font-bold px-3 py-1 rounded-full inline-block mb-4">
-                                            MAIS POPULAR
-                                        </div>
-                                    )}
-                                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                                    <div className="mb-6">
-                                        <span className="text-4xl font-bold text-[#d19563]">{plan.price}</span>
-                                        <span className="text-white/60 ml-2">{plan.period}</span>
+                            <div key={i} className={`relative rounded-2xl p-8 backdrop-blur-md border transition-all duration-300 hover:-translate-y-2 ${plan.highlight
+                                    ? 'bg-white/10 border-purple-500 shadow-2xl shadow-purple-900/40'
+                                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                                }`}>
+                                {plan.highlight && (
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
+                                        MAIS POPULAR
                                     </div>
-                                    <ul className="space-y-3 mb-6">
-                                        {plan.features.map((f, j) => (
-                                            <li key={j} className="flex items-center gap-2 text-white/80">
-                                                <CheckCircle className="text-green-400 flex-shrink-0" size={18} />
-                                                <span>{f}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                    <Button
-                                        className={`w-full ${plan.highlight ? 'bg-[#d19563] hover:bg-[#b8804f]' : 'bg-white/20 hover:bg-white/30'}`}
-                                        onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
-                                    >
-                                        Escolher Plano
-                                    </Button>
-                                </CardContent>
-                            </Card>
+                                )}
+                                <h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3>
+                                <p className="text-slate-400 text-sm mb-6">{plan.desc}</p>
+                                <div className="mb-6 flex items-baseline">
+                                    <span className="text-4xl font-bold text-white">{plan.price}</span>
+                                    <span className="text-slate-400 ml-2 text-sm">{plan.period}</span>
+                                </div>
+                                <ul className="space-y-4 mb-8">
+                                    {plan.features.map((f, j) => (
+                                        <li key={j} className="flex items-start gap-3 text-slate-300 text-sm">
+                                            <CheckCircle className={`w-5 h-5 flex-shrink-0 ${plan.highlight ? 'text-purple-400' : 'text-slate-500'}`} />
+                                            <span>{f}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <Button
+                                    className={`w-full h-12 rounded-xl text-base font-medium transition-all ${plan.highlight
+                                            ? 'bg-white text-purple-900 hover:bg-slate-100'
+                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                        }`}
+                                    onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
+                                >
+                                    Selecionar {plan.name}
+                                </Button>
+                            </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* FAQ */}
-            <section className="py-20 px-4 bg-white/5 backdrop-blur-sm">
-                <div className="max-w-4xl mx-auto">
-                    <h2 className="text-4xl font-bold text-center text-white mb-12">Perguntas Frequentes</h2>
-                    <div className="space-y-4">
-                        {faqs.map((faq, i) => (
-                            <details key={i} className="bg-white/10 rounded-lg p-6 cursor-pointer">
-                                <summary className="font-bold text-white text-lg">{faq.q}</summary>
-                                <p className="text-white/70 mt-3">{faq.a}</p>
+            {/* FAQ Accordion */}
+            <section className="py-24 px-4 bg-[#0f172a]">
+                <div className="max-w-3xl mx-auto">
+                    <h2 className="text-3xl font-bold text-center text-white mb-12">Dúvidas Frequentes</h2>
+                    <div className="space-y-4 reveal opacity-0 translate-y-4">
+                        {/* FAQs - Conteúdo igual, só visual novo */}
+                        {[
+                            { q: "Preciso pagar para testar?", a: "Não! Oferecemos 7 dias totalmente grátis para você conhecer a plataforma." },
+                            { q: "Posso colocar minha logo?", a: "sim! O sistema é White Label. Você personaliza logo, cores e textos para ficar com a cara da sua marca." },
+                            { q: "Como recebo o dinheiro dos bolões?", a: "Você define as regras. A plataforma gerencia os palpites, você gerencia a premiação diretamente com seu público." }
+                        ].map((faq, i) => (
+                            <details key={i} className="group bg-[#1e293b] rounded-xl overflow-hidden border border-white/5 open:border-purple-500/30 transition-all">
+                                <summary className="flex items-center justify-between p-6 cursor-pointer font-medium text-white select-none group-hover:text-purple-300 transition-colors">
+                                    {faq.q}
+                                    <span className="text-2xl transition-transform group-open:rotate-45 text-purple-500">+</span>
+                                </summary>
+                                <div className="px-6 pb-6 text-slate-400 leading-relaxed">
+                                    {faq.a}
+                                </div>
                             </details>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Contact Form */}
-            <section id="contact-form" className="py-20 px-4">
-                <div className="max-w-2xl mx-auto">
-                    <Card className="bg-white/10 border-[#d19563]/30 backdrop-blur-sm">
-                        <CardContent className="p-8">
-                            <h2 className="text-3xl font-bold text-center text-white mb-2">Solicitar Demonstração</h2>
-                            <p className="text-center text-white/70 mb-8">Preencha o formulário e entraremos em contato</p>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <Label className="text-white">Nome Completo</Label>
-                                    <Input
-                                        required
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="bg-white/20 border-white/30 text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="text-white">Email</Label>
-                                    <Input
-                                        type="email"
-                                        required
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        className="bg-white/20 border-white/30 text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="text-white">Telefone/WhatsApp</Label>
-                                    <Input
-                                        required
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        className="bg-white/20 border-white/30 text-white"
-                                    />
-                                </div>
-                                <div>
-                                    <Label className="text-white">Tipo de Negócio</Label>
-                                    <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
-                                        <SelectTrigger className="bg-white/20 border-white/30 text-white">
-                                            <SelectValue placeholder="Selecione..." />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="radio">Rádio</SelectItem>
-                                            <SelectItem value="bar">Bar/Estabelecimento</SelectItem>
-                                            <SelectItem value="instagram">Instagram/Influencer</SelectItem>
-                                            <SelectItem value="other">Outro</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <Button
-                                    type="submit"
-                                    className="w-full bg-[#d19563] hover:bg-[#b8804f] text-white text-lg py-6"
-                                    disabled={loading}
-                                >
-                                    {loading ? "Enviando..." : "Solicitar Demonstração"}
-                                </Button>
-                            </form>
-                        </CardContent>
-                    </Card>
+            {/* Contact Form Elegante */}
+            <section id="contact-form" className="py-24 px-4 bg-gradient-to-b from-[#0f172a] to-[#1e1b4b]">
+                <div className="max-w-4xl mx-auto bg-[#1e293b]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl reveal opacity-0 translate-y-4">
+                    <div className="text-center mb-10">
+                        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Vamos Impulsionar seu Engajamento?</h2>
+                        <p className="text-slate-400">Preencha o formulário abaixo para agendar uma demonstração gratuita.</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">Nome Completo</Label>
+                            <Input
+                                required
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                className="bg-[#0f172a] border-white/10 text-white h-12 focus:border-purple-500 focus:ring-purple-500/20"
+                                placeholder="Ex: João Silva"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">Email Corporativo</Label>
+                            <Input
+                                type="email"
+                                required
+                                value={formData.email}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                className="bg-[#0f172a] border-white/10 text-white h-12 focus:border-purple-500 focus:ring-purple-500/20"
+                                placeholder="joao@empresa.com"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">WhatsApp</Label>
+                            <Input
+                                required
+                                value={formData.phone}
+                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                className="bg-[#0f172a] border-white/10 text-white h-12 focus:border-purple-500 focus:ring-purple-500/20"
+                                placeholder="(00) 00000-0000"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-slate-300">Segmento</Label>
+                            <Select value={formData.type} onValueChange={(v) => setFormData({ ...formData, type: v })}>
+                                <SelectTrigger className="bg-[#0f172a] border-white/10 text-white h-12">
+                                    <SelectValue placeholder="Selecione seu segmento" />
+                                </SelectTrigger>
+                                <SelectContent className="bg-[#1e293b] border-white/10 text-white">
+                                    <SelectItem value="radio">Rádio / TV</SelectItem>
+                                    <SelectItem value="creator">Influencer / Podcaster</SelectItem>
+                                    <SelectItem value="bar">Bar / Eventos</SelectItem>
+                                    <SelectItem value="company">Empresa (Endomarketing)</SelectItem>
+                                    <SelectItem value="news">Portal de Notícias</SelectItem>
+                                    <SelectItem value="other">Outro</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <Button
+                            type="submit"
+                            className="md:col-span-2 w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg h-14 rounded-xl shadow-lg shadow-purple-500/25 mt-4 transition-all hover:scale-[1.02]"
+                            disabled={loading}
+                        >
+                            {loading ? "Enviando seus dados..." : "Solicitar Contato Especialista"}
+                        </Button>
+                        <p className="md:col-span-2 text-center text-xs text-slate-500 mt-4">
+                            Ao enviar, você concorda com nossos termos de privacidade. Seus dados estão seguros.
+                        </p>
+                    </form>
                 </div>
             </section>
 
-            {/* Footer */}
-            <footer className="py-12 px-4 bg-black/30 border-t border-white/10">
-                <div className="max-w-6xl mx-auto text-center">
-                    <p className="text-white/60 mb-4">© 2026 Palpite Premiado. Todos os direitos reservados.</p>
-                    <div className="flex justify-center gap-6 text-sm text-white/50 mb-4">
-                        <a href="#" className="hover:text-white/80">Sobre</a>
-                        <a href="#" className="hover:text-white/80">Contato</a>
-                        <a href="#" className="hover:text-white/80">Termos de Uso</a>
-                        <a href="#" className="hover:text-white/80">Privacidade</a>
-                    </div>
-                    <div className="pt-4 border-t border-white/10">
-                        <a href="/super" className="text-xs text-white/30 hover:text-white/60 transition-colors">
-                            Já é cliente? Acesse seu painel →
+            {/* Footer Minimalista */}
+            <footer className="py-12 px-4 bg-[#0f172a] border-t border-white/5 text-center">
+                <div className="flex items-center justify-center gap-2 mb-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                    {/* Placeholder for tech stack or partner logos if needed */}
+                    <span className="text-2xl font-bold text-white tracking-widest">PALPITE PREMIADO</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-500 mb-8">
+                    <a href="#" className="hover:text-purple-400 transition-colors">Sobre Nós</a>
+                    <a href="#" className="hover:text-purple-400 transition-colors">Cases de Sucesso</a>
+                    <a href="#" className="hover:text-purple-400 transition-colors">Blog</a>
+                    <a href="#" className="hover:text-purple-400 transition-colors">Termos</a>
+                </div>
+                <div className="text-slate-600 text-sm">
+                    © 2026 Palpite Premiado SaaS. Todos os direitos reservados.
+                    <div className="mt-2">
+                        <a href="/super" className="text-purple-900/40 hover:text-purple-500/60 transition-colors text-xs">
+                            Admin Acess
                         </a>
                     </div>
                 </div>
             </footer>
 
-            {/* WhatsApp Floating Button */}
+            {/* Floating Action Button */}
             <a
                 href="https://wa.me/5519991511288"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white rounded-full p-4 shadow-2xl z-50 transition-transform hover:scale-110"
+                className="fixed bottom-6 right-6 bg-[#25D366] hover:bg-[#128C7E] text-white rounded-full p-4 shadow-2xl z-50 transition-all hover:scale-110 hover:rotate-12 group"
             >
-                <MessageCircle size={32} />
+                <MessageCircle size={28} className="group-hover:animate-pulse" />
             </a>
         </div>
     );
