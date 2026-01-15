@@ -17,13 +17,10 @@ import {
     Shield,
     Radio,
     Beer,
-    Instagram,
     ArrowRight,
     MessageCircle,
-    Mic,
-    Newspaper,
     Building2,
-    Gamepad2
+    CalendarCheck
 } from "lucide-react";
 
 const Landing = () => {
@@ -39,7 +36,6 @@ const Landing = () => {
     useEffect(() => {
         setIsVisible(true);
 
-        // Simple intersection observer for scroll animations
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -82,7 +78,7 @@ const Landing = () => {
     };
 
     const features = [
-        { icon: Trophy, title: "Gestão Completa", desc: "Crie bolões e palpites em segundos" },
+        { icon: Trophy, title: "Gestão Completa", desc: "Crie ligas e palpites em segundos" },
         { icon: Users, title: "Base de Times", desc: "Milhares de escudos e times prontos" },
         { icon: Zap, title: "Sorteio Automático", desc: "IA define os vencedores sem erro" },
         { icon: BarChart3, title: "Dashboard Real", desc: "Acompanhe engajamento ao vivo" },
@@ -95,33 +91,33 @@ const Landing = () => {
     const plans = [
         {
             name: "Starter",
-            price: "R$ 49,90",
-            period: "à vista",
+            price: "R$ 598,80",
+            period: "/ano",
             desc: "Ideal para começar",
             features: ["Até 2 jogos simultâneos", "Personalização básica", "Suporte por email"],
             highlight: false
         },
         {
             name: "Pro",
-            price: "R$ 69,90",
-            period: "à vista",
-            desc: "O favorito dos criadores",
-            features: ["Jogos ilimitados", "Personalização total", "Suporte prioritário", "Remoção de branding"],
+            price: "R$ 838,80",
+            period: "/ano",
+            desc: "O favorito dos clientes",
+            features: ["Jogos ilimitados", "Personalização total", "Suporte prioritário", "Consultoria de engajamento"],
             highlight: true
         },
         {
             name: "Business",
-            price: "R$ 89,90",
-            period: "/mês",
-            desc: "Para máxima escala",
-            features: ["Tudo do Pro", "API de integração", "Gerente de conta", "Múltiplos usuários"],
+            price: "Sob Consulta",
+            period: "",
+            desc: "Para grandes volumes",
+            features: ["Múltiplos administradores", "Treinamento dedicado", "Suporte VIP 24/7"],
             highlight: false
         }
     ];
 
     return (
         <div className="min-h-screen bg-[#0f172a] text-white selection:bg-purple-500 selection:text-white">
-            {/* Navbar flutuante simples */}
+            {/* Navbar */}
             <nav className="fixed top-0 w-full z-50 bg-[#0f172a]/80 backdrop-blur-md border-b border-white/10">
                 <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                     <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
@@ -129,7 +125,7 @@ const Landing = () => {
                     </span>
                     <Button
                         size="sm"
-                        className="bg-purple-600 hover:bg-purple-700"
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
                         onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
                     >
                         Começar Agora
@@ -154,7 +150,7 @@ const Landing = () => {
                         </span>
                     </h1>
                     <p className="text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        A ferramenta definitiva para Rádios, Influencers e Empresas criarem bolões interativos e capturarem leads qualificados.
+                        A ferramenta definitiva para Rádios, Empresas e Bares criarem ligas interativas e capturarem leads qualificados.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -163,15 +159,14 @@ const Landing = () => {
                             className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg px-8 py-6 h-auto shadow-lg shadow-purple-500/25 transition-all hover:scale-105"
                             onClick={() => document.getElementById('contact-form')?.scrollIntoView({ behavior: 'smooth' })}
                         >
-                            Criar Meu Bolão <ArrowRight className="ml-2 w-5 h-5" />
+                            Criar Minha Liga <ArrowRight className="ml-2 w-5 h-5" />
                         </Button>
                         <Button
                             size="lg"
-                            variant="outline"
-                            className="border-white/20 text-white hover:bg-white/5 text-lg px-8 py-6 h-auto backdrop-blur-sm"
+                            className="bg-[#25D366] hover:bg-[#128C7E] text-white text-lg px-8 py-6 h-auto shadow-lg transition-all hover:scale-105"
                             onClick={() => window.open('https://wa.me/5519991511288', '_blank')}
                         >
-                            <MessageCircle className="mr-2 w-5 h-5 text-green-400" /> Falar com Consultor
+                            <MessageCircle className="mr-2 w-5 h-5" /> Falar com Consultor
                         </Button>
                     </div>
                 </div>
@@ -201,7 +196,7 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Use Cases - Expandido */}
+            {/* Use Cases */}
             <section className="py-24 px-4 bg-[#0f172a]">
                 <div className="max-w-7xl mx-auto">
                     <div className="text-center mb-16 reveal opacity-0 translate-y-4">
@@ -217,7 +212,7 @@ const Landing = () => {
                                     <Radio size={24} />
                                 </div>
                                 <h3 className="text-xl font-bold text-white mb-3">Rádios & Canais de TV</h3>
-                                <p className="text-slate-400 mb-4">Mantenha a audiência sintonizada. Crie palpites sobre os jogos da rodada e sorteie prêmios ao vivo.</p>
+                                <p className="text-slate-400 mb-4">Mantenha a audiência sintonizada. Crie palpites sobre os jogos da rodada e distribua brindes ao vivo.</p>
                                 <ul className="text-sm text-slate-500 space-y-2">
                                     <li className="flex items-center gap-2">✓ Aumento de retenção</li>
                                     <li className="flex items-center gap-2">✓ Merchandising digital</li>
@@ -247,7 +242,7 @@ const Landing = () => {
                                     <Building2 size={24} />
                                 </div>
                                 <h3 className="text-xl font-bold text-white mb-3">Endomarketing</h3>
-                                <p className="text-slate-400 mb-4">Bolão da firma profissional. Melhore o clima organizacional e integração entre equipes.</p>
+                                <p className="text-slate-400 mb-4">Ação interna para empresas. Melhore o clima organizacional e integração entre equipes com palpites divertidos.</p>
                                 <ul className="text-sm text-slate-500 space-y-2">
                                     <li className="flex items-center gap-2">✓ Team building divertido</li>
                                     <li className="flex items-center gap-2">✓ Baixo custo de implementação</li>
@@ -258,19 +253,19 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Pricing - Design Moderno com Cartões Glassmorphism */}
+            {/* Pricing */}
             <section className="py-24 px-4 bg-[url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070')] bg-cover bg-fixed bg-center relative group">
                 <div className="absolute inset-0 bg-[#0f172a]/90 backdrop-blur-sm"></div>
                 <div className="max-w-6xl mx-auto relative z-10">
                     <h2 className="text-4xl font-bold text-center text-white mb-4 reveal opacity-0 translate-y-4">Planos Flexíveis</h2>
-                    <p className="text-center text-slate-300 mb-12 reveal opacity-0 translate-y-4">Escolha a melhor opção para o seu momento</p>
+                    <p className="text-center text-slate-300 mb-12 reveal opacity-0 translate-y-4">Escolha a melhor opção para o seu negócio</p>
 
                     <div className="grid md:grid-cols-3 gap-8 reveal opacity-0 translate-y-4">
                         {plans.map((plan, i) => (
                             <div key={i} className={`relative rounded-2xl p-8 backdrop-blur-md border transition-all duration-300 hover:-translate-y-2 ${plan.highlight
                                 ? 'bg-white/10 border-purple-500 shadow-2xl shadow-purple-900/40'
                                 : 'bg-white/5 border-white/10 hover:border-white/20'
-                                }`}>
+                                } flex flex-col`}>
                                 {plan.highlight && (
                                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-lg">
                                         MAIS POPULAR
@@ -282,7 +277,7 @@ const Landing = () => {
                                     <span className="text-4xl font-bold text-white">{plan.price}</span>
                                     <span className="text-slate-400 ml-2 text-sm">{plan.period}</span>
                                 </div>
-                                <ul className="space-y-4 mb-8">
+                                <ul className="space-y-4 mb-8 flex-grow">
                                     {plan.features.map((f, j) => (
                                         <li key={j} className="flex items-start gap-3 text-slate-300 text-sm">
                                             <CheckCircle className={`w-5 h-5 flex-shrink-0 ${plan.highlight ? 'text-purple-400' : 'text-slate-500'}`} />
@@ -305,16 +300,15 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* FAQ Accordion */}
+            {/* FAQ */}
             <section className="py-24 px-4 bg-[#0f172a]">
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl font-bold text-center text-white mb-12">Dúvidas Frequentes</h2>
                     <div className="space-y-4 reveal opacity-0 translate-y-4">
-                        {/* FAQs - Conteúdo igual, só visual novo */}
                         {[
                             { q: "Preciso pagar para testar?", a: "Não! Oferecemos 7 dias totalmente grátis para você conhecer a plataforma." },
-                            { q: "Posso colocar minha logo?", a: "sim! O sistema é White Label. Você personaliza logo, cores e textos para ficar com a cara da sua marca." },
-                            { q: "Como recebo o dinheiro dos bolões?", a: "Você define as regras. A plataforma gerencia os palpites, você gerencia a premiação diretamente com seu público." }
+                            { q: "Posso colocar minha logo?", a: "Sim! O sistema é White Label. Você personaliza logo, cores e textos para ficar com a cara da sua marca." },
+                            { q: "É preciso pagar para participar?", a: "Não! O foco é 100% no engajamento. A participação é gratuita e serve para divertir e fidelizar seu público, sem burocracia de apostas. Nada de 'bets'." }
                         ].map((faq, i) => (
                             <details key={i} className="group bg-[#1e293b] rounded-xl overflow-hidden border border-white/5 open:border-purple-500/30 transition-all">
                                 <summary className="flex items-center justify-between p-6 cursor-pointer font-medium text-white select-none group-hover:text-purple-300 transition-colors">
@@ -330,7 +324,7 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Contact Form Elegante */}
+            {/* Contact Form */}
             <section id="contact-form" className="py-24 px-4 bg-gradient-to-b from-[#0f172a] to-[#1e1b4b]">
                 <div className="max-w-4xl mx-auto bg-[#1e293b]/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 md:p-12 shadow-2xl reveal opacity-0 translate-y-4">
                     <div className="text-center mb-10">
@@ -378,10 +372,8 @@ const Landing = () => {
                                 </SelectTrigger>
                                 <SelectContent className="bg-[#1e293b] border-white/10 text-white">
                                     <SelectItem value="radio">Rádio / TV</SelectItem>
-                                    <SelectItem value="creator">Influencer / Podcaster</SelectItem>
                                     <SelectItem value="bar">Bar / Eventos</SelectItem>
                                     <SelectItem value="company">Empresa (Endomarketing)</SelectItem>
-                                    <SelectItem value="news">Portal de Notícias</SelectItem>
                                     <SelectItem value="other">Outro</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -400,10 +392,9 @@ const Landing = () => {
                 </div>
             </section>
 
-            {/* Footer Minimalista */}
+            {/* Footer */}
             <footer className="py-12 px-4 bg-[#0f172a] border-t border-white/5 text-center">
                 <div className="flex items-center justify-center gap-2 mb-8 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                    {/* Placeholder for tech stack or partner logos if needed */}
                     <span className="text-2xl font-bold text-white tracking-widest">PALPITE PREMIADO</span>
                 </div>
                 <div className="flex flex-wrap justify-center gap-8 text-sm text-slate-500 mb-8">
