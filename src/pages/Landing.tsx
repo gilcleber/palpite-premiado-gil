@@ -138,8 +138,11 @@ const Landing = () => {
         if (lowerText.includes("olá") || lowerText.includes("oi") || lowerText.includes("tudo bem")) {
             return "Olá! Tudo ótimo. Como posso ajudar você hoje?";
         }
+        if (lowerText.includes("obrigado") || lowerText.includes("valeu") || lowerText.includes("ok") || lowerText.includes("tchau")) {
+            return "Por nada! Se precisar de mais alguma coisa, é só chamar. Boa sorte com seus palpites! 🚀";
+        }
 
-        return "Entendi sua pergunta. Para essa questão mais específica, recomendo falar com nosso consultor no WhatsApp clicando no botão verde!";
+        return "Entendi. Como sou uma IA em treinamento, posso não ter todas as respostas. Mas nosso consultor humano no WhatsApp sabe tudo! Basta clicar no botão verde.";
     };
 
     const handleAiSubmit = async (e: React.FormEvent) => {
