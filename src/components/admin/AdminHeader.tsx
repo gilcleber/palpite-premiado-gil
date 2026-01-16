@@ -25,10 +25,10 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: Adm
         <Button
           variant="outline"
           onClick={() => {
-            // Simplified and robust URL construction for HashRouter
+            // Simplified URL construction for BrowserRouter
             const baseUrl = window.location.origin;
-            // Force the hash path
-            let url = `${baseUrl}/#/live-draw`;
+            // Use standard path without hash
+            let url = `${baseUrl}/live-draw`;
 
             // Append matchId if available
             if (selectedMatchId) {
