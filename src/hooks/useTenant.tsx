@@ -37,6 +37,14 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
             const searchParams = new URLSearchParams(window.location.search);
             const queryTenant = searchParams.get('tenant');
 
+            // 1b. Get Hash Query Params (Fix for HashRouter navigation)
+            let hashTenant = null;
+            if (window.location.hash.includes('?')) {
+                const hashQueryString = window.location.hash.split('?')[1];
+                const hashParams = new URLSearchParams(hashQueryString);
+                hashTenant = hashParams.get('tenant');
+            }
+
             // 2. Determine Slug logic
             let slug = 'official';
 
@@ -50,6 +58,11 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
             else if (queryTenant) {
                 slug = queryTenant;
                 console.log("Tenant detected via Query Param:", slug);
+            }
+            // Priority 2b: Hash Query Param (HashRouter Support)
+            else if (hashTenant) {
+                slug = hashTenant;
+                console.log("Tenant detected via Hash Param:", slug);
             }
             // Priority 3: Subdomain (client.domain.com)
             else if (!(hostname.includes('localhost') || hostname.includes('127.0.0.1'))) {
