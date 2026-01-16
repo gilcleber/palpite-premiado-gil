@@ -180,7 +180,7 @@ const Landing = () => {
             period: "/mês",
             totalYear: "Fidelidade 12 meses",
             subtext: "Cobrança única de R$ 598,80/ano",
-            desc: "Ideal para começar",
+            desc: "Maior Economia (45% OFF)",
             features: [
                 "Jogos Ilimitados",
                 "Prêmios Ilimitados",
@@ -197,7 +197,7 @@ const Landing = () => {
             period: "/mês",
             totalYear: "Fidelidade 6 meses",
             subtext: "Cobrança única de R$ 419,40/semestre",
-            desc: "O favorito dos clientes",
+            desc: "Melhor Custo-Benefício",
             features: [
                 "Jogos Ilimitados",
                 "Prêmios Ilimitados",
@@ -214,7 +214,7 @@ const Landing = () => {
             period: "/mês",
             totalYear: "Pagamento Mensal",
             subtext: "Sem fidelidade (Cancele quando quiser)",
-            desc: "Para máxima liberdade",
+            desc: "Flexibilidade Total",
             features: [
                 "Jogos Ilimitados",
                 "Prêmios Ilimitados",
