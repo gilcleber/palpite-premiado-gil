@@ -182,12 +182,12 @@ const Landing = () => {
             subtext: "Cobrança única de R$ 598,80/ano",
             desc: "Ideal para começar",
             features: [
-                "Até 2 jogos simultâneos",
-                "Até 2 prêmios por jogo",
-                "Personalização de Campeonatos",
-                "Edição de regras e datas",
-                "Sem exportação de dados",
-                "Sorteio Interno (sem animação)"
+                "Jogos Ilimitados",
+                "Prêmios Ilimitados",
+                "Exportação de Dados",
+                "Sorteio com Live Popup",
+                "Personalização Total",
+                "Suporte 24/7"
             ],
             highlight: false
         },
@@ -199,12 +199,12 @@ const Landing = () => {
             subtext: "Cobrança única de R$ 419,40/semestre",
             desc: "O favorito dos clientes",
             features: [
-                "Jogos ilimitados",
-                "Prêmios ilimitados",
-                "Exportação Excel de Palpiteiros",
-                "Sorteio com Live Popup Animado",
+                "Jogos Ilimitados",
+                "Prêmios Ilimitados",
+                "Exportação de Dados",
+                "Sorteio com Live Popup",
                 "Personalização Total",
-                "Suporte Prioritário"
+                "Suporte 24/7"
             ],
             highlight: true
         },
@@ -214,12 +214,14 @@ const Landing = () => {
             period: "/mês",
             totalYear: "Pagamento Mensal",
             subtext: "Sem fidelidade (Cancele quando quiser)",
-            desc: "Para máxima performance",
+            desc: "Para máxima liberdade",
             features: [
-                "Tudo do plano Pro",
-                "Suporte IA 24/7 Exclusivo",
-                "Prioridade Máxima no Atendimento",
-                "Consultoria de Engajamento"
+                "Jogos Ilimitados",
+                "Prêmios Ilimitados",
+                "Exportação de Dados",
+                "Sorteio com Live Popup",
+                "Personalização Total",
+                "Suporte 24/7"
             ],
             highlight: false
         }
