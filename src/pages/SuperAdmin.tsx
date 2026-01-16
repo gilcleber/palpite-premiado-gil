@@ -846,7 +846,16 @@ const SuperAdmin = () => {
                                         <Input
                                             type="date"
                                             value={editForm.expires_at ? new Date(editForm.expires_at).toISOString().split('T')[0] : ''}
-                                            onChange={e => setEditForm({ ...editForm, expires_at: e.target.value ? new Date(e.target.value).toISOString() : null })}
+                                            onChange={e => {
+                                                if (!e.target.value) {
+                                                    setEditForm({ ...editForm, expires_at: null });
+                                                    return;
+                                                }
+                                                // Fix Timezone Bug: Save as 12:00 PM UTC to be safe in most timezones (UTC-11 to UTC+12)
+                                                // "2026-01-31" -> "2026-01-31T12:00:00.000Z"
+                                                const dateWithNoon = new Date(`${e.target.value}T12:00:00`);
+                                                setEditForm({ ...editForm, expires_at: dateWithNoon.toISOString() });
+                                            }}
                                         />
                                         <p className="text-[10px] text-gray-500">Deixe em branco para acesso vitalício/indefinido.</p>
                                     </div>
