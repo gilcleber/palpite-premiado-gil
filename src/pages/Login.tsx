@@ -89,7 +89,10 @@ const Login = () => {
             description: `Bem-vindo à gestão da ${tenantFull.name}`
           });
 
-          navigate(`/admin?tenant=${tenantFull.slug}`);
+          // Small delay to ensure tenant context propagates before navigation
+          setTimeout(() => {
+            navigate(`/admin?tenant=${tenantFull.slug}`);
+          }, 100);
         }
       } else {
         toast({
