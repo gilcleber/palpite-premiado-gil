@@ -565,118 +565,195 @@ const SuperAdmin = () => {
             {/* DIVIDER */}
             <div className="border-t border-gray-200 my-8"></div>
 
-            {/* FINANCE SECTION (BOTTOM) */}
-            <div className="grid md:grid-cols-3 gap-6 mt-6">
-                <Card className="md:col-span-1 border-t-4 border-slate-700 shadow bg-white">
-                    <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <Wallet className="w-5 h-5 text-slate-700" /> Lançar Finanças
-                        </CardTitle>
-                        <CardDescription>Adicione custos ou receitas extras.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleAddTransaction} className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Descrição</Label>
-                                <Input
-                                    placeholder="Ex: Servidor AWS, Domínio..."
-                                    value={newTransDesc}
-                                    onChange={e => setNewTransDesc(e.target.value)}
-                                />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Valor (R$)</Label>
-                                    <Input
-                                        type="number"
-                                        placeholder="0.00"
-                                        step="0.01"
-                                        value={newTransAmount}
-                                        onChange={e => setNewTransAmount(e.target.value)}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Tipo</Label>
-                                    <select
-                                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-black"
-                                        value={newTransType}
-                                        onChange={e => setNewTransType(e.target.value as any)}
-                                    >
-                                        <option value="expense">Despesa (-)</option>
-                                        <option value="income">Receita (+)</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <Button type="submit" className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold">
-                                <Plus className="w-4 h-4 mr-2" /> Adicionar Lançamento
-                            </Button>
-                        </form>
-                    </CardContent>
-                </Card>
+            {/* FINANCE DASHBOARD (REDESIGNED) */}
+            <div className="mt-8 rounded-3xl bg-[#0f172a] p-8 border border-white/5 relative overflow-hidden shadow-2xl">
+                {/* Background Decor */}
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none"></div>
+                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-600/10 rounded-full blur-[100px] pointer-events-none"></div>
 
-                <Card className="md:col-span-2 border-t-4 border-blue-500 shadow bg-white">
-                    <CardHeader>
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <BarChart3 className="w-5 h-5 text-blue-600" /> Extrato Recente (Balanço)
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Descrição</TableHead>
-                                    <TableHead>Tipo</TableHead>
-                                    <TableHead className="text-right">Valor</TableHead>
-                                    <TableHead className="text-right">Ações</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {transactions.length === 0 && (
-                                    <TableRow>
-                                        <TableCell colSpan={4} className="text-center py-4 text-muted-foreground">
-                                            Nenhum lançamento recente.
-                                        </TableCell>
-                                    </TableRow>
-                                )}
-                                {transactions.map(t => (
-                                    <TableRow key={t.id}>
-                                        <TableCell className="font-medium">{t.description}</TableCell>
-                                        <TableCell>
-                                            {t.type === 'expense' ? (
-                                                <span className="flex items-center text-red-600 text-xs font-bold uppercase"><ArrowDownRight className="w-3 h-3 mr-1" /> Despesa</span>
-                                            ) : (
-                                                <span className="flex items-center text-green-600 text-xs font-bold uppercase"><ArrowUpRight className="w-3 h-3 mr-1" /> Receita</span>
+                <div className="relative z-10">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                <Wallet className="w-6 h-6 text-purple-400" /> Financeiro SaaS
+                            </h2>
+                            <p className="text-slate-400 text-sm">Visão geral de faturamento e despesas do sistema.</p>
+                        </div>
+
+                        {/* Add Transaction Button Trigger (could be a modal, but keeping inline for now) */}
+                        <div className="flex gap-2">
+                            {/* Placeholder for future actions */}
+                        </div>
+                    </div>
+
+                    {/* FINANCE STATS GRID */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/5 relative group hover:border-purple-500/30 transition-all">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-green-500/20 rounded-xl">
+                                    <DollarSign className="w-6 h-6 text-green-400" />
+                                </div>
+                                <span className="text-xs font-bold px-2 py-1 rounded-full bg-green-900/50 text-green-400 border border-green-500/20">+ Recorrente</span>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Faturamento (MRR)</p>
+                                <h3 className="text-3xl font-bold text-white">R$ {mrr.toFixed(2)}</h3>
+                            </div>
+                        </div>
+
+                        <div className="p-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/5 relative group hover:border-red-500/30 transition-all">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="p-3 bg-red-500/20 rounded-xl">
+                                    <TrendingDown className="w-6 h-6 text-red-400" />
+                                </div>
+                                <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-900/50 text-red-400 border border-red-500/20">- Gastos</span>
+                            </div>
+                            <div className="space-y-1">
+                                <p className="text-slate-400 text-xs uppercase tracking-wider font-semibold">Despesas Extras</p>
+                                <h3 className="text-3xl font-bold text-white">R$ {totalExpenses.toFixed(2)}</h3>
+                            </div>
+                        </div>
+
+                        <div className="p-6 rounded-2xl bg-gradient-to-br from-[#1d244a] to-[#2a3459] border border-blue-500/30 relative overflow-hidden">
+                            {/* Glow */}
+                            <div className="absolute inset-0 bg-blue-500/10 blur-xl"></div>
+
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div className="p-3 bg-blue-500 rounded-xl shadow-lg shadow-blue-500/50">
+                                        <Wallet className="w-6 h-6 text-white" />
+                                    </div>
+                                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-blue-400/20 text-blue-200 border border-blue-400/30">Líquido</span>
+                                </div>
+                                <div className="space-y-1">
+                                    <p className="text-blue-200 text-xs uppercase tracking-wider font-semibold">Lucro Operacional</p>
+                                    <h3 className="text-3xl font-bold text-white">R$ {operationalProfit.toFixed(2)}</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="grid lg:grid-cols-3 gap-8">
+                        {/* ADD TRANSACTION FORM */}
+                        <div className="lg:col-span-1 space-y-4">
+                            <div className="p-6 rounded-2xl bg-slate-800/50 border border-white/5 backdrop-blur-sm">
+                                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                    <Plus className="w-5 h-5 text-purple-400" /> Novo Lançamento
+                                </h3>
+                                <form onSubmit={handleAddTransaction} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-xs font-medium text-slate-400">Descrição</label>
+                                        <Input
+                                            placeholder="Ex: Servidor, Domínio, Venda Extra..."
+                                            value={newTransDesc}
+                                            onChange={e => setNewTransDesc(e.target.value)}
+                                            className="bg-slate-900/80 border-slate-700 text-white placeholder:text-slate-600 focus:border-purple-500 focus:ring-purple-500/20"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-medium text-slate-400">Valor (R$)</label>
+                                            <Input
+                                                type="number"
+                                                placeholder="0.00"
+                                                step="0.01"
+                                                value={newTransAmount}
+                                                onChange={e => setNewTransAmount(e.target.value)}
+                                                className="bg-slate-900/80 border-slate-700 text-white placeholder:text-slate-600 focus:border-purple-500 focus:ring-purple-500/20"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-medium text-slate-400">Tipo</label>
+                                            <select
+                                                className="flex h-10 w-full rounded-md border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500"
+                                                value={newTransType}
+                                                onChange={e => setNewTransType(e.target.value as any)}
+                                            >
+                                                <option value="expense">🔴 Despesa</option>
+                                                <option value="income">🟢 Receita</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold h-10 shadow-lg shadow-purple-600/20 border-0">
+                                        Adicionar
+                                    </Button>
+                                </form>
+                            </div>
+                        </div>
+
+                        {/* RECENT TRANSACTIONS LIST */}
+                        <div className="lg:col-span-2">
+                            <div className="rounded-2xl border border-white/5 overflow-hidden bg-slate-800/30">
+                                <div className="p-4 border-b border-white/5 bg-slate-800/50 flex justify-between items-center">
+                                    <h3 className="font-bold text-white text-sm">Extrato Recente</h3>
+                                    <div className="flex gap-2">
+                                        {/* Filter placeholders could go here */}
+                                    </div>
+                                </div>
+                                <div className="overflow-x-auto">
+                                    <Table>
+                                        <TableHeader className="bg-slate-900/50 border-white/5">
+                                            <TableRow className="border-white/5 hover:bg-transparent">
+                                                <TableHead className="text-slate-400 text-xs font-bold uppercase tracking-wider">Descrição</TableHead>
+                                                <TableHead className="text-slate-400 text-xs font-bold uppercase tracking-wider">Tipo</TableHead>
+                                                <TableHead className="text-right text-slate-400 text-xs font-bold uppercase tracking-wider">Valor</TableHead>
+                                                <TableHead className="text-right text-slate-400 text-xs font-bold uppercase tracking-wider">Ações</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {transactions.length === 0 && (
+                                                <TableRow className="border-white/5 hover:bg-white/5">
+                                                    <TableCell colSpan={4} className="text-center py-8 text-slate-500">
+                                                        Nenhum lançamento encontrado.
+                                                    </TableCell>
+                                                </TableRow>
                                             )}
-                                        </TableCell>
-                                        <TableCell className={`text-right font-mono font-bold ${t.type === 'expense' ? 'text-red-600' : 'text-green-600'}`}>
-                                            {t.type === 'expense' ? '-' : '+'} R$ {t.amount.toFixed(2)}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <div className="flex justify-end gap-1">
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="h-7 w-7 p-0"
-                                                    onClick={() => handleEditTransaction(t)}
-                                                >
-                                                    <Pencil className="w-3.5 h-3.5" />
-                                                </Button>
-                                                <Button
-                                                    size="sm"
-                                                    variant="ghost"
-                                                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                                                    onClick={() => handleDeleteTransaction(t.id)}
-                                                >
-                                                    <Trash2 className="w-3.5 h-3.5" />
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
+                                            {transactions.map(t => (
+                                                <TableRow key={t.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                                                    <TableCell className="font-medium text-slate-200">{t.description}</TableCell>
+                                                    <TableCell>
+                                                        {t.type === 'expense' ? (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded bg-red-500/10 text-red-400 text-xs font-medium border border-red-500/20">
+                                                                <ArrowDownRight className="w-3 h-3 mr-1" /> Despesa
+                                                            </span>
+                                                        ) : (
+                                                            <span className="inline-flex items-center px-2 py-1 rounded bg-green-500/10 text-green-400 text-xs font-medium border border-green-500/20">
+                                                                <ArrowUpRight className="w-3 h-3 mr-1" /> Receita
+                                                            </span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className={`text-right font-mono font-bold ${t.type === 'expense' ? 'text-red-400' : 'text-green-400'}`}>
+                                                        {t.type === 'expense' ? '-' : '+'} R$ {t.amount.toFixed(2)}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <div className="flex justify-end gap-1">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-white/10"
+                                                                onClick={() => handleEditTransaction(t)}
+                                                            >
+                                                                <Pencil className="w-4 h-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant="ghost"
+                                                                className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                                                                onClick={() => handleDeleteTransaction(t.id)}
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* EDIT TENANT SHEET */}

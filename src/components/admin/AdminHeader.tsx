@@ -25,25 +25,18 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: Adm
         <Button
           variant="outline"
           onClick={() => {
-            // Safe Popup for Live Draw
-            let url = window.location.origin + window.location.pathname.replace('/admin', '/live-draw');
-            if (url.includes('/#')) {
-              // Handle HashRouter: origin/#/live-draw
-              url = url.replace(/\/$/, ""); // trim trailing slash
-            } else {
-              // If we are on /#/admin, pathname is just / usually in hash router context? 
-              // Actually with HashRouter, window.location.pathname is usually /index.html or just /.
-              // The hash part is window.location.hash
-              const baseUrl = window.location.origin + window.location.pathname;
-              url = baseUrl + '#/live-draw';
-            }
+            // Simplified and robust URL construction for HashRouter
+            const baseUrl = window.location.origin;
+            // Force the hash path
+            let url = `${baseUrl}/#/live-draw`;
 
-            // Append matchId
+            // Append matchId if available
             if (selectedMatchId) {
               url += `?matchId=${selectedMatchId}`;
             }
 
-            window.open(url, 'LiveDraw', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no');
+            // Open popup with specific specs
+            window.open(url, 'LiveDraw', 'width=1280,height=720,menubar=no,toolbar=no,location=no,status=no,scrollbars=yes,resizable=yes');
           }}
           className="border-blue-500 text-blue-400 bg-transparent hover:bg-blue-500 hover:text-white"
         >
