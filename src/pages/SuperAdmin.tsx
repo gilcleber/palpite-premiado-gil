@@ -161,7 +161,8 @@ const SuperAdmin = () => {
                     status: editForm.status,
                     subscription_price: editForm.subscription_price,
                     branding: editForm.branding,
-                    manager_pin: editForm.manager_pin
+                    manager_pin: editForm.manager_pin,
+                    expires_at: editForm.expires_at // Added missing field
                 })
                 .eq('id', editingTenant.id);
 
@@ -252,7 +253,8 @@ const SuperAdmin = () => {
             status: tenant.status,
             subscription_price: tenant.subscription_price,
             branding: { ...tenant.branding },
-            manager_pin: tenant.manager_pin
+            manager_pin: tenant.manager_pin,
+            expires_at: tenant.expires_at // Added missing field
         });
         setIsSheetOpen(true);
     };
