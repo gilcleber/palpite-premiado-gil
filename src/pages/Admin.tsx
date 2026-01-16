@@ -41,15 +41,19 @@ const Admin = () => {
     }
   }, [tenant]);
 
+  const navigate = useNavigate(); // Ensure this is used
+
   // If not authorized and fully loaded, redirect to login
   useEffect(() => {
     if (!isAuthorized && !authLoading && !tenantLoading) {
-      // We can't use navigation immediately inside render validation logic, so we do it here
-      // navigator logic to /admin/login handles this or we show Access Denied button
+      // Optional: Auto-redirect if unauthorized, instead of showing "Access Denied" loop.
+      // For now, checks are strict. If users prefer "Access Denied" screen, keep it, but fixing the link is critical.
+      const slugParam = tenant?.slug ? `?tenant=${tenant.slug}` : '';
+      // navigate(`/login${slugParam}`); // Uncomment to auto-redirect
     }
-  }, [isAuthorized, authLoading, tenantLoading]);
+  }, [isAuthorized, authLoading, tenantLoading, tenant, navigate]);
 
-
+  // ... (fetchMatches logic)
   const fetchMatches = async () => {
     if (!tenant) return;
     const { data } = await supabase
@@ -83,7 +87,7 @@ const Admin = () => {
       <div className="flex flex-col items-center justify-center h-screen space-y-4">
         <div className="text-center text-[#1d244a] text-xl font-bold">Acesso Negado</div>
         <p className="text-gray-500">Você não tem permissão para gerenciar esta rádio.</p>
-        <Button onClick={() => window.location.href = `/?tenant=${tenant?.slug || ''}#/admin/login`}>
+        <Button onClick={() => navigate(`/login${tenant?.slug ? `?tenant=${tenant.slug}` : ''}`)}>
           Ir para Login
         </Button>
       </div>
