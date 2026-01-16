@@ -89,7 +89,7 @@ const Login = () => {
             description: `Bem-vindo à gestão da ${tenantFull.name}`
           });
 
-          navigate("/admin");
+          navigate(`/admin?tenant=${tenantFull.slug}`);
         }
       } else {
         toast({
