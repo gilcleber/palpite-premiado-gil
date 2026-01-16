@@ -16,6 +16,9 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Debug: Log current state to console
+    console.log("Submitting with:", { slug, pin });
+
     if (!slug || !pin) {
       toast({
         title: "Campos obrigatórios",
@@ -29,62 +32,79 @@ const Login = () => {
       setIsLoading(true);
       const cleanSlug = slug.toLowerCase().trim();
 
-      console.log("Tentando login com:", { cleanSlug, pin });
+      // STEP 1: Check if Radio (Slug) exists
+      const { data: tenantCheck, error: checkError } = await supabase
+        .from('tenants')
+        .select('id, name')
+        .eq('slug', cleanSlug)
+        .maybeSingle();
 
-      // 1. Verify PIN via RPC
+      if (checkError) {
+        console.error("Check Error:", checkError);
+        throw new Error("Erro ao buscar rádio. Tente novamente.");
+      }
+
+      if (!tenantCheck) {
+        toast({
+          title: "Rádio não encontrada",
+          description: `Não existe rádio com o ID "${cleanSlug}". Verifique a digitação.`,
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      // STEP 2: Verify PIN
       // @ts-ignore
-      const { data: isValid, error } = await supabase.rpc('verify_tenant_pin', {
+      const { data: isValid, error: rpcError } = await supabase.rpc('verify_tenant_pin', {
         t_slug: cleanSlug,
         pin_attempt: pin
       });
 
-      if (error) {
-        console.error("RPC Error:", error);
-        throw new Error(`Erro de verificação: ${error.message}`);
+      if (rpcError) {
+        console.error("RPC Error:", rpcError);
+        throw new Error("Erro ao validar PIN.");
       }
 
       if (isValid) {
-        // 2. Fetch basic tenant info for session
-        const { data: tenant, error: tError } = await supabase
+        // 3. Set Session
+        const { data: tenantFull } = await supabase
           .from('tenants')
           .select('id, name, slug, branding')
-          .eq('slug', cleanSlug)
+          .eq('id', tenantCheck.id)
           .single();
 
-        if (tError || !tenant) throw new Error("Erro ao carregar dados da rádio");
+        if (tenantFull) {
+          const sessionData = {
+            tenant_id: tenantFull.id,
+            slug: tenantFull.slug,
+            role: 'manager',
+            timestamp: Date.now(),
+            pin: pin
+          };
+          localStorage.setItem('palpite_manager_auth', JSON.stringify(sessionData));
 
-        // 3. Set Local Session
-        const sessionData = {
-          tenant_id: tenant.id,
-          slug: tenant.slug,
-          role: 'manager',
-          timestamp: Date.now(),
-          pin: pin
-        };
-        localStorage.setItem('palpite_manager_auth', JSON.stringify(sessionData));
+          toast({
+            title: "Acesso Permitido",
+            description: `Bem-vindo à gestão da ${tenantFull.name}`
+          });
 
-        toast({
-          title: "Acesso Permitido",
-          description: `Bem-vindo à gestão da ${tenant.name}`
-        });
-
-        // Force reload/redirect to ensure TenantContext picks up the new status/slug if needed
-        // But simple navigate usually works if Admin component checks localStorage
-        navigate("/admin");
+          navigate("/admin");
+        }
       } else {
         toast({
-          title: "Acesso Negado",
-          description: `Rádio "${cleanSlug}" não encontrada ou PIN incorreto.`,
+          title: "PIN Incorreto",
+          description: `A rádio "${tenantCheck.name}" foi encontrada, mas o PIN está errado.`,
           variant: "destructive",
         });
-        setPin(""); // Clear pin on error
+        setPin("");
       }
 
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: "Erro no Login",
-        description: error.message || "Tente novamente mais tarde.",
+        description: error.message || "Tente novamente.",
         variant: "destructive",
       });
     } finally {
