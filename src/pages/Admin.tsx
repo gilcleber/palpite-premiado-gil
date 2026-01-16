@@ -84,10 +84,13 @@ const Admin = () => {
 
   if (!isAuthorized) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen space-y-4">
-        <div className="text-center text-[#1d244a] text-xl font-bold">Acesso Negado</div>
-        <p className="text-gray-500">Você não tem permissão para gerenciar esta rádio.</p>
-        <Button onClick={() => navigate(`/login${tenant?.slug ? `?tenant=${tenant.slug}` : ''}`)}>
+      <div className="flex flex-col items-center justify-center h-screen space-y-4 bg-[#0f172a]">
+        <div className="text-center text-white text-xl font-bold">Acesso Negado</div>
+        <p className="text-gray-400">Você não tem permissão para gerenciar esta rádio.</p>
+        <Button
+          className="bg-purple-600 hover:bg-purple-700 text-white"
+          onClick={() => navigate(`/login${tenant?.slug ? `?tenant=${tenant.slug}` : ''}`)}
+        >
           Ir para Login
         </Button>
       </div>

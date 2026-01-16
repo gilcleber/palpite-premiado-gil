@@ -82,7 +82,10 @@ const Landing = () => {
             setFormData({ name: "", email: "", phone: "", type: "" });
         } catch (error) {
             console.error(error);
-            toast.error("Erro ao enviar solicitação. Tente novamente.");
+            // Fallback: Open email client
+            const mailtoLink = `mailto:gilcleberloutor@gmail.com?subject=Novo Contato via Site&body=Nome: ${formData.name}%0AEmail: ${formData.email}%0AWhatsApp: ${formData.phone}%0ATipo: ${formData.type}`;
+            window.location.href = mailtoLink;
+            toast.error("Erro no sistema. Abrindo seu cliente de e-mail para enviar...");
         } finally {
             setLoading(false);
         }
