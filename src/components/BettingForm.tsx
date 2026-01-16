@@ -345,11 +345,26 @@ const BettingForm = ({ matchId: propMatchId }: { matchId?: string }) => {
       const { error: insertError } = await supabase.from("palpites").insert(insertPayload);
 
       if (insertError) {
-        console.error("Error inserting bet", insertError);
-        toast.error("Erro ao salvar palpite. Tente novamente.");
+        console.error("❌ ERRO AO SALVAR PALPITE:", insertError);
+        console.error("📦 Payload que tentou salvar:", insertPayload);
+        console.error("🔍 Detalhes do erro:", {
+          message: insertError.message,
+          details: insertError.details,
+          hint: insertError.hint,
+          code: insertError.code
+        });
+
+        // Show detailed error to user for debugging
+        toast.error(`Erro ao salvar: ${insertError.message}. Código: ${insertError.code || 'N/A'}. Entre em contato com o suporte.`);
         setLoading(false);
         return;
       }
+
+      console.log("✅ PALPITE SALVO COM SUCESSO!", {
+        nome: formData.fullName,
+        cpf: formData.cpf,
+        matchId: matchId
+      });
 
       // Show Success Modal instead of just toast
       setShowSuccess(true);
