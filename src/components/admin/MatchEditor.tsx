@@ -51,7 +51,21 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
         // Fetch teams for the library
         const fetchTeams = async () => {
             const { data } = await supabase.from('teams' as any).select('*').order('name');
-            if (data) setTeams(data);
+            if (data) {
+                // Deduplicate by name to prevent multiple "Corinthians" from appearing
+                // This handles cases where a team exists both as Global and Tenant-specific
+                const uniqueTeams = Object.values(
+                    data.reduce((acc: any, team: any) => {
+                        // If specific logic is needed (e.g. prefer Global over Local), add it here.
+                        // For now, first-come (or just ensuring one entry) serves the visual purpose.
+                        if (!acc[team.name]) {
+                            acc[team.name] = team;
+                        }
+                        return acc;
+                    }, {})
+                );
+                setTeams(uniqueTeams as any[]);
+            }
         };
         fetchTeams();
     }, []);
