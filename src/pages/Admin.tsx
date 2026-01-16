@@ -82,7 +82,9 @@ const Admin = () => {
     );
   }
 
-  if (!isAuthorized) {
+  // Extra safety: only show "Access Denied" if tenant is loaded AND user is not authorized
+  // This prevents race condition where tenantLoading=false but tenant hasn't propagated to useMemo
+  if (!isAuthorized && tenant) {
     return (
       <div className="flex flex-col items-center justify-center h-screen space-y-4 bg-[#0f172a]">
         <div className="text-center text-white text-xl font-bold">Acesso Negado</div>
