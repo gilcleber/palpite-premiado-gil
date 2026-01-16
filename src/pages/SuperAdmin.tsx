@@ -115,7 +115,7 @@ const SuperAdmin = () => {
                 .insert([
                     {
                         name: newTenantName,
-                        slug: newTenantSlug.toLowerCase().replace(/\s+/g, '-'),
+                        slug: newTenantSlug.trim().toLowerCase().replace(/\s+/g, '-'),
                         status: 'active',
                         subscription_price: 99.90, // Default price
                         branding: {
@@ -157,7 +157,7 @@ const SuperAdmin = () => {
                 .from('tenants' as any)
                 .update({
                     name: editForm.name,
-                    slug: editForm.slug,
+                    slug: editForm.slug.trim(),
                     status: editForm.status,
                     subscription_price: editForm.subscription_price,
                     branding: editForm.branding,
@@ -860,6 +860,15 @@ const SuperAdmin = () => {
                                             }}
                                         />
                                         <p className="text-[10px] text-gray-500">Deixe em branco para acesso vitalício/indefinido.</p>
+                                    </div>
+                                    <div className="grid gap-2 col-span-2">
+                                        <Label>PIN do Gestor (Login)</Label>
+                                        <Input
+                                            value={editForm.manager_pin || ''}
+                                            onChange={e => setEditForm({ ...editForm, manager_pin: e.target.value })}
+                                            placeholder="Ex: 1234"
+                                            maxLength={6}
+                                        />
                                     </div>
                                 </div>
                             </div>
