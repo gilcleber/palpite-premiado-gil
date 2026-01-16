@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from "react";
+import { useState, useEffect, useMemo, Suspense, lazy } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
@@ -22,8 +22,8 @@ const Admin = () => {
   const [matches, setMatches] = useState<any[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
 
-  // Check Manager Token (Silent Auth for PIN)
-  const isManager = (() => {
+  // Check Manager Token (Silent Auth for PIN) - useMemo ensures this recalculates when tenant loads
+  const isManager = useMemo(() => {
     if (!tenant) return false;
     try {
       const stored = localStorage.getItem('palpite_manager_auth');
@@ -31,7 +31,7 @@ const Admin = () => {
       const data = JSON.parse(stored);
       return data.tenant_id === tenant.id && data.role === 'manager';
     } catch (e) { return false; }
-  })();
+  }, [tenant]);
 
   const isAuthorized = isAdmin || isManager;
 
