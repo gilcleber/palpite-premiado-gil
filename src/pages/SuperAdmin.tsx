@@ -95,7 +95,6 @@ const SuperAdmin = () => {
 
             setTenants(safeTenants as unknown as Tenant[]);
             setTransactions(financeData as unknown as FinancialTransaction[] || []);
-
         } catch (error) {
             console.error("Error fetching data:", error);
             toast.error("Erro ao carregar dados do painel.");
@@ -275,14 +274,7 @@ const SuperAdmin = () => {
         .filter(t => t.status === 'active' && t.slug !== 'official')
         .reduce((sum, t) => sum + (Number(t.subscription_price) || 0), 0);
 
-    // Extra Income/Expenses from Transactions (All time check? No, visually we might want monthly but for now let's just sum what we fetched or do a fresh fetch for totals. 
-    // For simplicity in this v1 dashboard, we will calculate based on fetched limits or separate logic. 
-    // Ideally we should have a separate query for totals. Let's do a quick client-side sum of the 'recent' list for now, 
-    // BUT realistically user wants "Profit". 
-    // Let's assume the table `saas_financials` is small enough or we just care about the recent flow. 
-    // BETTER: Let's fetch pure sums for accurate stats.
-
-    // (Simulated for this turn to avoid complexity overkill, assuming the user will input data)
+    // Extra Income/Expenses (Using simulated logic matching Finance section)
     const totalExpenses = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
     const totalExtraIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
 
@@ -291,15 +283,15 @@ const SuperAdmin = () => {
     if (!user) return <div className="p-8">Acesso Negado. Faça login.</div>;
 
     return (
-        <div className="min-h-screen bg-gray-50/50 p-8 space-y-8">
+        <div className="min-h-screen bg-[#0b1121] p-8 space-y-8">
 
             {/* HEADER */}
             <header className="flex flex-col md:flex-row justify-between md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-[#1d244a] flex items-center gap-2">
-                        <ShieldAlert className="w-8 h-8" /> Super Admin
+                    <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+                        <ShieldAlert className="w-8 h-8 text-blue-400" /> Super Admin
                     </h1>
-                    <p className="text-gray-500">Gestão Global da Plataforma</p>
+                    <p className="text-slate-400">Gestão Global da Plataforma</p>
                 </div>
                 <div className="flex gap-2">
                     {officialTenant && (
@@ -315,46 +307,46 @@ const SuperAdmin = () => {
 
             {/* TOP STATS CARDS */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <Card>
+                <Card className="bg-slate-900 border-white/5 text-white shadow-lg">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Clientes Totais</CardTitle>
-                        <Globe className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium text-slate-300">Clientes Totais</CardTitle>
+                        <Globe className="h-4 w-4 text-slate-500" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{clientTenants.length}</div>
-                        <p className="text-xs text-muted-foreground">Rádios na plataforma</p>
+                        <p className="text-xs text-slate-500">Rádios na plataforma</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="bg-slate-900 border-white/5 text-white shadow-lg">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Faturamento (MRR)</CardTitle>
-                        <DollarSign className="h-4 w-4 text-green-600" />
+                        <CardTitle className="text-sm font-medium text-slate-300">Faturamento (MRR)</CardTitle>
+                        <DollarSign className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-700">R$ {mrr.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Mensal Recorrente</p>
+                        <div className="text-2xl font-bold text-green-400">R$ {mrr.toFixed(2)}</div>
+                        <p className="text-xs text-slate-500">Mensal Recorrente</p>
                     </CardContent>
                 </Card>
-                <Card>
+                <Card className="bg-slate-900 border-white/5 text-white shadow-lg">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Despesas Extras</CardTitle>
-                        <TrendingDown className="h-4 w-4 text-red-600" />
+                        <CardTitle className="text-sm font-medium text-slate-300">Despesas Extras</CardTitle>
+                        <TrendingDown className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-red-700">R$ {totalExpenses.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Últimos lançamentos</p>
+                        <div className="text-2xl font-bold text-red-400">R$ {totalExpenses.toFixed(2)}</div>
+                        <p className="text-xs text-slate-500">Últimos lançamentos</p>
                     </CardContent>
                 </Card>
-                <Card className={operationalProfit >= 0 ? "bg-green-50 border-green-200" : "bg-red-50 border-red-200"}>
+                <Card className={`bg-slate-900 border shadow-lg ${operationalProfit >= 0 ? "border-green-500/20" : "border-red-500/20"}`}>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Lucro Operacional</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-gray-600" />
+                        <CardTitle className="text-sm font-medium text-slate-300">Lucro Operacional</CardTitle>
+                        <TrendingUp className="h-4 w-4 text-slate-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className={`text-2xl font-bold ${operationalProfit >= 0 ? "text-green-800" : "text-red-800"}`}>
+                        <div className={`text-2xl font-bold ${operationalProfit >= 0 ? "text-green-400" : "text-red-400"}`}>
                             R$ {operationalProfit.toFixed(2)}
                         </div>
-                        <p className="text-xs text-gray-600">Considerando MRR e Extras</p>
+                        <p className="text-xs text-slate-500">Considerando MRR e Extras</p>
                     </CardContent>
                 </Card>
             </div>
@@ -426,40 +418,41 @@ const SuperAdmin = () => {
                     )}
 
                     {/* NEW RADIO FORM */}
-                    <Card className="border-[#1d244a] border-t-4">
+                    <Card className="bg-slate-900 border-white/5 border-t-purple-500 border-t-4 text-white shadow-lg">
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2">
-                                <Plus className="w-5 h-5" /> Nova Rádio Cliente
+                            <CardTitle className="flex items-center gap-2 text-white">
+                                <Plus className="w-5 h-5 text-purple-400" /> Nova Rádio Cliente
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
                             <form onSubmit={handleCreateTenant} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label>Nome Fantasia</Label>
+                                    <Label className="text-slate-300">Nome Fantasia</Label>
                                     <Input
                                         placeholder="Ex: Rádio Mix FM"
                                         value={newTenantName}
                                         onChange={e => setNewTenantName(e.target.value)}
+                                        className="bg-slate-800 border-slate-700 text-white placeholder:text-slate-500"
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label>Slug (Link)</Label>
+                                    <Label className="text-slate-300">Slug (Link)</Label>
                                     <div className="flex">
-                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-slate-700 bg-slate-800 text-slate-400 text-sm">
                                             /
                                         </span>
                                         <Input
-                                            className="rounded-l-none"
+                                            className="rounded-l-none bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-purple-500"
                                             placeholder="radiomix"
                                             value={newTenantSlug}
                                             onChange={e => setNewTenantSlug(e.target.value)}
                                         />
                                     </div>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-xs text-slate-500">
                                         Link: {window.location.host}/{newTenantSlug || '...'}
                                     </p>
                                 </div>
-                                <Button type="submit" className="w-full bg-[#1d244a] hover:bg-[#2a3459]">
+                                <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold">
                                     Criar Rádio
                                 </Button>
                             </form>
@@ -471,13 +464,13 @@ const SuperAdmin = () => {
                 <div className="md:col-span-3">
                     <Tabs defaultValue="active" className="w-full">
                         <div className="flex items-center justify-between mb-4">
-                            <TabsList className="bg-white border border-blue-100 shadow-sm">
-                                <TabsTrigger value="active" className="data-[state=active]:bg-[#1d244a] data-[state=active]:text-white">Ativos</TabsTrigger>
-                                <TabsTrigger value="suspended" className="data-[state=active]:bg-orange-500 data-[state=active]:text-white">Suspensos</TabsTrigger>
-                                <TabsTrigger value="cancelled" className="data-[state=active]:bg-red-600 data-[state=active]:text-white">Cancelados</TabsTrigger>
-                                <TabsTrigger value="all">Todos</TabsTrigger>
+                            <TabsList className="bg-slate-900 border border-white/5 shadow-sm p-1">
+                                <TabsTrigger value="active" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white text-slate-400">Ativos</TabsTrigger>
+                                <TabsTrigger value="suspended" className="data-[state=active]:bg-orange-600 data-[state=active]:text-white text-slate-400">Suspensos</TabsTrigger>
+                                <TabsTrigger value="cancelled" className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-slate-400">Cancelados</TabsTrigger>
+                                <TabsTrigger value="all" className="data-[state=active]:bg-slate-700 data-[state=active]:text-white text-slate-400">Todos</TabsTrigger>
                             </TabsList>
-                            <span className="text-xs text-muted-foreground font-medium">{tenants.length} rádios</span>
+                            <span className="text-xs text-slate-500 font-medium">{tenants.length} rádios</span>
                         </div>
 
                         {['active', 'suspended', 'cancelled', 'all'].map((tab) => (
@@ -555,7 +548,7 @@ const SuperAdmin = () => {
             </div>
 
             {/* DIVIDER */}
-            <div className="border-t border-gray-200 my-8"></div>
+            <div className="border-t border-white/5 my-8"></div>
 
             {/* TEAM APPROVAL QUEUE SECTION */}
             <div>
@@ -563,7 +556,7 @@ const SuperAdmin = () => {
             </div>
 
             {/* DIVIDER */}
-            <div className="border-t border-gray-200 my-8"></div>
+            <div className="border-t border-white/5 my-8"></div>
 
             {/* FINANCE DASHBOARD (REDESIGNED) */}
             <div className="mt-8 rounded-3xl bg-[#0f172a] p-8 border border-white/5 relative overflow-hidden shadow-2xl">
