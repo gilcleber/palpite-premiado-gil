@@ -214,17 +214,67 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
 
     const handleDelete = async () => {
         if (!matchId) return;
-        if (!confirm("Tem certeza que deseja excluir este jogo? Essa ação não pode ser desfeita.")) return;
 
-        setSaving(true);
-        const { error } = await supabase.from("matches" as any).delete().eq("id", matchId);
-        setSaving(false);
+        try {
+            setSaving(true);
 
-        if (error) {
-            toast({ title: "Erro", description: "Falha ao excluir jogo.", variant: "destructive" });
-        } else {
-            toast({ title: "Excluído", description: "Jogo removido com sucesso." });
-            onSaveSuccess(); // Trigger refresh (parent will handle tab switch if logic provided, but simpler to just reload)
+            // 1. Check for dependent participants (palpites)
+            const { count, error: countError } = await supabase
+                .from('palpites')
+                .select('*', { count: 'exact', head: true })
+                .eq('match_id', matchId);
+
+            if (countError) throw countError;
+
+            // 2. Custom Confirmation Message
+            let confirmMessage = "Tem certeza que deseja excluir este jogo?";
+            if (count && count > 0) {
+                confirmMessage = `⚠️ ATENÇÃO: Este jogo possui ${count} participantes registrados.\n\nAo excluir o jogo, TODOS os palpites e dados dos participantes serão apagados permanentemente.\n\nDeseja continuar mesmo assim?`;
+            } else {
+                confirmMessage += " Essa ação não pode ser desfeita.";
+            }
+
+            if (!confirm(confirmMessage)) {
+                setSaving(false);
+                return;
+            }
+
+            // 3. Manual Cascade Delete
+            // Delete dependent winners first (if any)
+            await supabase.from('winners' as any).delete().eq('match_id', matchId);
+
+            // Delete dependent palpites
+            if (count && count > 0) {
+                const { error: deleteParticipantsError } = await supabase
+                    .from('palpites')
+                    .delete()
+                    .eq('match_id', matchId);
+
+                if (deleteParticipantsError) throw deleteParticipantsError;
+            }
+
+            // 4. Finally Delete the Match
+            const { error } = await supabase.from("matches" as any).delete().eq("id", matchId);
+
+            if (error) throw error;
+
+            toast({ title: "Excluído", description: "Jogo e participantes removidos com sucesso." });
+            onSaveSuccess();
+
+        } catch (error: any) {
+            console.error("Delete error:", error);
+            // Handle specific FK violation just in case manual cascade missed something
+            if (error.code === '23503') {
+                toast({
+                    title: "Erro de Dependência",
+                    description: "Não foi possível excluir. Existem registros vinculados (ganhadores ou participantes) que impedem a exclusão.",
+                    variant: "destructive"
+                });
+            } else {
+                toast({ title: "Erro", description: "Falha ao excluir jogo: " + (error.message || "Erro desconhecido"), variant: "destructive" });
+            }
+        } finally {
+            setSaving(false);
         }
     };
 
