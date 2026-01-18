@@ -212,7 +212,7 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
   return (
     <Card className="shadow-md">
       <CardHeader className="bg-[#1d244a] text-white">
-        <CardTitle>Lista de Participantes</CardTitle>
+        <CardTitle>👥 Participantes ({filteredParticipants.length})</CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         <div className="relative mb-4">
