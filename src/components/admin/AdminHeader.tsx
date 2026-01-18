@@ -1,5 +1,5 @@
 
-import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink, Home } from "lucide-react";
+import { Shield, Settings, Filter, SortDesc, LogOut, ExternalLink, Home, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTenant } from "@/hooks/useTenant";
 
@@ -42,6 +42,16 @@ const AdminHeader = ({ activeTab, setActiveTab, onLogout, selectedMatchId }: Adm
         >
           <ExternalLink className="h-4 w-4 mr-2" />
           LIVE vMix (Popup)
+        </Button>
+
+        <Button
+          variant="outline"
+          onClick={() => window.location.reload()}
+          className="border-blue-400 text-blue-400 bg-transparent hover:bg-blue-400 hover:text-white"
+          title="Atualizar Sistema"
+        >
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Atualizar
         </Button>
 
         <Button
