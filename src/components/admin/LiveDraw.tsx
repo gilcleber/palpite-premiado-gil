@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Trophy, Shuffle, Instagram, Phone, Eye, EyeOff } from "lucide-react";
+import { Trophy, Shuffle, Instagram, Phone, Eye, EyeOff, Award, Users } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
 
@@ -16,6 +16,7 @@ type Palpite = {
     time_b: string;
     telefone: string;
     cpf: string;
+    escolha: string;
 };
 
 const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
@@ -27,6 +28,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
     const [teamNames, setTeamNames] = useState({ a: "", b: "" });
     const [displayIndex, setDisplayIndex] = useState(0);
     const [showFullPhone, setShowFullPhone] = useState(false);
+    const [drawMode, setDrawMode] = useState<'correct' | 'all'>('correct');
 
     // Load official result from Database
     useEffect(() => {
@@ -97,20 +99,25 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
         };
     }, [matchId]);
 
-    const fetchEligibleCandidates = async () => {
+    const fetchCandidates = async () => {
         setLoading(true);
         setWinner(null);
         try {
-            console.log(`Searching for: ${gameResult.a}x${gameResult.b}`);
+            console.log(`Searching candidates. Mode: ${drawMode}`);
 
             let query = supabase
                 .from("palpites")
-                .select("*")
-                .eq("placar_time_a", gameResult.a)
-                .eq("placar_time_b", gameResult.b);
+                .select("*");
 
             if (matchId) {
                 query = query.eq('match_id', matchId);
+            }
+
+            // Apply filter if in 'correct' mode
+            if (drawMode === 'correct') {
+                query = query
+                    .eq("placar_time_a", gameResult.a)
+                    .eq("placar_time_b", gameResult.b);
             }
 
             const { data, error } = await query;
@@ -119,18 +126,42 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
 
             console.log("Found:", data);
 
-            // Cast to ensure telefone is included (it might be missing in old records?)
+            // Cast to ensure type safety
             setCandidates(data as unknown as Palpite[]);
             if (data.length === 0) {
-                toast.info(`Nenhum acertador para o placar ${gameResult.a}x${gameResult.b}`);
+                toast.info(drawMode === 'correct'
+                    ? `Nenhum acertador para o placar ${gameResult.a}x${gameResult.b}`
+                    : "Nenhum participante encontrado."
+                );
             } else {
-                toast.success(`${data.length} acertadores encontrados!`);
+                toast.success(`${data.length} participantes encontrados!`);
             }
         } catch (error) {
             console.error("Error fetching candidates:", error);
-            toast.error("Erro ao buscar acertadores.");
+            toast.error("Erro ao buscar participantes.");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const saveWinnerToDB = async (winner: Palpite) => {
+        if (!matchId) return;
+        try {
+            const { error } = await supabase
+                .from('winners' as any)
+                .insert({
+                    match_id: matchId,
+                    participant_id: winner.id,
+                    prize_claimed: false
+                } as any);
+
+            if (error) throw error;
+
+            toast.success("Ganhador salvo!", { description: "Registrado no histórico com sucesso." });
+
+        } catch (err) {
+            console.error("Error saving winner:", err);
+            // Don't show error toast here to not interrupt flow, seeing as it's a background action
         }
     };
 
@@ -158,6 +189,9 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                 setWinner(selectedWinner);
                 setDisplayIndex(finalWinnerIndex);
                 setDrawing(false);
+
+                // Save to DB!
+                saveWinnerToDB(selectedWinner);
 
                 // Celebration
                 confetti({
@@ -194,6 +228,13 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
         return phone;
     }
 
+    const getTranslatedChoice = (choice: string) => {
+        if (choice === 'draw') return 'Empate';
+        if (choice === 'team1') return teamNames.a;
+        if (choice === 'team2') return teamNames.b;
+        return choice;
+    };
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl shadow-2xl border border-slate-700 min-h-[600px] flex flex-col items-center">
 
@@ -213,7 +254,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
             {!winner && !drawing && (
                 <div className="w-full mb-8 bg-slate-800/50 p-6 rounded-xl border border-slate-700">
                     <h3 className="text-white text-lg mb-4 text-center">Configurar Resultado da Partida</h3>
-                    <div className="flex justify-center items-center gap-4">
+                    <div className="flex justify-center items-center gap-4 mb-6">
                         <input
                             type="number"
                             value={gameResult.a}
@@ -228,10 +269,34 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                             className="w-16 h-16 text-3xl text-center bg-slate-900 text-white rounded-lg border-2 border-[#d19563] focus:outline-none focus:ring-4 focus:ring-[#d19563]/50"
                         />
                     </div>
-                    <div className="text-center mt-6">
-                        <Button onClick={fetchEligibleCandidates} className="bg-[#d19563] hover:bg-[#b07b4e] text-white px-8 py-2 text-lg font-bold">
-                            Buscar Acertadores
+
+                    {/* Mode Toggle */}
+                    <div className="flex justify-center gap-4 mb-6">
+                        <Button
+                            variant={drawMode === 'correct' ? 'default' : 'outline'}
+                            onClick={() => { setDrawMode('correct'); setCandidates([]); }}
+                            className={`min-w-[180px] ${drawMode === 'correct' ? 'bg-[#d19563] hover:bg-[#b07b4e] text-white' : 'text-slate-300 border-slate-600 hover:bg-slate-700'}`}
+                        >
+                            <Award className="w-4 h-4 mr-2" />
+                            Acertadores
                         </Button>
+                        <Button
+                            variant={drawMode === 'all' ? 'default' : 'outline'}
+                            onClick={() => { setDrawMode('all'); setCandidates([]); }}
+                            className={`min-w-[180px] ${drawMode === 'all' ? 'bg-[#d19563] hover:bg-[#b07b4e] text-white' : 'text-slate-300 border-slate-600 hover:bg-slate-700'}`}
+                        >
+                            <Users className="w-4 h-4 mr-2" />
+                            Todos Participantes
+                        </Button>
+                    </div>
+
+                    <div className="text-center">
+                        <Button onClick={fetchCandidates} className="bg-[#d19563] hover:bg-[#b07b4e] text-white px-8 py-2 text-lg font-bold w-full max-w-md">
+                            {drawMode === 'correct' ? 'Buscar Acertadores' : 'Buscar Todos Participantes'}
+                        </Button>
+                        <p className="text-slate-500 text-sm mt-2">
+                            {drawMode === 'correct' ? `Filtrando por placar exato: ${gameResult.a}x${gameResult.b}` : "Sorteio entre todos os participantes registrados"}
+                        </p>
                     </div>
                 </div>
             )}
@@ -240,7 +305,6 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
             <div className="flex-1 w-full flex flex-col items-center justify-center relative">
 
                 {/* Counter Badge */}
-                {/* Counter Badge - Moved up and styled to match theme */}
                 {candidates.length > 0 && !winner && (
                     <div className="absolute -top-12 right-0 bg-[#d19563]/10 text-[#d19563] px-6 py-2 rounded-full border border-[#d19563]/30 text-base font-bold shadow-lg backdrop-blur-sm z-10 animate-fade-in">
                         {candidates.length} Participantes
@@ -279,7 +343,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                                                 }
                                             </span>
 
-                                            {/* Privacy Toggle Button - Only visible on hover/focus to not clutter stream if possible, or small */}
+                                            {/* Privacy Toggle Button */}
                                             <button
                                                 onClick={() => setShowFullPhone(!showFullPhone)}
                                                 className="absolute right-3 p-1 hover:bg-gray-300 rounded-full transition-colors opacity-0 group-hover:opacity-100"
@@ -287,6 +351,11 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                                             >
                                                 {showFullPhone ? <EyeOff size={16} /> : <Eye size={16} />}
                                             </button>
+                                        </div>
+
+                                        {/* Choice Display (Translated) */}
+                                        <div className="text-slate-500 text-sm mt-2">
+                                            Palpite: {winner.placar_time_a}x{winner.placar_time_b} ({getTranslatedChoice(winner.escolha)})
                                         </div>
                                     </div>
 
@@ -308,7 +377,9 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                         </div>
                     ) : (
                         <div className="text-slate-400 text-center">
-                            <p className="text-xl">Aguardando busca de participantes...</p>
+                            <p className="text-xl">
+                                {loading ? "Buscando..." : "Aguardando busca de participantes..."}
+                            </p>
                         </div>
                     )}
                 </div>

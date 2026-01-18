@@ -414,7 +414,12 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
                   <p><strong>Telefone:</strong> {winner.telefone}</p>
                 </div>
                 <div className="text-left">
-                  <p><strong>Time escolhido:</strong> {winner.escolha}</p>
+                  <p><strong>Time escolhido:</strong> {
+                    winner.escolha === 'draw' ? 'Empate' :
+                      winner.escolha === 'team1' ? teamAName :
+                        winner.escolha === 'team2' ? teamBName :
+                          winner.escolha
+                  }</p>
                   <p><strong>Palpite:</strong> {winner.placar_time_a}x{winner.placar_time_b}</p>
                 </div>
               </div>
@@ -455,7 +460,14 @@ const WinnerDraw = ({ matchId }: { matchId: string | null }) => {
                     </TableCell>
                     <TableCell>{participant.cidade}</TableCell>
                     <TableCell>{participant.telefone}</TableCell>
-                    <TableCell>{participant.escolha}</TableCell>
+                    <TableCell>
+                      {
+                        participant.escolha === 'draw' ? 'Empate' :
+                          participant.escolha === 'team1' ? teamAName :
+                            participant.escolha === 'team2' ? teamBName :
+                              participant.escolha
+                      }
+                    </TableCell>
                     <TableCell>
                       {participant.placar_time_a}x{participant.placar_time_b}
                     </TableCell>
