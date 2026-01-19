@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Trash2, ExternalLink, Search, Eye, Copy, Check } from "lucide-react";
+import { Loader2, Trash2, ExternalLink, Search, Eye, Copy, Check, Download, CalendarX } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,8 +18,10 @@ import {
     DialogHeader,
     DialogTitle,
     DialogDescription,
+    DialogFooter,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
+import { Label } from "@/components/ui/label";
 
 interface Winner {
     id: string; // ID from winners table
@@ -49,6 +51,11 @@ const WinnersTab = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedWinner, setSelectedWinner] = useState<Winner | null>(null);
+
+    // Cleanup State
+    const [isCleanupOpen, setIsCleanupOpen] = useState(false);
+    const [cleanupDays, setCleanupDays] = useState("30");
+    const [cleanupLoading, setCleanupLoading] = useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -110,6 +117,100 @@ const WinnersTab = () => {
         }
     };
 
+    const handleExportWinners = () => {
+        if (winners.length === 0) {
+            toast({ title: "Vazio", description: "Sem dados para exportar." });
+            return;
+        }
+
+        const headers = [
+            "Data do Sorteio",
+            "Jogo",
+            "Ganhador",
+            "Palpite",
+            "Cidade",
+            "Telefone",
+            "CPF",
+            "Email",
+            "Instagram"
+        ];
+
+        const csvContent = winners.map(w => {
+            const date = new Date(w.drawn_at).toLocaleDateString("pt-BR") + " " + new Date(w.drawn_at).toLocaleTimeString("pt-BR");
+            const jogo = w.match ? `${w.match.team_a_name} x ${w.match.team_b_name}` : "Jogo Excluído";
+
+            const clean = (t: string) => `"${(t || "").replace(/"/g, '""')}"`;
+
+            if (!w.participant) {
+                return [clean(date), clean(jogo), "Excluído", "-", "-", "-", "-", "-", "-"].join(";");
+            }
+
+            return [
+                clean(date),
+                clean(jogo),
+                clean(w.participant.nome_completo),
+                clean(`${w.participant.placar_time_a} x ${w.participant.placar_time_b}`),
+                clean(w.participant.cidade),
+                clean(w.participant.telefone),
+                clean(w.participant.cpf),
+                clean(w.participant.email),
+                clean(w.participant.instagram)
+            ].join(";");
+        });
+
+        const csvString = [headers.join(";"), ...csvContent].join("\r\n");
+        const blob = new Blob(["\ufeff" + csvString], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `ganhadores_palpite_premiado_${new Date().toISOString().split('T')[0]}.csv`;
+        link.click();
+    };
+
+    const handleCleanup = async () => {
+        const days = parseInt(cleanupDays);
+        if (isNaN(days) || days < 1) {
+            toast({ title: "Inválido", description: "Digite um número de dias válido.", variant: "destructive" });
+            return;
+        }
+
+        // Calculate cutoff date
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+
+        // Find winners OLDER than cutoff
+        const oldWinners = winners.filter(w => new Date(w.drawn_at) < cutoffDate);
+
+        if (oldWinners.length === 0) {
+            toast({ title: "Nada a limpar", description: `Nenhum ganhador com mais de ${days} dias.` });
+            setIsCleanupOpen(false);
+            return;
+        }
+
+        if (!confirm(`Confirmar exclusão de ${oldWinners.length} ganhadores antigos (mais de ${days} dias)?\n\nEssa ação é irreversível.`)) return;
+
+        setCleanupLoading(true);
+        try {
+            const idsToDelete = oldWinners.map(w => w.id);
+
+            const { error } = await supabase
+                .from('winners' as any)
+                .delete()
+                .in('id', idsToDelete);
+
+            if (error) throw error;
+
+            setWinners(prev => prev.filter(w => !idsToDelete.includes(w.id)));
+            toast({ title: "Limpeza Concluída", description: `${oldWinners.length} registros antigos removidos.` });
+            setIsCleanupOpen(false);
+
+        } catch (err: any) {
+            console.error("Cleanup error:", err);
+            toast({ title: "Erro", description: "Falha na limpeza.", variant: "destructive" });
+        } finally {
+            setCleanupLoading(false);
+        }
+    };
+
     const handleInstagramSearch = (nome: string, cidade: string) => {
         const query = `site:instagram.com "${nome}" "${cidade}"`;
         const url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
@@ -139,8 +240,29 @@ const WinnersTab = () => {
 
     return (
         <Card className="shadow-md">
-            <CardHeader className="bg-[#1d244a] text-white">
-                <CardTitle>Histórico de Ganhadores</CardTitle>
+            <CardHeader className="bg-[#1d244a] text-white flex flex-row items-center justify-between">
+                <CardTitle>Histórico de Ganhadores ({winners.length})</CardTitle>
+                <div className="flex gap-2">
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => setIsCleanupOpen(true)}
+                        className="text-red-600 bg-white hover:bg-red-50 border border-red-200"
+                        title="Excluir ganhadores antigos"
+                    >
+                        <CalendarX className="w-4 h-4 mr-2" />
+                        Limpar Antigos
+                    </Button>
+                    <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={handleExportWinners}
+                        className="text-[#1d244a] bg-white hover:bg-gray-100"
+                    >
+                        <Download className="w-4 h-4 mr-2" />
+                        Exportar CSV
+                    </Button>
+                </div>
             </CardHeader>
             <CardContent className="p-6">
 
@@ -327,7 +449,53 @@ const WinnersTab = () => {
                     )}
                 </DialogContent>
             </Dialog>
-        </Card>
+        </Dialog>
+
+            {/* Cleanup Dialog */ }
+    <Dialog open={isCleanupOpen} onOpenChange={setIsCleanupOpen}>
+        <DialogContent>
+            <DialogHeader>
+                <DialogTitle>Limpar Ganhadores Antigos</DialogTitle>
+                <DialogDescription>
+                    Defina o prazo de validade para exclusão automática.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                    <Label>Excluir ganhadores com mais de:</Label>
+                    <div className="flex items-center gap-2">
+                        <Input
+                            type="number"
+                            value={cleanupDays}
+                            onChange={(e) => setCleanupDays(e.target.value)}
+                            min={1}
+                            className="w-24"
+                        />
+                        <span className="text-gray-500">dias</span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                        Isso apagará permanentemente os registros anteriores a {(() => {
+                            const d = new Date();
+                            d.setDate(d.getDate() - (parseInt(cleanupDays) || 0));
+                            return d.toLocaleDateString();
+                        })()}.
+                    </p>
+                </div>
+            </div>
+            <DialogFooter>
+                <Button variant="outline" onClick={() => setIsCleanupOpen(false)}>Cancelar</Button>
+                <Button
+                    variant="destructive"
+                    onClick={handleCleanup}
+                    disabled={cleanupLoading}
+                >
+                    {cleanupLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                    Confirmar Exclusão
+                </Button>
+            </DialogFooter>
+        </DialogContent>
+    </Dialog>
+        </Card >
     );
 };
 
