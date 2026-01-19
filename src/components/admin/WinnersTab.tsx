@@ -448,53 +448,53 @@ const WinnersTab = () => {
                         </div>
                     )}
                 </DialogContent>
-            </Dialog>
-        </Dialog>
 
-            {/* Cleanup Dialog */ }
-    <Dialog open={isCleanupOpen} onOpenChange={setIsCleanupOpen}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Limpar Ganhadores Antigos</DialogTitle>
-                <DialogDescription>
-                    Defina o prazo de validade para exclusão automática.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                    <Label>Excluir ganhadores com mais de:</Label>
-                    <div className="flex items-center gap-2">
-                        <Input
-                            type="number"
-                            value={cleanupDays}
-                            onChange={(e) => setCleanupDays(e.target.value)}
-                            min={1}
-                            className="w-24"
-                        />
-                        <span className="text-gray-500">dias</span>
+            </Dialog>
+
+            {/* Cleanup Dialog */}
+            <Dialog open={isCleanupOpen} onOpenChange={setIsCleanupOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Limpar Ganhadores Antigos</DialogTitle>
+                        <DialogDescription>
+                            Defina o prazo de validade para exclusão automática.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Excluir ganhadores com mais de:</Label>
+                            <div className="flex items-center gap-2">
+                                <Input
+                                    type="number"
+                                    value={cleanupDays}
+                                    onChange={(e) => setCleanupDays(e.target.value)}
+                                    min={1}
+                                    className="w-24"
+                                />
+                                <span className="text-gray-500">dias</span>
+                            </div>
+                            <p className="text-xs text-gray-500">
+                                Isso apagará permanentemente os registros anteriores a {(() => {
+                                    const d = new Date();
+                                    d.setDate(d.getDate() - (parseInt(cleanupDays) || 0));
+                                    return d.toLocaleDateString();
+                                })()}.
+                            </p>
+                        </div>
                     </div>
-                    <p className="text-xs text-gray-500">
-                        Isso apagará permanentemente os registros anteriores a {(() => {
-                            const d = new Date();
-                            d.setDate(d.getDate() - (parseInt(cleanupDays) || 0));
-                            return d.toLocaleDateString();
-                        })()}.
-                    </p>
-                </div>
-            </div>
-            <DialogFooter>
-                <Button variant="outline" onClick={() => setIsCleanupOpen(false)}>Cancelar</Button>
-                <Button
-                    variant="destructive"
-                    onClick={handleCleanup}
-                    disabled={cleanupLoading}
-                >
-                    {cleanupLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />}
-                    Confirmar Exclusão
-                </Button>
-            </DialogFooter>
-        </DialogContent>
-    </Dialog>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsCleanupOpen(false)}>Cancelar</Button>
+                        <Button
+                            variant="destructive"
+                            onClick={handleCleanup}
+                            disabled={cleanupLoading}
+                        >
+                            {cleanupLoading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Trash2 className="mr-2 h-4 w-4" />}
+                            Confirmar Exclusão
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </Card >
     );
 };
