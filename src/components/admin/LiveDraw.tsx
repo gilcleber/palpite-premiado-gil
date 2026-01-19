@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Trophy, Shuffle, Instagram, Phone, Eye, EyeOff, Award, Users } from "lucide-react";
+import { Trophy, Shuffle, Instagram, Phone, Eye, EyeOff, Award, Users, Download, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import confetti from "canvas-confetti";
+import html2canvas from "html2canvas";
 
 type Palpite = {
     id: string;
@@ -29,6 +30,10 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
     const [displayIndex, setDisplayIndex] = useState(0);
     const [showFullPhone, setShowFullPhone] = useState(false);
     const [drawMode, setDrawMode] = useState<'correct' | 'all'>('correct');
+    const [previousWinnerIds, setPreviousWinnerIds] = useState<string[]>([]);
+
+    // Ref for the specific card element we want to capture
+    const winnerCardRef = useRef<HTMLDivElement>(null);
 
     // Load official result from Database
     useEffect(() => {
@@ -99,11 +104,39 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
         };
     }, [matchId]);
 
+    // NEW: Load Previous Winners to filter them out
+    const loadPreviousWinners = async () => {
+        if (!matchId) return [];
+        try {
+            const { data, error } = await supabase
+                .from('winners' as any)
+                .select('participant_id')
+                .eq('match_id', matchId);
+
+            if (error) throw error;
+
+            const ids = data.map((w: any) => w.participant_id);
+            setPreviousWinnerIds(ids);
+            return ids;
+        } catch (err) {
+            console.error("Error loading previous winners:", err);
+            return [];
+        }
+    };
+
+    // Load winners when component mounts or matchId changes
+    useEffect(() => {
+        loadPreviousWinners();
+    }, [matchId]);
+
     const fetchCandidates = async () => {
         setLoading(true);
         setWinner(null);
         try {
             console.log(`Searching candidates. Mode: ${drawMode}`);
+
+            // Reload excluded IDs to be sure
+            const currentWinnerIds = await loadPreviousWinners();
 
             let query = supabase
                 .from("palpites")
@@ -126,15 +159,22 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
 
             console.log("Found:", data);
 
+            // Filter out existing winners
+            let filteredData = (data as unknown as Palpite[]);
+            if (currentWinnerIds.length > 0) {
+                filteredData = filteredData.filter(p => !currentWinnerIds.includes(p.id));
+            }
+
             // Cast to ensure type safety
-            setCandidates(data as unknown as Palpite[]);
-            if (data.length === 0) {
+            setCandidates(filteredData);
+
+            if (filteredData.length === 0) {
                 toast.info(drawMode === 'correct'
-                    ? `Nenhum acertador para o placar ${gameResult.a}x${gameResult.b}`
-                    : "Nenhum participante encontrado."
+                    ? `Nenhum acertador DISPONÍVEL para o placar ${gameResult.a}x${gameResult.b} (vencedores anteriores excluídos)`
+                    : "Nenhum participante disponível (todos já ganharam ou lista vazia)."
                 );
             } else {
-                toast.success(`${data.length} participantes encontrados!`);
+                toast.success(`${filteredData.length} participantes aptos para sorteio!`);
             }
         } catch (error) {
             console.error("Error fetching candidates:", error);
@@ -158,6 +198,9 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
             if (error) throw error;
 
             toast.success("Ganhador salvo!", { description: "Registrado no histórico com sucesso." });
+
+            // Update local exclusion list immediately
+            setPreviousWinnerIds(prev => [...prev, winner.id]);
 
         } catch (err) {
             console.error("Error saving winner:", err);
@@ -183,11 +226,20 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
 
             if (elapsedTime > duration) {
                 clearInterval(shuffleInterval);
-                // Pick Winner
-                const finalWinnerIndex = Math.floor(Math.random() * candidates.length);
-                const selectedWinner = candidates[finalWinnerIndex];
+                // Pick Winner (Double Check Exclusion!)
+                const finalCandidates = candidates.filter(c => !previousWinnerIds.includes(c.id));
+
+                if (finalCandidates.length === 0) {
+                    setDrawing(false);
+                    toast.error("Todos os participantes listados já ganharam!");
+                    return;
+                }
+
+                const finalWinnerIndex = Math.floor(Math.random() * finalCandidates.length);
+                const selectedWinner = finalCandidates[finalWinnerIndex];
+
                 setWinner(selectedWinner);
-                setDisplayIndex(finalWinnerIndex);
+                setDisplayIndex(finalWinnerIndex); // Visual only, index might mismatch but name will be correct
                 setDrawing(false);
 
                 // Save to DB!
@@ -233,6 +285,29 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
         if (choice === 'team1') return teamNames.a;
         if (choice === 'team2') return teamNames.b;
         return choice;
+    };
+
+    // Download Card Function
+    const handleDownloadCard = async () => {
+        if (!winnerCardRef.current || !winner) return;
+
+        try {
+            const canvas = await html2canvas(winnerCardRef.current, {
+                backgroundColor: null,
+                scale: 2, // Higher resolution
+                logging: false,
+                useCORS: true // Important for images
+            });
+
+            const link = document.createElement('a');
+            link.download = `vencedor_${winner.nome_completo.replace(/\s+/g, '_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            toast.success("Imagem baixada com sucesso!");
+        } catch (error) {
+            console.error("Error downloading card:", error);
+            toast.error("Erro ao gerar imagem para download.");
+        }
     };
 
     return (
@@ -311,8 +386,11 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                     </div>
                 )}
 
-                {/* The Card / Name Display */}
-                <div className="relative w-full max-w-2xl aspect-video bg-white rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(209,149,99,0.3)] flex items-center justify-center transform transition-all duration-300">
+                {/* The Card / Name Display - Ref added here for capture */}
+                <div
+                    ref={winnerCardRef}
+                    className="relative w-full max-w-2xl aspect-video bg-white rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(209,149,99,0.3)] flex items-center justify-center transform transition-all duration-300"
+                >
                     {candidates.length > 0 ? (
                         <div className="text-center p-8 w-full animate-fade-in">
                             {winner ? (
@@ -325,6 +403,11 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                                     <h2 className="text-3xl text-slate-700 font-bold mb-4">
                                         {winner.nome_completo.split(' ').slice(1).join(' ')}
                                     </h2>
+
+                                    {/* Hide these details when capturing/downloading if privacy needed? 
+                                        Actually, usually winner cards for social media want the name big and maybe city.
+                                        We'll capture exactly what is shown.
+                                    */}
 
                                     <div className="flex flex-col gap-3 min-w-[300px]">
                                         {/* Instagram */}
@@ -343,11 +426,12 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                                                 }
                                             </span>
 
-                                            {/* Privacy Toggle Button */}
+                                            {/* Privacy Toggle Button - Hide from capture using data-html2canvas-ignore if needed, but button is small enough */}
                                             <button
                                                 onClick={() => setShowFullPhone(!showFullPhone)}
                                                 className="absolute right-3 p-1 hover:bg-gray-300 rounded-full transition-colors opacity-0 group-hover:opacity-100"
                                                 title={showFullPhone ? "Ocultar" : "Mostrar Completo"}
+                                                data-html2canvas-ignore
                                             >
                                                 {showFullPhone ? <EyeOff size={16} /> : <Eye size={16} />}
                                             </button>
@@ -386,7 +470,7 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
             </div>
 
             {/* Controls */}
-            <div className="w-full mt-10 h-24 flex items-center justify-center">
+            <div className="w-full mt-10 h-24 flex items-center justify-center gap-4">
                 {candidates.length > 0 && !drawing && !winner && (
                     <Button
                         onClick={startDraw}
@@ -402,6 +486,16 @@ const LiveDraw = ({ matchId }: { matchId?: string | null }) => {
                             className="bg-slate-700 hover:bg-slate-600 text-white text-xl font-bold py-6 px-10 rounded-xl"
                         >
                             Novo Sorteio
+                        </Button>
+
+                        {/* Download Image Button */}
+                        <Button
+                            onClick={handleDownloadCard}
+                            className="bg-green-600 hover:bg-green-500 text-white text-xl font-bold py-6 px-6 rounded-xl flex items-center gap-2"
+                            title="Baixar imagem do card"
+                        >
+                            <Download className="w-6 h-6" />
+                            <span className="hidden sm:inline">Baixar Imagem</span>
                         </Button>
 
                         {/* Admin Only - Copy Full Data */}
