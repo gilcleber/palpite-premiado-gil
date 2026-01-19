@@ -22,6 +22,7 @@ const Admin = () => {
   const [matches, setMatches] = useState<any[]>([]);
   const [selectedMatchId, setSelectedMatchId] = useState<string | null>(null);
   const [showArchived, setShowArchived] = useState(false);
+  const [finishedMatchIds, setFinishedMatchIds] = useState<Set<string>>(new Set());
 
   // Check Manager Token (Silent Auth for PIN) - useMemo ensures this recalculates when tenant loads
   const isManager = useMemo(() => {
@@ -57,20 +58,34 @@ const Admin = () => {
   // ... (fetchMatches logic)
   const fetchMatches = async () => {
     if (!tenant) return;
-    const { data } = await supabase
+
+    // 1. Fetch Matches
+    const matchesQuery = supabase
       .from("matches" as any)
       .select("*")
       .eq("tenant_id", tenant.id)
       .order("created_at", { ascending: false });
 
-    if (data) {
-      const allMatches = data as any[];
+    // 2. Fetch Winners (to identify finished games)
+    const winnersQuery = supabase
+      .from("winners" as any)
+      .select("match_id");
+
+    const [matchesRes, winnersRes] = await Promise.all([matchesQuery, winnersQuery]);
+
+    if (matchesRes.data) {
+      const allMatches = matchesRes.data as any[];
       setMatches(allMatches);
-      if (data.length > 0 && !selectedMatchId) {
+      if (allMatches.length > 0 && !selectedMatchId) {
         setSelectedMatchId(allMatches[0].id);
-      } else if (data.length === 0) {
+      } else if (allMatches.length === 0) {
         setSelectedMatchId(null);
       }
+    }
+
+    if (winnersRes.data) {
+      const ids = new Set(winnersRes.data.map((w: any) => w.match_id));
+      setFinishedMatchIds(ids);
     }
   };
 
@@ -143,12 +158,22 @@ const Admin = () => {
                 value={selectedMatchId || ""}
                 onChange={(e) => setSelectedMatchId(e.target.value)}
               >
-                {(matches.filter(m => m.visible || showArchived)).map(m => (
+                {(matches.filter(m => {
+                  // Show if:
+                  // 1. Visible (ON)
+                  // 2. Draft/Pending (OFF but no winner yet)
+                  // 3. showArchived is true (Show everything)
+                  const isFinished = finishedMatchIds.has(m.id);
+                  if (showArchived) return true;
+                  if (m.visible) return true; // Always show visible
+                  if (!isFinished) return true; // Show drafts (invisible but not finished)
+                  return false; // Hide finished invisible games
+                })).map(m => (
                   <option key={m.id} value={m.id}>
-                    {m.team_a_name} x {m.team_b_name} {!m.visible ? '(Arquivado)' : ''}
+                    {m.team_a_name} x {m.team_b_name} {!m.visible ? (finishedMatchIds.has(m.id) ? '(Arquivado)' : '(Rascunho)') : ''}
                   </option>
                 ))}
-                {(matches.filter(m => m.visible || showArchived)).length === 0 && <option value="">Nenhum jogo visível</option>}
+                {(matches.filter(m => m.visible || showArchived || !finishedMatchIds.has(m.id))).length === 0 && <option value="">Nenhum jogo visível</option>}
               </select>
 
               {/* Show/Hide Archived Toggle */}
@@ -157,9 +182,9 @@ const Admin = () => {
                 size="sm"
                 onClick={() => setShowArchived(!showArchived)}
                 className={`text-xs ${showArchived ? 'bg-gray-200 text-gray-700' : 'text-gray-400 hover:text-gray-600'}`}
-                title="Mostrar jogos antigos/ocultos"
+                title="Mostrar jogos já sorteados e ocultos"
               >
-                {showArchived ? 'Ocultar Antigos' : 'Ver Antigos'}
+                {showArchived ? 'Ocultar Concluídos' : 'Ver Concluídos'}
               </Button>
             </div>
 

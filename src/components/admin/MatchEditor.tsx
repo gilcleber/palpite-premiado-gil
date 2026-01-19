@@ -565,7 +565,7 @@ const MatchEditor = ({ matchId, onSaveSuccess, onCancel }: MatchEditorProps) => 
                     size="lg"
                     className="w-full shadow-2xl bg-[#1d244a] hover:bg-[#2a3459] text-white border-2 border-white/20"
                 >
-                    {saving ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />} SALVAR DADOS DO JOGO
+                    {saving ? <Loader2 className="mr-2" /> : <Save className="mr-2" />} SALVAR DADOS DO JOGO
                 </Button>
             </div>
         </div>
