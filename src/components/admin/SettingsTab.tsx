@@ -76,7 +76,53 @@ const SettingsTab = () => {
     setLoading(false);
   };
 
-  // ... handleSaveBranding code ... 
+  const handleSaveBranding = async () => {
+    if (!tenant) return;
+    setSaving(true);
+    try {
+      const managerAuth = localStorage.getItem('palpite_manager_auth');
+      if (!managerAuth) throw new Error("Sessão inválida");
+
+      const session = JSON.parse(managerAuth);
+      const pin = session.pin;
+
+      if (!pin) {
+        toast({ title: "Sessão Antiga", description: "Por favor, saia e entre novamente para salvar as alterações.", variant: "destructive" });
+        setSaving(false);
+        return;
+      }
+
+      // Preserve existing fields we don't edit here
+      const newBranding = {
+        ...tenant.branding,
+        logo_url: branding.logo_url,
+        site_title: branding.site_title,
+        primary_color: branding.primary_color,
+        secondary_color: branding.secondary_color,
+      };
+
+      // Call RPC
+      const { data, error } = await supabase.rpc('update_own_branding', {
+        t_slug: tenant.slug,
+        t_pin: pin,
+        new_branding: newBranding
+      });
+
+      if (error) throw error;
+      if (data !== true) throw new Error("PIN Incorreto ou Falha ao atualizar");
+
+      toast({ title: "Sucesso!", description: "Identidade visual atualizada em todo o sistema." });
+
+      // Delay reload to show toast
+      setTimeout(() => window.location.reload(), 1500);
+
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Erro", description: "Erro ao salvar. Verifique se seu PIN mudou ou faça login novamente.", variant: "destructive" });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-fade-in">
