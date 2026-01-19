@@ -173,6 +173,51 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
     document.body.removeChild(link);
   };
 
+  const handleCleanLosers = async () => {
+    if (!matchId) return;
+
+    // 1. Get Winners first to safeguard
+    const { data: winners } = await supabase
+      .from('winners' as any)
+      .select('participant_id')
+      .eq('match_id', matchId);
+
+    const winnerIds = (winners || []).map((w: any) => w.participant_id);
+    const losersCount = participants.length; // participants state already excludes winners
+
+    if (losersCount === 0) {
+      toast.info("Nenhum participante perdedor para limpar.");
+      return;
+    }
+
+    if (!confirm(`⚠️ LIMPEZA DE PERDEDORES ⚠️\n\nVocê está prestes a apagar ${losersCount} participantes PERDEDORES deste jogo.\n\nOs ganhadores (se houver) SERÃO MANTIDOS.\n\nEssa ação economiza espaço no banco de dados e não pode ser desfeita.\n\nConfirmar?`)) return;
+
+    try {
+      setLoading(true);
+      // Delete all participants for this match that are NOT in the winner list
+      let query = supabase
+        .from('palpites')
+        .delete()
+        .eq('match_id', matchId);
+
+      if (winnerIds.length > 0) {
+        query = query.not('id', 'in', `(${winnerIds.join(',')})`);
+      }
+
+      const { error } = await query;
+      if (error) throw error;
+
+      toast.success(`${losersCount} perdedores removidos com sucesso!`);
+      loadParticipants(); // Reload list
+
+    } catch (error) {
+      console.error("Error cleaning losers:", error);
+      toast.error("Erro ao limpar perdedores.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadParticipants = async () => {
     try {
       setLoading(true);
@@ -226,7 +271,19 @@ const ParticipantsList = ({ matchId }: { matchId: string | null }) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
         </div>
 
-        <div className="flex justify-end mb-4">
+        <div className="flex justify-end mb-4 gap-2">
+          {filteredParticipants.length > 0 && (
+            <Button
+              variant="outline"
+              onClick={handleCleanLosers}
+              className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+              title="Apagar todos os perdedores para economizar espaço"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Limpar Perdedores
+            </Button>
+          )}
+
           <Button
             variant="outline"
             onClick={handleExportCSV}
